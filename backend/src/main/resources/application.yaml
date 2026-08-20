@@ -1,0 +1,20 @@
+server:
+  port: 8496
+spring:
+  application:
+    name: atom-2027
+  datasource:
+    url: jdbc:postgresql://localhost:5432/postgres
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      schema: atom-2027
+  jpa:
+    hibernate:
+      ddl-auto: create
+auth:
+  admin-role: admin
+  default-role: user
+  jwt-secret: sTcIbJgW4pmMl9EHCpHnw+fUz/vX7dr6LpK2AdoPiLNrTT0fLyAga1dktkeqwiBg
+  jwt-expiration-minutes: 60
