@@ -14,8 +14,21 @@ export class HomePageComponent {
 
   onClick() {
     const dialog = this.dialogService.createDialog(DummyDialogComponent);
-    dialog.subscribeToResult((value) => {
-      console.log(value);
-    });
+    dialog.callbacks = {
+      ok: async (d, r) => {
+        d.loading = true;
+        await new Promise<void>((resolve) =>
+          setTimeout(() => {
+            resolve();
+          }, 1000),
+        );
+        console.log(r);
+        d.visible = false;
+      },
+      enableLoading: (dialog) => {
+        dialog.loading = true;
+        setTimeout(() => (dialog.loading = false), 1500);
+      },
+    };
   }
 }

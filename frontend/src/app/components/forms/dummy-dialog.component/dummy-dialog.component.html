@@ -1,4 +1,8 @@
-<p-dialog header="JOPA">
+<p-dialog header="JOPA" [style]="{ width: '60%', height: '70%' }" [modal]="true">
   <div>YA EBLAN</div>
-  <p-button label="Закрыть" (onClick)="visible = false"></p-button>
+  <ng-template #footer>
+    <p-button label="Ok" (onClick)="ok()"></p-button>
+    <p-button label="Loader" (onClick)="enableLoading()"></p-button>
+    <p-button label="Close" (onClick)="close()"></p-button>
+  </ng-template>
 </p-dialog>

@@ -1,1 +1,5 @@
 @import "@openng/icons/openng-icons.css";
+
+.disabled {
+    filter: brightness(0.8);
+}
