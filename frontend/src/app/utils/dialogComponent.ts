@@ -16,24 +16,21 @@ import { Dialog } from '@openng/optimus-ui/dialog';
 import { Subject, Subscription } from 'rxjs';
 import { ProgressSpinner } from '@openng/optimus-ui/progressspinner';
 
-export type DialogCallback<Res> = (
-  dialog: DialogComponent<Res, DialogCallbacks<Res>>,
+export type DialogCallback<Res> = CallbackFunction<Res> | CallbackClass<Res>;
+export type CallbackFunction<Res> = (
+  dialog: DialogComponent<Res, string>,
   res: Res | undefined,
 ) => void | Promise<void>;
-export type DialogCallbacks<Res> = Record<string, DialogCallback<Res>> & {
-  cancel?: DialogCallback<Res>;
-};
+export interface CallbackClass<Res> {
+  callback(dialog: DialogComponent<Res, string>, res: Res | undefined): void | Promise<void>;
+}
 
 @Component({
   template: '',
 })
-export abstract class DialogComponent<Res, Callbacks extends DialogCallbacks<Res>>
-  implements OnInit, OnDestroy
-{
+export abstract class DialogComponent<Res, Callbacks extends string> implements OnInit, OnDestroy {
   private readonly dialogRef = viewChild(Dialog);
-  private readonly defaultCancel = () => {
-    this.visible = false;
-  };
+
   private onHide = new Subject<void>();
   private _visible = signal(true);
   private _loading = signal(false);
@@ -43,7 +40,8 @@ export abstract class DialogComponent<Res, Callbacks extends DialogCallbacks<Res
   private readonly applicationRef = inject(ApplicationRef);
   private readonly renderer2 = inject(Renderer2);
 
-  protected _callbacks: Callbacks = {} as Callbacks;
+  protected _callbacks = {} as Record<Callbacks, CallbackFunction<Res>> &
+    Partial<Record<'cancel', CallbackFunction<Res>>>;
 
   public get visible() {
     return this._visible();
@@ -66,8 +64,16 @@ export abstract class DialogComponent<Res, Callbacks extends DialogCallbacks<Res
     this._loading.set(value);
   }
 
-  public set callbacks(value: Callbacks & { cancel?: DialogCallback<Res> }) {
-    this._callbacks = { cancel: this.defaultCancel, ...value };
+  public set callbacks(value: Record<Callbacks, DialogCallback<Res>>) {
+    function isCallbackClass(cb: DialogCallback<Res>): cb is CallbackClass<Res> {
+      return typeof cb === 'object' && typeof cb.callback === 'function';
+    }
+
+    const target = this._callbacks as Record<Callbacks, CallbackFunction<Res>>;
+
+    (Object.entries(value) as [Callbacks, DialogCallback<Res>][]).forEach(([key, cb]) => {
+      target[key] = isCallbackClass(cb) ? cb.callback.bind(cb) : cb;
+    });
   }
 
   protected set res(value: Res | undefined | null) {

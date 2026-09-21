@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { Dialog } from '@openng/optimus-ui/dialog';
-import { DialogCallback, DialogComponent } from '../../../utils/dialogComponent';
+import { DialogComponent } from '../../../utils/dialogComponent';
 import { Button } from '@openng/optimus-ui/button';
 
 @Component({
@@ -9,10 +9,7 @@ import { Button } from '@openng/optimus-ui/button';
   styleUrl: './dummy-dialog.component.css',
   templateUrl: './dummy-dialog.component.html',
 })
-export class DummyDialogComponent extends DialogComponent<
-  number,
-  { ok: DialogCallback<number>; enableLoading: DialogCallback<number> }
-> {
+export class DummyDialogComponent extends DialogComponent<number, 'ok' | 'enableLoading'> {
   constructor() {
     super();
     this.res = 496;

@@ -25,9 +25,11 @@ export class HomePageComponent {
         console.log(r);
         d.visible = false;
       },
-      enableLoading: (dialog) => {
-        dialog.loading = true;
-        setTimeout(() => (dialog.loading = false), 1500);
+      enableLoading: {
+        callback(dialog) {
+          dialog.loading = true;
+          setTimeout(() => (dialog.loading = false), 1500);
+        },
       },
     };
   }
