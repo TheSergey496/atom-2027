@@ -26,9 +26,15 @@ export class HomePageComponent {
         d.visible = false;
       },
       enableLoading: {
-        callback(dialog) {
-          dialog.loading = true;
-          setTimeout(() => (dialog.loading = false), 1500);
+        async callback(dialog) {
+          await dialog.loadingService?.withLoader(async () => {
+            await new Promise<void>((resolve) =>
+              setTimeout(() => {
+                dialog.loading = false;
+                resolve();
+              }, 1500),
+            );
+          });
         },
       },
     };

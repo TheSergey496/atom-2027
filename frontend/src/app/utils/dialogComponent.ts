@@ -1,20 +1,7 @@
-import {
-  ApplicationRef,
-  Component,
-  ComponentRef,
-  createComponent,
-  effect,
-  EnvironmentInjector,
-  inject,
-  OnDestroy,
-  OnInit,
-  Renderer2,
-  signal,
-  viewChild,
-} from '@angular/core';
+import { Component, effect, inject, Injector, OnDestroy, viewChild } from '@angular/core';
 import { Dialog } from '@openng/optimus-ui/dialog';
 import { Subject, Subscription } from 'rxjs';
-import { ProgressSpinner } from '@openng/optimus-ui/progressspinner';
+import { LoadingService } from '../services/loading.service';
 
 export type DialogCallback<Res> = CallbackFunction<Res> | CallbackClass<Res>;
 export type CallbackFunction<Res> = (
@@ -28,28 +15,26 @@ export interface CallbackClass<Res> {
 @Component({
   template: '',
 })
-export abstract class DialogComponent<Res, Callbacks extends string> implements OnInit, OnDestroy {
+export abstract class DialogComponent<Res, Callbacks extends string> implements OnDestroy {
   private readonly dialogRef = viewChild(Dialog);
 
-  private onHide = new Subject<void>();
-  private _visible = signal(true);
-  private _loading = signal(false);
-  private _res?: Res = undefined;
+  public loadingService?: LoadingService;
 
-  private readonly environmentInjector = inject(EnvironmentInjector);
-  private readonly applicationRef = inject(ApplicationRef);
-  private readonly renderer2 = inject(Renderer2);
+  private readonly onHide = new Subject<void>();
+
+  private _visible = true;
+  private _res?: Res = undefined;
 
   protected _callbacks = {} as Record<Callbacks, CallbackFunction<Res>> &
     Partial<Record<'cancel', CallbackFunction<Res>>>;
 
   public get visible() {
-    return this._visible();
+    return this._visible;
   }
 
   public set visible(value: boolean) {
     const valueBefore = this.visible;
-    this._visible.set(value);
+    this._visible = value;
     if (!value && valueBefore) {
       void this._callbacks.cancel?.call(this, this, this._res);
       this.onHide.next();
@@ -57,11 +42,15 @@ export abstract class DialogComponent<Res, Callbacks extends string> implements 
   }
 
   public get loading() {
-    return this._loading();
+    return this.loadingService?.loading ?? false;
   }
 
   public set loading(value: boolean) {
-    this._loading.set(value);
+    if (value) {
+      this.loadingService?.beginLoading();
+    } else {
+      this.loadingService?.stopLoading();
+    }
   }
 
   public set callbacks(value: Record<Callbacks, DialogCallback<Res>>) {
@@ -85,45 +74,27 @@ export abstract class DialogComponent<Res, Callbacks extends string> implements 
   }
 
   protected constructor() {
-    effect(() => {
-      const dialogRef = this.dialogRef();
-      if (dialogRef != null) {
-        dialogRef.visible = this.visible;
-        dialogRef.cd.detectChanges();
-      }
-    });
-    let loaderComponentRef: ComponentRef<DialogLoader> | undefined = undefined;
+    const injector = inject(Injector);
+
     const getDialogNativeEl = (dialogRef: Dialog): unknown => {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call,@typescript-eslint/no-unsafe-member-access
       return dialogRef.el.nativeElement.querySelector('.p-component.p-dialog');
     };
+
     effect(() => {
       const dialogRef = this.dialogRef();
       if (dialogRef != null) {
-        if (this.loading) {
-          loaderComponentRef = createComponent(DialogLoader, {
-            environmentInjector: this.environmentInjector,
-          });
-          this.applicationRef.attachView(loaderComponentRef.hostView);
-          const dialog = getDialogNativeEl(dialogRef);
-          this.renderer2.appendChild(dialog, loaderComponentRef.location.nativeElement);
-          this.renderer2.addClass(dialog, 'disabled');
-        } else if (loaderComponentRef != null) {
-          loaderComponentRef.destroy();
-          const dialog = getDialogNativeEl(dialogRef);
-          this.renderer2.removeClass(dialog, 'disabled');
-        }
+        dialogRef.visibleChange.subscribe((v) => {
+          this.visible = v;
+        });
+
+        dialogRef.visible = this.visible;
+        dialogRef.cd.detectChanges();
+
+        this.loadingService?.stopLoadingImmediate();
+        this.loadingService = new LoadingService(getDialogNativeEl(dialogRef), injector);
       }
     });
-  }
-
-  ngOnInit(): void {
-    const dialogRef = this.dialogRef();
-    if (dialogRef != null) {
-      dialogRef.visibleChange.subscribe((v) => {
-        this.visible = v;
-      });
-    }
   }
 
   ngOnDestroy(): void {
@@ -134,25 +105,3 @@ export abstract class DialogComponent<Res, Callbacks extends string> implements 
     return this.onHide.subscribe(callback);
   }
 }
-
-@Component({
-  template: ` <div class="disabled">
-    <p-progressSpinner [style]="{ width: '50px', height: '50px' }"></p-progressSpinner>
-  </div>`,
-  imports: [ProgressSpinner],
-  styles: `
-    .disabled {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      z-index: 9999999;
-    }
-  `,
-})
-// eslint-disable-next-line @typescript-eslint/no-extraneous-class
-class DialogLoader {}

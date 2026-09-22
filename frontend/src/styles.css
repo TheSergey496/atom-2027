@@ -2,4 +2,5 @@
 
 .disabled {
     filter: brightness(0.8);
+    pointer-events: none;
 }
