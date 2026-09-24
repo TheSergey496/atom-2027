@@ -3,36 +3,58 @@ import {
   Component,
   ComponentRef,
   createComponent,
+  effect,
   EnvironmentInjector,
   Injector,
   Renderer2,
+  Signal,
   signal,
 } from '@angular/core';
 import { ProgressSpinner } from '@openng/optimus-ui/progressspinner';
 
 export class LoadingService {
-  private readonly targetNativeElement: unknown;
+  private targetNativeElement?: unknown;
   private readonly environmentInjector;
   private readonly applicationRef;
   private readonly renderer2;
 
-  private readonly loaderComponentRef: ComponentRef<Loader>;
+  private loaderComponentRef?: ComponentRef<Loader>;
   private _counter = 0;
 
-  constructor(targetNativeElement: unknown, injector: Injector) {
+  constructor(targetNativeElement: Signal<unknown>, injector: Injector) {
     this.environmentInjector = injector.get(EnvironmentInjector);
     this.applicationRef = injector.get(ApplicationRef);
     this.renderer2 = injector.get(Renderer2);
 
-    this.targetNativeElement = targetNativeElement;
-    this.loaderComponentRef = createComponent(Loader, {
-      environmentInjector: this.environmentInjector,
+    effect(() => {
+      this.hideLoader();
+      const targetNativeElementBefore = this.targetNativeElement;
+      this.targetNativeElement = targetNativeElement();
+      if (targetNativeElementBefore == this.targetNativeElement) {
+        return;
+      }
+      if (this.loaderComponentRef == null) {
+        this.loaderComponentRef = createComponent(Loader, {
+          environmentInjector: this.environmentInjector,
+        });
+        this.applicationRef.attachView(this.loaderComponentRef.hostView);
+      }
+      if (targetNativeElementBefore != null) {
+        this.renderer2.removeChild(
+          targetNativeElementBefore,
+          this.loaderComponentRef.location.nativeElement,
+        );
+      }
+      if (this.targetNativeElement != null) {
+        this.renderer2.appendChild(
+          this.targetNativeElement,
+          this.loaderComponentRef.location.nativeElement,
+        );
+      }
+      if (this.loading) {
+        this.showLoader();
+      }
     });
-    this.applicationRef.attachView(this.loaderComponentRef.hostView);
-    this.renderer2.appendChild(
-      this.targetNativeElement,
-      this.loaderComponentRef.location.nativeElement,
-    );
   }
 
   public get loading(): boolean {
@@ -70,20 +92,24 @@ export class LoadingService {
   private set counter(value: number) {
     if (this._counter === 0 && value > 0) {
       this.showLoader();
-      this.renderer2.addClass(this.targetNativeElement, 'disabled');
     } else if (this._counter > 0 && value === 0) {
       this.hideLoader();
-      this.renderer2.removeClass(this.targetNativeElement, 'disabled');
     }
     this._counter = value;
   }
 
   private showLoader() {
+    if (this.loaderComponentRef == null) return;
+
     this.loaderComponentRef.instance.visible = true;
+    this.renderer2.addClass(this.targetNativeElement, 'disabled');
   }
 
   private hideLoader() {
+    if (this.loaderComponentRef == null) return;
+
     this.loaderComponentRef.instance.visible = false;
+    this.renderer2.removeClass(this.targetNativeElement, 'disabled');
   }
 }
 

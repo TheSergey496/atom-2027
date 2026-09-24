@@ -27,7 +27,7 @@ export class HomePageComponent {
       },
       enableLoading: {
         async callback(dialog) {
-          await dialog.loadingService?.withLoader(async () => {
+          await dialog.loadingService.withLoader(async () => {
             await new Promise<void>((resolve) =>
               setTimeout(() => {
                 dialog.loading = false;
