@@ -3,16 +3,20 @@ server:
 spring:
   application:
     name: atom-2027
+  jpa:
+    properties:
+      hibernate:
+        default_schema: atom-2027
+        show_sql: true
+        hbm2ddl:
+          create_namespaces: true
+    hibernate:
+      ddl-auto: create
   datasource:
     url: jdbc:postgresql://localhost:5432/postgres
     username: postgres
     password: postgres
     driver-class-name: org.postgresql.Driver
-    hikari:
-      schema: atom-2027
-  jpa:
-    hibernate:
-      ddl-auto: create
 auth:
   admin-role: admin
   default-role: user
