@@ -119,6 +119,6 @@ export abstract class DialogComponent<Res, Callbacks extends string>
   }
 
   public subscribeOnHide(callback: () => void): Subscription {
-    return this.onHide.subscribe(callback);
+    return this.onHide.subscribe({ next: callback });
   }
 }

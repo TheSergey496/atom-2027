@@ -1,7 +1,19 @@
 <main class="main">
-  <div class="toolbar">
-    <p-menubar [model]="menuModel()"></p-menubar>
-  </div>
+  <p-toolbar>
+    <ng-template #start>
+      <div>
+        {{ this.isHomeComponent() ? 'Супер приложение для победы на Atom Skills' : 'Домой' }}
+      </div>
+      <p-button icon="pi pi-home" routerLink="/"></p-button>
+      <p-button label="Test 1" routerLink="/test-page-1"></p-button>
+    </ng-template>
+    <ng-template #end>
+      <p-button icon="pi pi-user" (onClick)="openLoginForm()"></p-button>
+      @if (currentUser !== null) {
+        <div>{{ currentUser.shortName }}</div>
+      }
+    </ng-template>
+  </p-toolbar>
   <div class="content">
     <router-outlet />
   </div>
