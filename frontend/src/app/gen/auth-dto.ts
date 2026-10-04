@@ -1,3 +1,4 @@
+
 export class RoleDto {
   id?: number;
   localeName?: string;
@@ -19,3 +20,4 @@ export class UserDto {
   shortName?: string;
   surname?: string;
 }
+

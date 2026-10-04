@@ -1,29 +1,31 @@
-import { HttpClient, HttpParams } from '@angular/common/http';
-import { Injectable } from '@angular/core';
-import { UserDto } from './auth-dto';
-import { Observable } from 'rxjs';
+import {HttpClient, HttpHeaders, HttpParams} from '@angular/common/http';
+import {Service, inject} from '@angular/core';
+import {UserDto} from './auth-dto';
+import {Observable} from 'rxjs';
+import {map} from 'rxjs/operators';
 
-@Injectable({
-  providedIn: 'root',
-})
+@Service()
 export class AdminService {
   httpService: HttpClient;
 
-  public constructor(httpService: HttpClient) {
-    this.httpService = httpService;
+
+ public constructor() {
+    this.httpService = inject(HttpClient);
   }
 
-  public getUsers(joinRoles: boolean): Observable<UserDto[]> {
-    const queryParamsList: { name: string; value: string }[] = [];
-    queryParamsList.push({ name: 'joinRoles', value: joinRoles.toString() });
-    let params = new HttpParams();
+ public getUsers(joinRoles: boolean): Observable<UserDto[]>  {
+    const queryParamsList: { name: string, value: string }[] = [];
+    queryParamsList.push({name: 'joinRoles', value: joinRoles.toString()});
+      let params = new HttpParams();
     for (const queryParam of queryParamsList) {
       params = params.append(queryParam.name, queryParam.value);
     }
-    return this.httpService.get<UserDto[]>('admin/users', { params, responseType: 'json' });
+    return this.httpService.get<UserDto[]>('admin/users', {params, responseType: 'json'});
   }
 
-  public test(): Observable<void> {
+ public test(): Observable<void>  {
     return this.httpService.get<void>('admin');
   }
+
 }
+
