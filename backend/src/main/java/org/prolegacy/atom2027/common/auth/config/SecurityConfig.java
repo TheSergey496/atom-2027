@@ -47,6 +47,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, "/authentication/registration").permitAll()
                         .requestMatchers(HttpMethod.GET, "/authentication/restore-password-code").permitAll()
                         .requestMatchers(HttpMethod.PATCH, "/authentication/restore-password").permitAll()
+                        .requestMatchers("/queue-test").permitAll()
                         .anyRequest().authenticated()
                 )
                 .httpBasic(Customizer.withDefaults());

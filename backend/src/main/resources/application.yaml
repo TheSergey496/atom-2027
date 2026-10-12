@@ -1,3 +1,5 @@
+app:
+  db-schema: atom-2027
 server:
   port: 8496
 spring:
@@ -6,14 +8,13 @@ spring:
   jpa:
     properties:
       hibernate:
-        default_schema: atom-2027
+        default_schema: ${app.db-schema}
         show_sql: true
         hbm2ddl:
           create_namespaces: true
-    hibernate:
-      ddl-auto: create
+          auto: create
   datasource:
-    url: jdbc:postgresql://localhost:5496/postgres
+    url: jdbc:postgresql://localhost:5496/postgres?currentSchema=${app.db-schema}
     username: postgres
     password: postgres
     driver-class-name: org.postgresql.Driver
