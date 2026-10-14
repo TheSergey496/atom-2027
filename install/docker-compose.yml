@@ -1,0 +1,35 @@
+services:
+  backend:
+    image: localhost:5000/backend
+    container_name: backend
+    build:
+      dockerfile: Dockerfile
+    environment:
+      server.port: 8085
+      spring.datasource.url: jdbc:postgresql://db:5432/postgres?currentSchema=atom-2027
+    ports:
+      - 8496:8085
+    depends_on:
+      - db
+  frontend:
+    image: localhost:5000/frontend
+    container_name: frontend
+    build:
+      dockerfile: Dockerfile
+      target: frontend
+    environment:
+      baseUrl: http://${REST_IP}:8496
+    ports:
+      - 4963:80
+    depends_on:
+      - backend
+
+  db:
+    image: postgres:18.6-alpine
+    container_name: db
+    ports:
+      - 5496:5432
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
