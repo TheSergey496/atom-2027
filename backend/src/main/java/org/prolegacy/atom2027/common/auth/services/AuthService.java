@@ -6,6 +6,7 @@ import org.prolegacy.atom2027.common.auth.dto.UserDto;
 import org.prolegacy.atom2027.common.auth.readers.UserReader;
 import org.prolegacy.atom2027.common.auth.util.JwtTokenUtil;
 import org.prolegacy.atom2027.common.exceptions.BusinessLogicException;
+import org.prolegacy.atom2027.services.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -14,11 +15,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Isolation;
-import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Locale;
-import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -27,9 +24,6 @@ import java.util.regex.Pattern;
 public class AuthService {
     @Autowired
     private UserReader userReader;
-
-    @Autowired
-    private UserService userService;
 
     @Autowired
     private AuthenticationManager authenticationManager;
@@ -64,18 +58,6 @@ public class AuthService {
 
         String token = matcher.group(1);
         jwtTokenUtil.getBlacklistedTokens().put(token, Boolean.TRUE);
-    }
-
-    @Transactional(isolation = Isolation.SERIALIZABLE)
-    public void restorePassword(String email, String newPassword, Long code) {
-        String lowerCaseEmail = Optional.ofNullable(email).map(e -> e.toLowerCase(Locale.US))
-                .orElseThrow(() -> new BusinessLogicException("Не задан email-адрес"));
-
-        if (!code.equals(passwordRestorationCodes.getIfPresent(lowerCaseEmail))) {
-            throw new BusinessLogicException("Неверный или истёкший проверочный код, попробуйте ещё раз");
-        }
-
-        userService.restorePassword(lowerCaseEmail, newPassword);
     }
 
     public UserDto getCurrentUserDto() {

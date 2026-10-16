@@ -1,11 +1,10 @@
 import { Component, inject } from '@angular/core';
-import { Button } from '@openng/optimus-ui/button';
 import { DummyDialogComponent } from '../../forms/dummy-dialog.component/dummy-dialog.component';
 import { DialogService } from '../../../services/dialog.service';
 
 @Component({
   selector: 'pro-legacy-home-page.component',
-  imports: [Button],
+  imports: [],
   templateUrl: './home-page.component.html',
   styleUrl: './home-page.component.css',
 })

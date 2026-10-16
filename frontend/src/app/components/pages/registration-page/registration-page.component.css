@@ -1,0 +1,29 @@
+.registration-wrapper {
+    width: 100%;
+    height: 100%;
+    padding-top: 100px;
+    align-items: center;
+    flex-flow: column;
+    display: flex;
+}
+
+:host ::ng-deep .registration-wrapper .p-card-body {
+    width: 480px;
+}
+
+.title-wrapper {
+    position: relative;
+}
+
+.back-button {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    color: var(--p-surface-600);
+}
+
+.back-button:hover {
+    color: var(--p-surface-900);
+}

@@ -1,0 +1,64 @@
+<div class="login-wrapper">
+  <p-card [style]="{textAlign: 'center'}">
+    <span style="font-size: x-large; font-weight: bold;">
+      Войдите или
+      <a class="link" (click)="createUser()" [class.content-disabled]="loading()">
+        создайте аккаунт
+      </a>
+    </span>
+    <div style="height: 40px"></div>
+    <form #loginForm="ngForm" class="prolegacy-form">
+      <div>
+        <p-floatlabel proLegacyFloatLabelTransitionFix variant="on">
+          <input pInputText
+                 required
+                 #usernameInputModel="ngModel"
+                 id="usernameInput"
+                 name="username"
+                 maxlength="50"
+                 type="email"
+                 style="width: 100%"
+                 [pattern]="'^[\\w.\\-]+@([\\w\\-]+.)+[\\w\\-]{2,4}$'"
+                 [autofocus]="true"
+                 [disabled]="loading()"
+                 [(ngModel)]="email">
+          <label for="usernameInput">Адрес электронной почты</label>
+        </p-floatlabel>
+        @if (usernameInputModel.dirty && usernameInputModel.hasError('pattern')) {
+          <pro-legacy-form-message message="Неверный формат"></pro-legacy-form-message>
+        }
+      </div>
+
+      <p-floatlabel proLegacyFloatLabelTransitionFix variant="on">
+        <p-password required
+                    inputId="passwordInput"
+                    name="password"
+                    style="width: 100%"
+                    [inputStyle]="{width: '100%'}"
+                    [toggleMask]="true"
+                    [feedback]="false"
+                    [maxlength]="50"
+                    [disabled]="loading()"
+                    [(ngModel)]="password">
+        </p-password>
+        <label for="passwordInput">Пароль</label>
+      </p-floatlabel>
+    </form>
+
+    <p-footer>
+      <p-button iconPos="right"
+                [icon]="loading() ? 'pi pi-spin pi-spinner' : undefined"
+                [label]="loading() ? 'ВЫПОЛНЯЕТСЯ ВХОД...' : 'ВОЙТИ'"
+                [style]="{width: '100%'}"
+                [disabled]="!!loginForm.invalid || loading()"
+                (onClick)="login()">
+      </p-button>
+
+            <div style="margin-top: 20px">
+              <span class="link" [class.content-disabled]="loading()" (click)="restorePassword()">
+                Забыли пароль?
+              </span>
+            </div>
+    </p-footer>
+  </p-card>
+</div>

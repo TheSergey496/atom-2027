@@ -1,31 +1,16 @@
 import {HttpClient, HttpHeaders, HttpParams} from '@angular/common/http';
 import {Service, inject} from '@angular/core';
-import {TestQueue$TestQueuePayload} from './atom2027-services';
-import {UserDto} from './auth-dto';
+import {TestQueue$TestQueuePayload} from './atom2027-queue';
 import {Observable} from 'rxjs';
 import {map} from 'rxjs/operators';
 
 @Service()
-export class AdminService {
+export class LogService {
   httpService: HttpClient;
 
 
  public constructor() {
     this.httpService = inject(HttpClient);
-  }
-
- public getUsers(joinRoles: boolean): Observable<UserDto[]>  {
-    const queryParamsList: { name: string, value: string }[] = [];
-    queryParamsList.push({name: 'joinRoles', value: joinRoles.toString()});
-      let params = new HttpParams();
-    for (const queryParam of queryParamsList) {
-      params = params.append(queryParam.name, queryParam.value);
-    }
-    return this.httpService.get<UserDto[]>('admin/users', {params, responseType: 'json'});
-  }
-
- public test(): Observable<void>  {
-    return this.httpService.get<void>('admin');
   }
 
 }

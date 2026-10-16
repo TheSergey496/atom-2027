@@ -2,7 +2,7 @@ package org.prolegacy.atom2027.common.auth.controllers;
 
 import org.prolegacy.atom2027.common.auth.dto.UserDto;
 import org.prolegacy.atom2027.common.auth.services.AuthService;
-import org.prolegacy.atom2027.common.auth.services.UserService;
+import org.prolegacy.atom2027.services.user.UserService;
 import org.prolegacy.atom2027.common.auth.util.JwtTokenUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -19,9 +19,6 @@ import java.util.Locale;
 public class AuthenticationController {
     @Autowired
     private AuthService authService;
-
-    @Autowired
-    private UserService userService;
 
     @Autowired
     private JwtTokenUtil jwtTokenUtil;
@@ -48,11 +45,6 @@ public class AuthenticationController {
         }
     }
 
-    @PostMapping("registration")
-    public UserDto registerUser(@RequestBody UserDto userDto) {
-        return userService.registerUser(userDto);
-    }
-
     @GetMapping
     public UserDto getCurrentUser() {
         return authService.getCurrentUserDto();
@@ -61,11 +53,6 @@ public class AuthenticationController {
     @DeleteMapping
     public void logout(@RequestHeader(HttpHeaders.AUTHORIZATION) String authorization) {
         authService.logout(authorization);
-    }
-
-    @PatchMapping("restore-password")
-    public void restorePassword(@RequestParam String email, @RequestParam String newPassword, @RequestParam Long code) {
-        authService.restorePassword(email, newPassword, code);
     }
 
     public record AuthRequest(String email, String password) {

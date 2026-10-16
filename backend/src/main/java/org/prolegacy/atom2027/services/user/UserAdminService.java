@@ -1,7 +1,6 @@
-package org.prolegacy.atom2027.common.auth.services;
+package org.prolegacy.atom2027.services.user;
 
-import com.google.common.base.Strings;
-import com.google.common.collect.Lists;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.prolegacy.atom2027.common.auth.dto.RoleDto;
 import org.prolegacy.atom2027.common.auth.dto.UserDto;
 import org.prolegacy.atom2027.common.auth.entities.Role;
@@ -13,11 +12,8 @@ import org.prolegacy.atom2027.common.auth.readers.UserReader;
 import org.prolegacy.atom2027.common.auth.repositories.RoleRepository;
 import org.prolegacy.atom2027.common.auth.repositories.UserRepository;
 import org.prolegacy.atom2027.common.exceptions.BusinessLogicException;
-import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,50 +21,28 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 
 @Service
-public class UserService {
-//    @Value("${auth.default-role:#{null}}")
-//    private String defaultRoleName;
+public class UserAdminService {
 
     @Value("${auth.admin-role:#{null}}")
     private String adminRoleName;
 
     @Autowired
-    private UserReader userReader;
-
-    @Autowired
     private UserRepository userRepository;
-
-    @Autowired
-    private UserProvider userProvider;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
     @Autowired
     private RoleRepository roleRepository;
+    @Autowired
+    private UserProvider userProvider;
+    @Autowired
+    private UserReader userReader;
+    @Autowired
+    private UserUtilsService userUtilsService;
 
-    /**
-     * Регистрация юзера (для бичей)
-     */
-    @Transactional(isolation = Isolation.SERIALIZABLE)
-    public UserDto registerUser(UserDto userDto) {
-        this.validateUserDoesntExist(userDto);
-
-        User user = new User(userDto, encodeAndValidatePassword(userDto.getPassword()), Lists.newArrayList());
-        userRepository.save(user);
-
-        return userReader.getUser(user.getId());
-    }
-
-    /**
-     * Создание юзера (для админа)
-     */
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public UserDto createUser(UserDto userDto) {
-        this.validateUserDoesntExist(userDto);
+        userUtilsService.validateUserDoesntExist(userDto);
         User user = new User(
                 userDto,
-                encodeAndValidatePassword(userDto.getPassword()),
+                userUtilsService.encodeAndValidatePassword(userDto.getPassword()),
                 getAndValidateRoles(userDto)
         );
         userRepository.save(user);
@@ -81,8 +55,10 @@ public class UserService {
         User user = Optional.ofNullable(userId)
                 .flatMap(uId -> userRepository.findById(uId))
                 .orElseThrow(() -> new UserNotFoundException(userDto.getEmail()));
+
         String adminRoleWithPrefix = Optional.ofNullable(adminRoleName).map(r -> "ROLE_" + r)
                 .orElseThrow(() -> new BusinessLogicException("Не найдена роль администратора"));
+
         if (user.getRoles().stream().map(Role::getName).anyMatch(roleName -> Objects.equals(roleName, adminRoleWithPrefix))
                 && userDto.getRoles().stream().map(RoleDto::getName).noneMatch(roleName -> Objects.equals(roleName, adminRoleWithPrefix))) {
             this.validateIsntLastAdmin(userId, "Невозможно забрать роль администратора у последнего пользователя с ролью администратора");
@@ -92,36 +68,6 @@ public class UserService {
         user.adminUpdate(userDto, getAndValidateRoles(userDto));
 
         return userReader.getUser(user.getId());
-    }
-
-    @Transactional(isolation = Isolation.SERIALIZABLE)
-    public UserDto resetPassword(UserId userId) {
-        User user = Optional.ofNullable(userId)
-                .flatMap(uId -> userRepository.findById(uId))
-                .orElseThrow(UserNotFoundException::new);
-        validateIsNotSelfChange(userId, "Невозможно сбросить пароль текущего пользователя");
-        user.setPassword(this.encodeAndValidatePassword(Base64.getEncoder().encodeToString(DigestUtils.sha256(user.getEmail()))));
-
-        return userReader.getUser(user.getId());
-    }
-
-    @Transactional(isolation = Isolation.SERIALIZABLE)
-    public void restorePassword(String email, String password) {
-        if (Strings.isNullOrEmpty(password)) {
-            throw new BusinessLogicException("Новый пароль не может быть пустым");
-        }
-
-        User user = userRepository.findByEmail(email).orElseThrow(() ->
-                new BusinessLogicException("Пользователя с таким email не существует")
-        );
-
-        UserDto userDto = userReader.getUserByEmail(email);
-        assert userDto != null;
-        if (userDto.getArchived()) {
-            throw new BusinessLogicException("Пользователь с таким email в архиве, обратитесь к администратору");
-        }
-
-        user.update(userDto, passwordEncoder.encode(password));
     }
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
@@ -136,20 +82,6 @@ public class UserService {
         return userReader.getUser(user.getId());
     }
 
-    private void validateIsntLastAdmin(UserId userId, String errorMessage) {
-        List<User> usersWithAdminRole = Optional.ofNullable(adminRoleName)
-                .map(roleWithoutPrefix -> userRepository.findActualUsersWithRoleName("ROLE_" + roleWithoutPrefix))
-                .orElseThrow(() -> new BusinessLogicException("Не найдена роль администратора"));
-        if (usersWithAdminRole.size() == 1 && usersWithAdminRole.get(0).getId().equals(userId)) {
-            throw new BusinessLogicException(errorMessage);
-        }
-    }
-
-    private void validateIsNotSelfChange(UserId userId, String errorMessage) {
-        if (Optional.ofNullable(userProvider.get()).map(User::getId).map(userId1 -> Objects.equals(userId, userId1)).orElse(false)) {
-            throw new BusinessLogicException(errorMessage);
-        }
-    }
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public UserDto unarchiveUser(UserId userId) {
@@ -161,22 +93,15 @@ public class UserService {
         return userReader.getUser(user.getId());
     }
 
-    private String encodeAndValidatePassword(String password) {
-        return Optional.ofNullable(password)
-                .map(s -> {
-                    if (StringUtils.isBlank(s)) {
-                        throw new BusinessLogicException("Пароль не может быть пустым");
-                    }
-                    return s;
-                })
-                .map(pass -> passwordEncoder.encode(pass))
-                .orElseThrow(() -> new BusinessLogicException("Отсутствует пароль"));
-    }
+    @Transactional(isolation = Isolation.SERIALIZABLE)
+    public UserDto resetPassword(UserId userId) {
+        User user = Optional.ofNullable(userId)
+                .flatMap(uId -> userRepository.findById(uId))
+                .orElseThrow(UserNotFoundException::new);
+        validateIsNotSelfChange(userId, "Невозможно сбросить пароль текущего пользователя");
+        user.setPassword(userUtilsService.encodeAndValidatePassword(Base64.getEncoder().encodeToString(DigestUtils.sha256(user.getEmail()))));
 
-    private void validateUserDoesntExist(UserDto userDto) {
-        if (userRepository.existsByEmail(userDto.getEmail().toLowerCase(Locale.US))) {
-            throw new BusinessLogicException("Пользователь с email-адресом %s уже существует".formatted(userDto.getEmail()));
-        }
+        return userReader.getUser(user.getId());
     }
 
     private List<Role> getAndValidateRoles(UserDto userDto) {
@@ -196,5 +121,20 @@ public class UserService {
             throw new BusinessLogicException("Пользователь должен иметь хотя бы одну роль");
         }
         return roles;
+    }
+
+    private void validateIsntLastAdmin(UserId userId, String errorMessage) {
+        List<User> usersWithAdminRole = Optional.ofNullable(adminRoleName)
+                .map(roleWithoutPrefix -> userRepository.findActualUsersWithRoleName("ROLE_" + roleWithoutPrefix))
+                .orElseThrow(() -> new BusinessLogicException("Не найдена роль администратора"));
+        if (usersWithAdminRole.size() == 1 && usersWithAdminRole.get(0).getId().equals(userId)) {
+            throw new BusinessLogicException(errorMessage);
+        }
+    }
+
+    private void validateIsNotSelfChange(UserId userId, String errorMessage) {
+        if (Optional.ofNullable(userProvider.get()).map(User::getId).map(userId1 -> Objects.equals(userId, userId1)).orElse(false)) {
+            throw new BusinessLogicException(errorMessage);
+        }
     }
 }

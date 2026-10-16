@@ -1,0 +1,46 @@
+.change-password-select-wrapper {
+    display: flex;
+    flex-flow: row;
+    align-items: center
+}
+
+.change-password-select-label {
+    width: 250px;
+}
+
+.expand-container {
+    display: grid;
+    grid-template-rows: 1fr;
+}
+
+.expand-content {
+    overflow: hidden;
+}
+
+.expand {
+    animation: expand-in 250ms ease-out;
+}
+
+.shrink {
+    animation: expand-out 250ms ease-out;
+}
+
+@keyframes expand-in {
+    from {
+        grid-template-rows: 0fr;
+    }
+
+    to {
+        grid-template-rows: 1fr;
+    }
+}
+
+@keyframes expand-out {
+    from {
+        grid-template-rows: 1fr;
+    }
+
+    to {
+        grid-template-rows: 0fr;
+    }
+}

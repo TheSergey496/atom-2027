@@ -1,0 +1,35 @@
+:host ::ng-deep .form-message i.p-message-icon {
+    font-size: 0.85rem;
+    width: 0.85rem;
+    height: 0.85rem;
+
+}
+
+:host ::ng-deep .form-message .p-message-content {
+    padding-left: 5px;
+    gap: 5px
+}
+
+:host ::ng-deep .form-message.p-message-error {
+    color: var(--p-inputtext-invalid-border-color);
+}
+
+:host ::ng-deep .form-message.p-message-error i.p-message-icon {
+    margin-top: 1px;
+}
+
+:host ::ng-deep .form-message.p-message-warn {
+    color: var(--p-orange-600);
+}
+
+:host ::ng-deep .form-message.p-message-warn i.p-message-icon {
+    margin-top: 1px;
+}
+
+:host ::ng-deep .form-message.p-message-info i.p-message-icon {
+    margin-top: 3px;
+}
+
+:host ::ng-deep .form-message.p-message-success i.p-message-icon {
+    margin-top: 3px;
+}

@@ -1,5 +1,5 @@
 app:
-  db-schema: atom-2027
+  db-schema: atom_2027
 server:
   port: 8496
 spring:

@@ -1,20 +1,32 @@
-<main class="main">
-  <p-toolbar>
-    <ng-template #start>
+@if (loading()) {
+  <pro-legacy-loader></pro-legacy-loader>
+} @else {
+  <main>
+    <pro-legacy-header></pro-legacy-header>
+    <router-outlet></router-outlet>
+  </main>
+}
+
+<p-toast [breakpoints]="{'720px': {width: '100%', right: '0', left: '0'}}"></p-toast>
+
+<p-toast position="center" key="{{MessageServiceKey.OK}}" class="toast-ok-wrapper">
+  <ng-template let-message pTemplate="message">
+    <div class="toast-ok">
       <div>
-        {{ this.isHomeComponent() ? 'Супер приложение для победы на Atom Skills' : 'Домой' }}
+        <i [class]="getToastIconClass(message)" style="font-size: 3em"></i>
+        <div class="toast-ok-summary">{{ message.summary }}</div>
+        <p-scrollpanel [class]="'toast-ok-detail-scroll'">
+          <p class="toast-ok-detail">{{ message.detail }}</p>
+        </p-scrollpanel>
       </div>
-      <p-button icon="pi pi-home" routerLink="/"></p-button>
-      <p-button label="Test 1" routerLink="/test-page-1"></p-button>
-    </ng-template>
-    <ng-template #end>
-      <p-button icon="pi pi-user" (onClick)="openLoginForm()"></p-button>
-      @if (currentUser !== null) {
-        <div>{{ currentUser.shortName }}</div>
-      }
-    </ng-template>
-  </p-toolbar>
-  <div class="content">
-    <router-outlet />
-  </div>
-</main>
+
+      <div>
+        <p-button label="OK" [severity]="getSeverity(message)"
+                  (click)="onToastButtonClick()">
+        </p-button>
+      </div>
+    </div>
+
+    <p-blockUI proLegacyBlockedForLive></p-blockUI>
+  </ng-template>
+</p-toast>

@@ -8,7 +8,7 @@ const eslintConfigPrettier = require('eslint-config-prettier');
 
 module.exports = defineConfig([
   {
-    ignores: ['src/app/gen/']
+    ignores: ['src/app/gen/'],
   },
   {
     files: ['**/*.ts'],
@@ -38,6 +38,7 @@ module.exports = defineConfig([
         'error',
         { type: 'element', prefix: 'pro-legacy', style: 'kebab-case' },
       ],
+      '@angular-eslint/template/eqeqeq': ['error', 'always', { null: 'ignore' }],
     },
   },
   {
@@ -49,6 +50,7 @@ module.exports = defineConfig([
     rules: {
       ...eslintConfigPrettier.rules,
       'prettier/prettier': ['warn', { parser: 'angular' }],
+      '@angular-eslint/template/eqeqeq': ['error', 'always', { null: 'ignore' }],
     },
   },
 ]);

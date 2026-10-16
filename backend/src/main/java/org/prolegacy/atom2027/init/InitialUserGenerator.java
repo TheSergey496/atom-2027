@@ -6,7 +6,8 @@ import org.prolegacy.atom2027.common.auth.dto.RoleDto;
 import org.prolegacy.atom2027.common.auth.dto.UserDto;
 import org.prolegacy.atom2027.common.auth.repositories.RoleRepository;
 import org.prolegacy.atom2027.common.auth.repositories.UserRepository;
-import org.prolegacy.atom2027.common.auth.services.UserService;
+import org.prolegacy.atom2027.services.user.UserAdminService;
+import org.prolegacy.atom2027.services.user.UserService;
 import org.prolegacy.atom2027.common.exceptions.BusinessLogicException;
 import org.prolegacy.atom2027.common.util.InitializationOrder;
 import org.prolegacy.atom2027.enums.Role;
@@ -26,7 +27,7 @@ public class InitialUserGenerator implements ApplicationRunner {
     private UserRepository userRepository;
 
     @Autowired
-    private UserService userService;
+    private UserAdminService userAdminService;
 
     @Autowired
     private RoleRepository roleRepository;
@@ -41,7 +42,7 @@ public class InitialUserGenerator implements ApplicationRunner {
         var role = roleRepository.findByName(Role.ADMIN.getRoleName())
                 .orElseThrow(() -> new BusinessLogicException("Отсутствует роль администратора"));
 
-        userService.createUser(UserDto.builder()
+        userAdminService.createUser(UserDto.builder()
                 .email("admin@admin.com")
                 .password(Base64.getEncoder().encodeToString(DigestUtils.sha256("password")))
                 .firstname("Админ")

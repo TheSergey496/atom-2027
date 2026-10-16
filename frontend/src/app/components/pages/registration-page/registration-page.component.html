@@ -1,0 +1,25 @@
+<div class="registration-wrapper">
+  <p-card [style]="{textAlign: 'center'}">
+    <div class="title-wrapper">
+      <i class="pi pi-arrow-left back-button" (click)="backToLogin()"></i>
+      <span style="font-size: x-large; font-weight: bold;">Регистрация пользователя</span>
+    </div>
+    <div style="height: 40px"></div>
+    <pro-legacy-user-edit-form
+      [user]="user"
+      [disabled]="loading()"
+      (validityChange)="formValid = $event">
+    </pro-legacy-user-edit-form>
+
+    <p-footer>
+      <p-button
+        iconPos="right"
+        [icon]="loading() ? 'pi pi-spin pi-spinner' : undefined"
+        [label]="loading() ? 'РЕГИСТРАЦИЯ...' : 'ЗАРЕГИСТРИРОВАТЬСЯ'"
+        [style]="{width: '100%'}"
+        [disabled]="!formValid || loading()"
+        (onClick)="createUser()">
+      </p-button>
+    </p-footer>
+  </p-card>
+</div>

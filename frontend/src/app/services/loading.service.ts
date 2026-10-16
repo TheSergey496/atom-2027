@@ -116,7 +116,7 @@ export class LoadingService {
 @Component({
   template: ` @if (_visible()) {
     <div class="loader">
-      <p-progressSpinner [style]="{ width: '50px', height: '50px' }"></p-progressSpinner>
+      <p-progressSpinner [style]="{ width: '75px', height: '75px' }"></p-progressSpinner>
     </div>
   }`,
   imports: [ProgressSpinner],

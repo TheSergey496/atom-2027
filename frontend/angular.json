@@ -11,15 +11,18 @@
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
+          "type": "component",
           "skipTests": true
         },
         "@schematics/angular:directive": {
+          "type": "directive",
           "skipTests": true
         },
         "@schematics/angular:interceptor": {
           "skipTests": true
         },
         "@schematics/angular:service": {
+          "type": "service",
           "skipTests": true
         }
       },
@@ -33,6 +36,7 @@
             "browser": "src/main.ts",
             "tsConfig": "tsconfig.app.json",
             "assets": [
+              "src/assets",
               {
                 "glob": "**/*",
                 "input": "public"

@@ -1,0 +1,50 @@
+<div class="header" #header>
+  <a class="logo" [routerLink]="'/'">
+    <img id="logo"
+         priority=""
+         ngSrc="/assets/images/logo.png"
+         alt="ProLegacy"
+         style="height: 100%; width: auto"
+         height="123"
+         width="330" />
+  </a>
+
+  <div class="tabmenu-wrapper">
+    <p-tabs [value]="activeRoute" #tabs>
+      <p-tablist>
+        @for (tab of menuTabs; track tab.route) {
+          <p-tab [value]="tab.route" (click)="navigate(tab.route)">
+            {{ tab.label }}
+          </p-tab>
+        }
+      </p-tablist>
+    </p-tabs>
+  </div>
+
+  @if (userService.currentUser != null) {
+    <div class="alert-wrapper">
+      <p-overlaybadge pTooltip="Уведомления"
+                      tooltipPosition="bottom"
+                      severity="danger"
+                      [value]="alertsCount">
+        <i class="pi pi-bell" [class.ring]="alertsCount > 0"></i>
+      </p-overlaybadge>
+    </div>
+
+    <div class="user-info-wrapper">
+      <p-button #trigger
+                class="user-menu-button"
+                icon="pi pi-angle-down"
+                iconPos="right"
+                [label]="userName"
+                (click)="userMenu.toggle($event)"
+      />
+      <p-menu #userMenu
+              [model]="userMenuItems"
+              [popup]="true"
+              [style]="{ width: trigger.el.nativeElement.offsetWidth + 'px', minWidth: '0px' }"
+      />
+    </div>
+  }
+</div>
+
