@@ -104,6 +104,7 @@ export abstract class DialogComponent<Res, Callbacks extends string>
       dialogRef.visibleChange.subscribe((v) => {
         this.visible = v;
       });
+      dialogRef.resizable = false;
 
       dialogRef.visible = this.visible;
       dialogRef.cd.detectChanges();

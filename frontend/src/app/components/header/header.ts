@@ -32,7 +32,7 @@ import { UserService } from '../../services/auth/user.service';
 })
 export class Header {
   protected menuTabs: MenuTab[] = [];
-  protected activeRoute? = '/';
+  protected activeRoute? = '/home';
   protected alertsCount = 0;
   protected userMenuItems: MenuItem[] = [
     {
@@ -83,7 +83,7 @@ export class Header {
         this.menuTabs = [
           {
             label: 'Home',
-            route: '/',
+            route: '/home',
           },
           {
             label: 'Test',
@@ -97,6 +97,7 @@ export class Header {
       const routes = this.menuTabs.map(t => t.route);
       routes.sort((a, b) => b.localeCompare(a));
       this.descSortedRoutes = routes;
+      this.activeRoute = this.getActiveRoute(this.router.url);
     });
 
     this.router.events
@@ -104,27 +105,22 @@ export class Header {
       .subscribe((event: NavigationEnd | NavigationError) => {
         if (event instanceof NavigationEnd) {
           this.activeRoute = this.getActiveRoute(event.urlAfterRedirects);
+          setTimeout(() => this.tabs()?.updateValue(this.activeRoute));
         } else {
-          this.activeRoute = '/';
+          this.activeRoute = '/home';
           setTimeout(() => this.tabs()?.updateValue(this.activeRoute));
         }
       });
 
-    // this.activeRoute = this.getActiveRoute(this.router.url);
-    this.activeRoute = undefined;
+    this.activeRoute = this.getActiveRoute(this.router.url);
   }
 
-  private getActiveRoute(url: string): string {
-    const route = this.descSortedRoutes.find(r => url.startsWith(r));
-    return route ?? '/';
+  private getActiveRoute(url: string): string | undefined {
+    return this.descSortedRoutes.find(r => url.startsWith(r));
   }
 
   protected async navigate(route: string) {
-    try {
       await this.router.navigate([route]);
-    } catch {
-      await this.router.navigate(['/']);
-    }
   }
 
   private editUser() {
