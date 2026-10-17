@@ -1,4 +1,20 @@
 services:
+  db:
+    image: postgres:18.6-alpine
+    container_name: db
+    ports:
+      - "${DB_PORT:-5496}:5432"
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: postgres
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+
   backend:
     image: localhost:5000/backend
     container_name: backend
@@ -8,9 +24,17 @@ services:
       server.port: 8085
       spring.datasource.url: jdbc:postgresql://db:5432/postgres?currentSchema=atom-2027
     ports:
-      - 8496:8085
+      - "${BACKEND_PORT:-8496}:8085"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q --spider http://localhost:8085/actuator/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 18
+      start_period: 60s
+
   frontend:
     image: localhost:5000/frontend
     container_name: frontend
@@ -18,18 +42,15 @@ services:
       dockerfile: Dockerfile
       target: frontend
     environment:
-      baseUrl: http://${REST_IP}:8496
+      baseUrl: http://${BACKEND_HOST:-127.0.0.1}:${BACKEND_PORT:-8496}
     ports:
-      - 4963:80
+      - "${FRONTEND_PORT:-4963}:80"
     depends_on:
-      - backend
-
-  db:
-    image: postgres:18.6-alpine
-    container_name: db
-    ports:
-      - 5496:5432
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: postgres
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:80 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 10s
