@@ -19,6 +19,7 @@ RUN npm install --force --legacy-peer-deps
 RUN npm run build --prod
 
 FROM eclipse-temurin:25-jdk-alpine as backend
+RUN apk --no-cache add bash curl
 ARG DEPENDENCY=/workspace/app/target/dependency
 COPY --from=rest_build ${DEPENDENCY}/BOOT-INF/lib /app/lib
 COPY --from=rest_build ${DEPENDENCY}/META-INF /app/META-INF

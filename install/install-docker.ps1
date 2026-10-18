@@ -97,7 +97,8 @@ function Stop-WithError {
 function Invoke-Docker {
     param(
         [string]$FilePath,
-        [string[]]$Arguments
+        [string[]]$Arguments,
+        [switch]$SuppressOutput
     )
 
     $result = @{ Output = @(); ExitCode = -1; NotFound = $false }
@@ -114,24 +115,21 @@ function Invoke-Docker {
         $raw = & $FilePath @Arguments 2>&1
     }
     catch [System.Management.Automation.CommandNotFoundException] {
-        $result.NotFound = $true
-        $result.ExitCode = -1
-        return $result
+        $result.NotFound = $true; $result.ExitCode = -1; return $result
     }
     catch {
         Write-Log ("Команда завершилась исключением: {0}" -f $_.Exception.Message) 'ERROR'
-        $result.ExitCode = -1
-        return $result
+        $result.ExitCode = -1; return $result
     }
 
     $clean = New-Object System.Collections.Generic.List[string]
     foreach ($line in $raw) {
         $text = [string]$line
         if (Test-IsBenign $text) {
-            Write-Log $text 'WARN'
+            if (-not $SuppressOutput) { Write-Log $text 'WARN' }
         }
         else {
-            Write-Log $text
+            if (-not $SuppressOutput) { Write-Log $text }
             $clean.Add($text)
         }
     }
@@ -230,11 +228,280 @@ function Wait-ForHealthy {
     return $false
 }
 
+# --- Разбор health-JSON -----------------------------------------------------
+
+<#
+Возвращает @{ Lines = string[]; Summary = string[] }.
+Lines  — читаемое представление ошибки для лога;
+Summary — короткие пары "component=STATUS (detail=..., ...)" для итоговой сводки.
+#>
+function Get-HealthComponentErrors {
+    param([string]$Output)
+
+    $lines   = New-Object System.Collections.Generic.List[string]
+    $summary = New-Object System.Collections.Generic.List[string]
+    $empty   = @{ Lines = $lines; Summary = $summary }
+
+    if ([string]::IsNullOrWhiteSpace($Output)) { return $empty }
+
+    # Health-выход может содержать префикс/суффикс от curl — берём «{...}».
+    $start = $Output.IndexOf('{')
+    $end   = $Output.LastIndexOf('}')
+    if ($start -lt 0 -or $end -le $start) { return $empty }
+    $jsonText = $Output.Substring($start, $end - $start + 1)
+
+    $obj = $null
+    try { $obj = $jsonText | ConvertFrom-Json -ErrorAction Stop } catch {
+        return $empty
+    }
+    if ($obj -isnot [System.Management.Automation.PSCustomObject]) { return $empty }
+
+    $topStatus = $null
+    if ($obj.PSObject.Properties.Name -contains 'status') { $topStatus = [string]$obj.status }
+
+    $components = $null
+    if ($obj.PSObject.Properties.Name -contains 'components') { $components = $obj.components }
+
+    if ($null -ne $components -and $components -is [System.Management.Automation.PSCustomObject]) {
+        $bad = @()
+        foreach ($prop in $components.PSObject.Properties) {
+            $comp   = $prop.Value
+            $status = $null
+            if ($comp -and ($comp.PSObject.Properties.Name -contains 'status')) {
+                $status = [string]$comp.status
+            }
+            if ($status -and $status -ne 'UP') {
+                $bad += ,[pscustomobject]@{ Name = $prop.Name; Component = $comp; Status = $status }
+            }
+        }
+
+        if ($bad.Count -gt 0) {
+            $overallText = if ($topStatus) { $topStatus } else { 'UNKNOWN' }
+            $lines.Add("Health: компоненты с проблемами (overall=$overallText):")
+
+            foreach ($b in $bad) {
+                $lines.Add("- $($b.Name): status=$($b.Status)")
+
+                $detailPairs = @()
+                if (($b.Component.PSObject.Properties.Name -contains 'details') -and $b.Component.details) {
+                    foreach ($dl in (Format-DetailsObject -Details $b.Component.details -Indent '    ')) {
+                        $lines.Add($dl)
+                    }
+                    foreach ($dp in $b.Component.details.PSObject.Properties) {
+                        $v = $dp.Value
+                        if ($null -eq $v) {
+                            $detailPairs += "$($dp.Name)=null"
+                        }
+                        elseif ($v -is [string] -or $v -is [int] -or $v -is [long] -or
+                                $v -is [double] -or $v -is [bool]) {
+                            $detailPairs += "$($dp.Name)=$v"
+                        }
+                        else {
+                            $detailPairs += "$($dp.Name)=<json>"
+                        }
+                    }
+                }
+
+                $summaryText = "$($b.Name)=$($b.Status)"
+                if ($detailPairs.Count -gt 0) {
+                    $summaryText += ' (' + ($detailPairs -join ', ') + ')'
+                }
+                $summary.Add($summaryText)
+            }
+        }
+    }
+    elseif ($topStatus -and $topStatus -ne 'UP') {
+        $lines.Add("Health status: $topStatus")
+        $summary.Add("status=$topStatus")
+    }
+
+    return @{ Lines = $lines; Summary = $summary }
+}
+
+function Format-DetailsObject {
+    param($Details, [string]$Indent = '  ')
+    $lines = New-Object System.Collections.Generic.List[string]
+    if ($null -eq $Details) { return ,$lines }
+    foreach ($p in $Details.PSObject.Properties) {
+        $v = $p.Value
+        if ($null -eq $v) {
+            $lines.Add("$Indent$($p.Name): (null)")
+        }
+        elseif ($v -is [string] -or $v -is [int] -or $v -is [long] -or
+                $v -is [double] -or $v -is [bool]) {
+            $lines.Add("$Indent$($p.Name): $v")
+        }
+        else {
+            $ser = $null
+            try { $ser = ConvertTo-Json -InputObject $v -Compress -Depth 5 -ErrorAction Stop }
+            catch { $ser = [string]$v }
+            $lines.Add("$Indent$($p.Name): $ser")
+        }
+    }
+    return ,$lines
+}
+
+<#
+Полный разбор одного контейнера через docker inspect.
+Возвращает @{ Lines = string[]; Problems = string[] }.
+#>
+function Get-ContainerDiagnostic {
+    param([string]$ContainerId, [string]$Service)
+
+    $lines    = New-Object System.Collections.Generic.List[string]
+    $problems = New-Object System.Collections.Generic.List[string]
+
+    $r = Invoke-Docker -FilePath 'docker' -SuppressOutput `
+        -Arguments @('inspect', '--format', '{{json .State}}', $ContainerId)
+    if ($r.ExitCode -ne 0 -or $r.Output.Count -eq 0) {
+        $lines.Add("${Service}: не удалось выполнить docker inspect для $ContainerId")
+        $problems.Add('inspect failed')
+        return @{ Lines = $lines; Problems = $problems }
+    }
+
+    $jsonLine = $null
+    foreach ($l in $r.Output) {
+        $t = ([string]$l).Trim()
+        if ($t.StartsWith('{') -and $t.EndsWith('}')) { $jsonLine = $t; break }
+    }
+    if (-not $jsonLine) {
+        $lines.Add("${Service}: JSON не найден в выводе docker inspect")
+        foreach ($l in $r.Output) { $lines.Add("  raw: $l") }
+        $problems.Add('inspect JSON not found')
+        return @{ Lines = $lines; Problems = $problems }
+    }
+
+    $state = $null
+    try { $state = $jsonLine | ConvertFrom-Json -ErrorAction Stop }
+    catch {
+        $lines.Add("${Service}: ошибка разбора docker inspect: $($_.Exception.Message)")
+        $problems.Add('inspect parse error')
+        return @{ Lines = $lines; Problems = $problems }
+    }
+
+    $status = [string]$state.Status
+    $lines.Add("${Service}: Status=$status ExitCode=$($state.ExitCode)")
+
+    if ($status -ne 'running') {
+        $problems.Add("state=$status")
+    }
+
+    if ($state.Error) {
+        $lines.Add("  Container error: $($state.Error)")
+        $problems.Add("container error: $($state.Error)")
+    }
+
+    $health = $state.Health
+    if ($null -eq $health) {
+        $lines.Add('  Healthcheck не задан')
+        return @{ Lines = $lines; Problems = $problems }
+    }
+
+    $healthStatus  = [string]$health.Status
+    $failingStreak = $health.FailingStreak
+    $lines.Add("  Health=$healthStatus FailingStreak=$failingStreak")
+    if ($healthStatus -and $healthStatus -ne 'healthy') {
+        $problems.Add("health=$healthStatus (failingStreak=$failingStreak)")
+    }
+
+    $logEntries = @()
+    if ($health.Log) { $logEntries = @($health.Log | Where-Object { $_ }) }
+    if ($logEntries.Count -eq 0) {
+        $lines.Add('  Результатов health-проб пока нет')
+        return @{ Lines = $lines; Problems = $problems }
+    }
+
+    $failedEntries = @($logEntries | Where-Object { [int]$_.ExitCode -ne 0 })
+    $entriesToShow = @()
+    if ($failedEntries.Count -gt 0) {
+        $candidates     = @($failedEntries | Select-Object -Last 5)
+        $distinctByError = [ordered]@{}
+        foreach ($e in $candidates) {
+            $out = [string]$e.Output
+            $cr  = Get-HealthComponentErrors -Output $out
+            $key = if ($cr.Summary.Count -gt 0) {
+                $cr.Summary -join '; '
+            } else {
+                $t = $out.Trim()
+                if ($t.Length -gt 200) { $t = $t.Substring(0, 200) }
+                $t
+            }
+            $distinctByError[$key] = @{ Entry = $e; Result = $cr }
+        }
+        $entriesToShow = @($distinctByError.Values | Select-Object -Last 2)
+    } else {
+        $last = $logEntries[-1]
+        $entriesToShow = @(
+            @{ Entry  = $last
+               Result = (Get-HealthComponentErrors -Output ([string]$last.Output)) }
+        )
+    }
+
+    $summaryCaptured = $false
+    foreach ($item in $entriesToShow) {
+        $entry           = $item.Entry
+        $componentResult = $item.Result
+        $out             = [string]$entry.Output
+
+        $lines.Add("  Probe: exit=$($entry.ExitCode) end=$($entry.End)")
+
+        if ($componentResult.Lines.Count -gt 0) {
+            foreach ($cl in $componentResult.Lines) { $lines.Add("  $cl") }
+        }
+        if (-not $summaryCaptured -and $componentResult.Summary.Count -gt 0) {
+            $problems.Add($componentResult.Summary -join '; ')
+            $summaryCaptured = $true
+        }
+
+        if ($componentResult.Lines.Count -eq 0 -and -not [string]::IsNullOrWhiteSpace($out)) {
+            $raw = $out.Trim()
+            if ($raw.Length -gt 800) { $raw = $raw.Substring(0, 800) + '...' }
+            foreach ($rl in ($raw -split "`r?`n")) {
+                if ($rl.Trim()) { $lines.Add("    $rl") }
+            }
+            if (-not $summaryCaptured -and $healthStatus -ne 'healthy') {
+                $problems.Add("probe exit=$($entry.ExitCode)")
+                $summaryCaptured = $true
+            }
+        }
+    }
+
+    return @{ Lines = $lines; Problems = $problems }
+}
+
 function Write-ServiceDiagnostics {
     param([string[]]$Services)
+
+    Write-Log '=== Диагностика контейнеров ===' 'ERROR'
+
+    $r = Invoke-Docker -FilePath 'docker' -SuppressOutput `
+        -Arguments @('compose', '-f', $script:ComposeFile, 'ps', '-a')
+    foreach ($l in $r.Output) { Write-Log $l 'ERROR' }
+
+    $allProblems = New-Object System.Collections.Generic.List[string]
+
     foreach ($svc in $Services) {
-        $r = Test-ServiceReady -Service $svc
-        Write-Log ("{0}: state={1}, health={2}, id={3}" -f $svc, $r.State, $r.Health, $r.ContainerId) 'ERROR'
+        $ids = @(& docker compose -f $script:ComposeFile ps -a -q $svc 2>$null | Where-Object { $_ })
+        if ($ids.Count -eq 0) {
+            Write-Log "${svc}: контейнер не найден" 'ERROR'
+            $allProblems.Add("${svc}: not found")
+            continue
+        }
+
+        foreach ($id in $ids) {
+            $diag = Get-ContainerDiagnostic -ContainerId $id -Service $svc
+            foreach ($line in $diag.Lines) { Write-Log $line 'ERROR' }
+            foreach ($p in $diag.Problems) { $allProblems.Add("${svc}: $p") }
+        }
+    }
+
+    Write-Log '=== Конец диагностики ===' 'ERROR'
+
+    $unique = @($allProblems | Select-Object -Unique)
+    if ($unique.Count -gt 0) {
+        # Сводка идёт последней — её и увидит Inno Setup через GetTail().
+        Write-Log '=== СВОДКА ПРОБЛЕМ ===' 'ERROR'
+        foreach ($u in $unique) { Write-Log "  $u" 'ERROR' }
     }
 }
 
@@ -330,7 +597,6 @@ try {
         Stop-WithError 'Не удалось запустить docker compose up.' $script:EXIT_COMPOSE_UP
     }
 
-    # Копируем захваченный вывод в главный лог.
     foreach ($logPath in @($script:ComposeOut, $script:ComposeErr)) {
         if (Test-Path -LiteralPath $logPath) {
             Get-Content -LiteralPath $logPath -ErrorAction SilentlyContinue | ForEach-Object {
@@ -340,16 +606,25 @@ try {
         }
     }
 
-    if ($proc.ExitCode -ne 0) {
-        Invoke-Docker -FilePath 'docker' -Arguments @('compose', 'ps') | Out-Null
-        Stop-WithError "docker compose up завершился с ошибкой (код $($proc.ExitCode))." $script:EXIT_COMPOSE_UP
+    $composeFailed = ($proc.ExitCode -ne 0)
+    $healthy       = $false
+
+    if (-not $composeFailed) {
+        # 9. Ожидание здоровья — только если compose up не упал сам.
+        Write-Log 'Ожидание перехода контейнеров в состояние healthy ...'
+        $healthy = Wait-ForHealthy -Services $script:Services -TimeoutSeconds $TimeoutSeconds
+        Write-Log ("Wait-ForHealthy завершился: healthy=$healthy")
     }
 
-    # 9. Ожидание здоровья
-    Write-Log 'Ожидание перехода контейнеров в состояние healthy ...'
-    if (-not (Wait-ForHealthy -Services $script:Services -TimeoutSeconds $TimeoutSeconds)) {
-        Invoke-Docker -FilePath 'docker' -Arguments @('compose', 'ps') | Out-Null
+    # 10. Единая точка диагностики — срабатывает на ОБОИХ путях отказа.
+    if ($composeFailed -or -not $healthy) {
         Write-ServiceDiagnostics -Services $script:Services
+    }
+
+    if ($composeFailed) {
+        Stop-WithError "docker compose up завершился с ошибкой (код $($proc.ExitCode))." $script:EXIT_COMPOSE_UP
+    }
+    if (-not $healthy) {
         Stop-WithError 'Контейнеры не перешли в состояние «healthy» за отведённое время.' $script:EXIT_NOT_HEALTHY
     }
 

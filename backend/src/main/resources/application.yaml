@@ -18,6 +18,10 @@ spring:
     username: postgres
     password: postgres
     driver-class-name: org.postgresql.Driver
+management:
+  endpoint:
+    health:
+      show-details: always
 auth:
   admin-role: admin
   default-role: user

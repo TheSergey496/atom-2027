@@ -19,27 +19,35 @@ services:
     image: localhost:5000/backend
     container_name: backend
     build:
-      dockerfile: Dockerfile
+      dockerfile: ../Dockerfile
+      target: backend
     environment:
+      APP_DB_SCHEMA: &schema "atom_2027"
+      app.db-schema: *schema
       server.port: 8085
-      spring.datasource.url: jdbc:postgresql://db:5432/postgres?currentSchema=atom-2027
+      spring.datasource.url: "jdbc:postgresql://db:5432/postgres?currentSchema=$${APP_DB_SCHEMA}"
     ports:
       - "${BACKEND_PORT:-8496}:8085"
     depends_on:
       db:
         condition: service_healthy
     healthcheck:
-      test: ["CMD-SHELL", "wget -q --spider http://localhost:8085/actuator/health || exit 1"]
+      test:
+        - CMD-SHELL
+        - >-
+          curl -s -o /tmp/h -w '%{http_code}' http://127.0.0.1:8085/actuator/health > /tmp/code;
+          cat /tmp/h;
+          [ "$(cat /tmp/code)" = "200" ]
       interval: 10s
       timeout: 5s
-      retries: 18
-      start_period: 60s
+      retries: 2
+      start_period: 10s
 
   frontend:
     image: localhost:5000/frontend
     container_name: frontend
     build:
-      dockerfile: Dockerfile
+      dockerfile: ../Dockerfile
       target: frontend
     environment:
       baseUrl: http://${BACKEND_HOST:-127.0.0.1}:${BACKEND_PORT:-8496}
@@ -52,5 +60,5 @@ services:
       test: ["CMD-SHELL", "curl -fsS http://localhost:80 || exit 1"]
       interval: 10s
       timeout: 5s
-      retries: 6
+      retries: 2
       start_period: 10s
