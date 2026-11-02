@@ -11,7 +11,7 @@ import { Router } from '@angular/router';
 import { MessageService } from '@openng/optimus-ui/api';
 import { FloatLabel } from '@openng/optimus-ui/floatlabel';
 import { FloatLabelTransitionFixDirective } from '../../../directives/float-label-transition-fix.directive';
-import { FormMessageComponent } from '../../forms/form-message/form-message.component';
+import { FormMessageComponent } from '../../library/form-message/form-message.component';
 import { MessageServiceKey } from '../../../app';
 
 @Component({

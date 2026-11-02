@@ -23,9 +23,6 @@ import java.util.*;
 @Service
 public class UserAdminService {
 
-    @Value("${auth.admin-role:#{null}}")
-    private String adminRoleName;
-
     @Autowired
     private UserRepository userRepository;
     @Autowired
@@ -42,7 +39,7 @@ public class UserAdminService {
         userUtilsService.validateUserDoesntExist(userDto);
         User user = new User(
                 userDto,
-                userUtilsService.encodeAndValidatePassword(userDto.getPassword()),
+                () -> userUtilsService.encodePasswordFromRawString(userDto.getEmail()),
                 getAndValidateRoles(userDto)
         );
         userRepository.save(user);
@@ -56,11 +53,9 @@ public class UserAdminService {
                 .flatMap(uId -> userRepository.findById(uId))
                 .orElseThrow(() -> new UserNotFoundException(userDto.getEmail()));
 
-        String adminRoleWithPrefix = Optional.ofNullable(adminRoleName).map(r -> "ROLE_" + r)
-                .orElseThrow(() -> new BusinessLogicException("Не найдена роль администратора"));
-
-        if (user.getRoles().stream().map(Role::getName).anyMatch(roleName -> Objects.equals(roleName, adminRoleWithPrefix))
-                && userDto.getRoles().stream().map(RoleDto::getName).noneMatch(roleName -> Objects.equals(roleName, adminRoleWithPrefix))) {
+        String adminRoleName = org.prolegacy.atom2027.enums.Role.ADMIN.getRoleName();
+        if (user.getRoles().stream().map(Role::getName).anyMatch(roleName -> Objects.equals(roleName, adminRoleName))
+                && userDto.getRoles().stream().map(RoleDto::getName).noneMatch(roleName -> Objects.equals(roleName, adminRoleName))) {
             this.validateIsntLastAdmin(userId, "Невозможно забрать роль администратора у последнего пользователя с ролью администратора");
             this.validateIsNotSelfChange(userId, "Невозможно забрать роль администратора у текущего пользователя");
         }
@@ -99,7 +94,7 @@ public class UserAdminService {
                 .flatMap(uId -> userRepository.findById(uId))
                 .orElseThrow(UserNotFoundException::new);
         validateIsNotSelfChange(userId, "Невозможно сбросить пароль текущего пользователя");
-        user.setPassword(userUtilsService.encodeAndValidatePassword(Base64.getEncoder().encodeToString(DigestUtils.sha256(user.getEmail()))));
+        user.setPassword(userUtilsService.encodePasswordFromRawString(user.getEmail()));
 
         return userReader.getUser(user.getId());
     }
@@ -124,10 +119,8 @@ public class UserAdminService {
     }
 
     private void validateIsntLastAdmin(UserId userId, String errorMessage) {
-        List<User> usersWithAdminRole = Optional.ofNullable(adminRoleName)
-                .map(roleWithoutPrefix -> userRepository.findActualUsersWithRoleName("ROLE_" + roleWithoutPrefix))
-                .orElseThrow(() -> new BusinessLogicException("Не найдена роль администратора"));
-        if (usersWithAdminRole.size() == 1 && usersWithAdminRole.get(0).getId().equals(userId)) {
+        List<User> usersWithAdminRole = userRepository.findActualUsersWithRoleName(org.prolegacy.atom2027.enums.Role.ADMIN.getRoleName());
+        if (usersWithAdminRole.size() == 1 && usersWithAdminRole.getFirst().getId().equals(userId)) {
             throw new BusinessLogicException(errorMessage);
         }
     }

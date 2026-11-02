@@ -1,0 +1,72 @@
+<p-blockUI [blocked]="blockingMask()"></p-blockUI>
+<div class="v-flex">
+  <p-toolbar>
+    <ng-template #start>
+      <div class="table-title">
+        {{table.getTitle('Пользователи')}}
+      </div>
+
+      <p-button icon="pi pi-sync"
+                size="small"
+                (onClick)="loadData()">
+      </p-button>
+      <p-button icon="pi pi-filter"
+                size="small"
+                (onClick)="filter.set(!filter())">
+      </p-button>
+
+      <div class="splitter"></div>
+
+      <p-button icon="pi pi-plus"
+                size="small"
+                severity="success"
+                pTooltip="Добавить пользователя"
+                (onClick)="createUser()">
+      </p-button>
+
+      <p-button icon="pi pi-pencil"
+                size="small"
+                pTooltip="Редактировать пользователя"
+                [disabled]="selectedUser() == null"
+                (onClick)="editUser()">
+      </p-button>
+
+      @if (selectedUser()?.archived) {
+        <p-button icon="pi pi-undo"
+                  size="small"
+                  severity="warn"
+                  pTooltip="Восстановить пользователя из архива"
+                  [disabled]="selectedUser() == null"
+                  (onClick)="unarchiveUser()">
+        </p-button>
+      } @else {
+        <p-button icon="pi pi-undo"
+                  size="small"
+                  severity="warn"
+                  pTooltip="Сбросить пароль пользователя"
+                  [disabled]="selectedUser() == null"
+                  (onClick)="resetUserPassword()">
+        </p-button>
+
+        <p-button icon="pi pi-trash"
+                  size="small"
+                  severity="danger"
+                  pTooltip="Архивировать пользователя"
+                  [disabled]="selectedUser() == null"
+                  (onClick)="archiveUser()">
+        </p-button>
+      }
+    </ng-template>
+  </p-toolbar>
+  <pro-legacy-table #table
+                    class="v-flex-grow"
+                    [defaultSort]="[{field: 'id', order: -1}]"
+                    [columns]="columns()"
+                    [value]="users()"
+                    [checkboxSelection]="false"
+                    [(selection)]="selectedUser"
+                    [filter]="filter()"
+                    [loading]="loading()"
+                    [getRowId]="getRowId">
+  </pro-legacy-table>
+</div>

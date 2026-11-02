@@ -8,8 +8,8 @@ import org.prolegacy.atom2027.common.intefaces.LocaleEnum;
 @RequiredArgsConstructor
 @Getter
 public enum Role implements RoleInfo, LocaleEnum {
-    ADMIN("admin", "Администратор"),
-    USER("user", "Пользователь");
+    ADMIN("ROLE_admin", "Администратор"),
+    USER("ROLE_user", "Пользователь");
 
     private final String roleName;
     private final String localization;

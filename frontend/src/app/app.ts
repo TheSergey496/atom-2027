@@ -1,14 +1,15 @@
-import { Component, inject, OnInit, signal, viewChild } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { LoaderComponent } from './components/loader/loader.component';
+import { LoaderComponent } from './components/library/loader/loader.component';
 import { Header } from './components/header/header';
 import { ToastModule } from '@openng/optimus-ui/toast';
 import { ButtonModule, ButtonSeverity } from '@openng/optimus-ui/button';
-import { MessageService, ToastMessageOptions } from '@openng/optimus-ui/api';
-import { BlockUI, BlockUIModule } from '@openng/optimus-ui/blockui';
+import { ConfirmationService, MessageService, ToastMessageOptions } from '@openng/optimus-ui/api';
+import { BlockUIModule } from '@openng/optimus-ui/blockui';
 import { BlockedForLiveDirective } from './directives/blocked-for-live.directive';
 import { Optimus } from '@openng/optimus-ui/config';
 import { ScrollPanelModule } from '@openng/optimus-ui/scrollpanel';
+import { ConfirmDialogModule } from '@openng/optimus-ui/confirmdialog';
 
 @Component({
   selector: 'pro-legacy-root',
@@ -21,6 +22,7 @@ import { ScrollPanelModule } from '@openng/optimus-ui/scrollpanel';
     BlockUIModule,
     BlockedForLiveDirective,
     ScrollPanelModule,
+    ConfirmDialogModule,
   ],
   templateUrl: './app.html',
   styleUrl: './app.css',

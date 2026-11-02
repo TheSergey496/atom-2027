@@ -132,6 +132,11 @@ export const DefaultTheme = definePreset(Material, {
       header: {
         padding: '1rem 1rem 0.5rem 1.5rem',
       },
+      css: `
+        .p-dialog-footer {
+          justify-content: center;
+        }
+      `,
     },
     progressspinner: {
       root: {
@@ -143,8 +148,131 @@ export const DefaultTheme = definePreset(Material, {
     },
     scrollpanel: {
       bar: {
-        background: '{surface.300}'
-      }
-    }
+        background: '{surface.300}',
+      },
+    },
+    toolbar: {
+      root: {
+        background: '{surface.0}',
+        borderColor: '{surface.300}',
+        borderRadius: '6px 6px 0 0',
+      },
+      css: `
+        .p-toolbar {
+          border-bottom: 0;
+          box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+        }
+        .p-toolbar-start, .p-toolbar-center, .p-toolbar-end {
+          gap: 5px;
+        }
+      `,
+    },
+    datatable: {
+      row: {
+        selectedBackground: '{primary.100}',
+      },
+      colorScheme: {
+        light: {
+          bodyCell: {
+            selectedBorderColor: '{content.border.color}',
+          },
+        },
+        dark: {
+          bodyCell: {
+            selectedBorderColor: '{content.border.color}',
+          },
+        },
+      },
+    },
+    button: {
+      root: {
+        secondary: {
+          background: '{surface.200}',
+          hoverBackground: '{surface.300}',
+        },
+      },
+    },
+    checkbox: {
+      css: `
+        .p-checkbox {
+            border-radius: 50%;
+            transition: box-shadow dt('checkbox.transition.duration');
+        }
+        
+        .p-checkbox-box {
+            border-width: 2px;
+        }
+        
+        .p-checkbox:not(.p-disabled):has(.p-checkbox-input:hover) {
+            box-shadow: 0 0 1px 10px color-mix(in srgb, dt('text.color'), transparent 96%);
+        }
+        
+        .p-checkbox:not(.p-disabled):has(.p-checkbox-input:focus-visible) {
+            box-shadow: 0 0 1px 10px color-mix(in srgb, dt('text.color'), transparent 88%);
+        }
+        
+        .p-checkbox-checked:not(.p-disabled):has(.p-checkbox-input:hover) {
+            box-shadow: 0 0 1px 10px color-mix(in srgb, dt('checkbox.checked.background'), transparent 92%);
+        }
+        
+        .p-checkbox-checked:not(.p-disabled):has(.p-checkbox-input:focus-visible) {
+            box-shadow: 0 0 1px 10px color-mix(in srgb, dt('checkbox.checked.background'), transparent 84%);
+        }
+        
+        .p-checkbox-checked .p-checkbox-box:before  {
+            content: "";
+            position: absolute;
+            top: var(--p-md-check-icon-t);
+            left: 2px;
+            border-right: 2px solid transparent;
+            border-bottom: 2px solid transparent;
+            transform: rotate(45deg);
+            transform-origin: 0% 100%;
+            animation: p-md-check  var(--p-checkbox-check-duration, 125ms) var(--p-checkbox-check-delay, 50ms) linear forwards;
+        }
+        
+        .p-checkbox-checked .p-checkbox-icon {
+            display: none;
+        }
+        
+        .p-checkbox {
+            --p-md-check-icon-t: 10px;
+            --p-md-check-icon-w: 6px;
+            --p-md-check-icon-h: 12px;
+        }
+        
+        .p-checkbox-sm {
+            --p-md-check-icon-t: 8px;
+            --p-md-check-icon-w: 4px;
+            --p-md-check-icon-h: 10px;
+        }
+        
+        .p-checkbox-lg {
+            --p-md-check-icon-t: 12px;
+            --p-md-check-icon-w: 8px;
+            --p-md-check-icon-h: 16px;
+        }
+        
+        @keyframes p-md-check {
+            0%{
+              width: 0;
+              height: 0;
+              border-color: dt('checkbox.icon.checked.color');
+              transform: translate3d(0,0,0) rotate(45deg);
+            }
+            33%{
+              width: var(--p-md-check-icon-w);
+              height: 0;
+              transform: translate3d(0,0,0) rotate(45deg);
+            }
+            100%{
+              width: var(--p-md-check-icon-w);
+              height: var(--p-md-check-icon-h);
+              border-color: dt('checkbox.icon.checked.color');
+              transform: translate3d(0,calc(-1 * var(--p-md-check-icon-h)),0) rotate(45deg);
+            }
+        }
+      `,
+    },
   },
 });

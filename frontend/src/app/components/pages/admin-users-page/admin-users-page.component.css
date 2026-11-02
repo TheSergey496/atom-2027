@@ -1,0 +1,9 @@
+.toolbar {
+    min-height: 40px;
+    background-color: white;
+    border-left: 1px solid var(--border-color);
+    border-right: 1px solid var(--border-color);
+    border-top: 1px solid var(--border-color);
+    border-top-left-radius: var(--p-border-radius-sm);
+    border-top-right-radius: var(--p-border-radius-sm);
+}

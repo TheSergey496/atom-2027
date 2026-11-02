@@ -12,6 +12,7 @@ import org.prolegacy.atom2027.common.exceptions.BusinessLogicException;
 
 import java.time.Instant;
 import java.util.*;
+import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
 @Entity
@@ -50,8 +51,6 @@ public class User {
     )
     private Set<Role> roles = new HashSet<>();
 
-    // Для дебага
-    @Deprecated(forRemoval = true)
     public User(String email, String password, String firstname, String lastname, String surname, String phoneNumber, Collection<Role> roles) {
         this.email = email;
         this.password = password;
@@ -64,7 +63,7 @@ public class User {
     }
 
     public User(@NonNull UserDto userDto,
-                @NonNull String encodedPassword,
+                @NonNull Supplier<String> encodedPassword,
                 @NonNull List<Role> roles) {
         this.registrationDate = Instant.now();
         this.email = formatAndValidateEmail(userDto.getEmail());
@@ -75,10 +74,10 @@ public class User {
     public void adminUpdate(@NonNull UserDto userDto,
                             @NonNull List<Role> roles) {
         this.roles = new HashSet<>(roles);
-        this.update(userDto, null);
+        this.update(userDto, () -> null);
     }
 
-    public void update(@NonNull UserDto userDto, String newEncodedPassword) {
+    public void update(@NonNull UserDto userDto, @NonNull Supplier<String> encodedPassword) {
         if (Strings.isNullOrEmpty(userDto.getFirstname())) {
             throw new BusinessLogicException("Отсутствует имя");
         }
@@ -89,7 +88,7 @@ public class User {
         this.lastname = userDto.getLastname();
         this.surname = userDto.getSurname();
         this.phoneNumber = userDto.getPhoneNumber();
-        Optional.ofNullable(newEncodedPassword).ifPresent(this::setPassword);
+        Optional.ofNullable(encodedPassword.get()).ifPresent(this::setPassword);
     }
 
     private String formatAndValidateEmail(String email) {

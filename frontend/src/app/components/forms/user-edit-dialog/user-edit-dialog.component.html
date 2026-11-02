@@ -1,8 +1,8 @@
 <p-dialog header="Управление аккаунтом" [style]="{ width: '480px' }" [modal]="true">
 
   <div style="height: 10px"></div>
-  <pro-legacy-user-edit-form [user]="user"
-                             [isEditMode]="true"
+  <pro-legacy-user-edit-form [mode]="'edit'"
+                             [user]="user"
                              (validityChange)="formValid = $event"
                              (currentPasswordChange)="currentPassword = $event">
   </pro-legacy-user-edit-form>
@@ -10,7 +10,7 @@
   <ng-template #footer>
     <p-button label="Сохранить" (onClick)="save()" [disabled]="!formValid">
     </p-button>
-    <p-button label="Закрыть" severity="secondary" (onClick)="this.visible = false">
+    <p-button label="Отмена" severity="secondary" (onClick)="this.visible = false">
     </p-button>
   </ng-template>
 </p-dialog>

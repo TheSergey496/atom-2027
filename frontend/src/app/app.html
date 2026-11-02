@@ -1,8 +1,8 @@
 @if (loading()) {
   <pro-legacy-loader></pro-legacy-loader>
 } @else {
+  <pro-legacy-header></pro-legacy-header>
   <main>
-    <pro-legacy-header></pro-legacy-header>
     <router-outlet></router-outlet>
   </main>
 }
@@ -30,3 +30,6 @@
     <p-blockUI proLegacyBlockedForLive></p-blockUI>
   </ng-template>
 </p-toast>
+
+<p-confirm-dialog key="confirm" header="Требуется подтверждение" icon="pi pi-question-circle" [rtl]="true">
+</p-confirm-dialog>

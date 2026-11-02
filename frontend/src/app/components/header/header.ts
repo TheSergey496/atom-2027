@@ -34,7 +34,7 @@ export class Header {
   protected menuTabs: MenuTab[] = [];
   protected activeRoute? = '/home';
   protected alertsCount = 0;
-  protected userMenuItems: MenuItem[] = [
+  protected readonly userMenuItems: MenuItem[] = [
     {
       label: 'Управление аккаунтом',
       icon: 'pi pi-cog',
@@ -78,16 +78,11 @@ export class Header {
   constructor() {
     // тут типо чтобы от ролей разное показывать
     effect(() => {
-      const user = this.userService.currentUser;
-      if (user != null) {
+      if (this.userService.hasRole('ROLE_admin')) {
         this.menuTabs = [
           {
-            label: 'Home',
-            route: '/home',
-          },
-          {
-            label: 'Test',
-            route: '/test-page-1',
+            label: 'Пользователи',
+            route: '/administration/users',
           },
         ];
       } else {

@@ -1,0 +1,303 @@
+:host ::ng-deep .p-datatable-mask.p-overlay-mask {
+    background: white;
+    color: var(--p-primary-600);
+    opacity: 0.5;
+    animation: none;
+}
+
+:host ::ng-deep .p-datatable-table-container {
+    border: 1px solid var(--border-color);
+    border-bottom-left-radius: var(--p-border-radius-sm);
+    border-bottom-right-radius: var(--p-border-radius-sm);
+    background-color: var(--p-surface-50);
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+}
+
+:host ::ng-deep .header-background {
+    width: 100%;
+    position: sticky;
+    top: 0;
+    background-color: var(--p-surface-100);
+    border-bottom: 1px solid var(--border-color);
+    z-index: 1;
+}
+
+
+:host ::ng-deep .p-datatable-header {
+    position: relative;
+    padding: 0;
+    border: 0;
+}
+
+:host ::ng-deep .cell-content {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+    padding-left: 1rem;
+    padding-right: 1rem;
+}
+
+:host ::ng-deep .cell-content-value {
+    width: 100%;
+    text-overflow: ellipsis;
+    overflow: hidden;
+    white-space: nowrap;
+}
+
+:host ::ng-deep .cell-content-value-left {
+    text-align: left;
+}
+
+:host ::ng-deep .cell-content-value-center {
+    text-align: center;
+}
+
+:host ::ng-deep .indicator-cell-content {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+:host ::ng-deep .indicator-menu-button {
+    height: 100%;
+    padding: 0;
+    color: inherit;
+    background-color: transparent;
+    border: 0;
+    border-radius: 0;
+}
+
+:host ::ng-deep .indicator-menu-button:not(:disabled):hover {
+    color: var(--p-primary-800);
+    background-color: var(--p-datatable-header-cell-hover-background);
+    border: 0;
+}
+
+:host ::ng-deep .indicator-menu-button:not(:disabled):active {
+    color: var(--p-primary-800);
+    background-color: var(--p-datatable-header-cell-hover-background);
+    border: 0;
+}
+
+:host ::ng-deep .indicator-menu-button:focus-visible {
+    color: var(--p-primary-800);
+    background-color: var(--p-datatable-header-cell-hover-background);
+    border: 0;
+}
+
+:host ::ng-deep .column-menu-button {
+    height: 100%;
+    padding: 0;
+    color: inherit;
+    background-color: transparent;
+    border: 0;
+    border-radius: 0;
+}
+
+:host ::ng-deep .column-menu-button:not(:disabled):hover {
+    color: var(--p-primary-800);
+    background-color: transparent;
+    border: 0;
+}
+
+:host ::ng-deep .column-menu-button:not(:disabled):active {
+    color: var(--p-primary-800);
+    background-color: transparent;
+    border: 0;
+}
+
+
+:host ::ng-deep .column-menu-button:focus-visible {
+    color: var(--p-primary-800);
+    background-color: transparent;
+    border: 0;
+}
+
+:host ::ng-deep .p-datatable-thead > tr > th {
+    color: var(--p-primary-700);
+    border-top: 0;
+    padding: 0;
+}
+
+:host ::ng-deep .p-datatable-gridlines .p-datatable-thead > tr > th {
+    border-width: 1px 1px 1px 0;
+}
+
+:host ::ng-deep .p-datatable-thead > tr > th:not(.p-datatable-frozen-column) {
+    left: 0 !important;
+    right: 0 !important;
+}
+
+:host ::ng-deep .p-datatable-thead > th > th.p-datatable-frozen-column {
+    z-index: 1;
+}
+
+
+:host ::ng-deep .p-datatable-gridlines .p-datatable-thead > tr > th:last-child {
+    border-left: 0;
+}
+
+:host ::ng-deep .p-datatable-gridlines .p-datatable-thead > tr > th:nth-child(1 of .frozen-right) {
+    border-left: 1px solid var(--border-color);
+}
+
+
+:host ::ng-deep .p-datatable-thead > tr > th.p-datatable-sortable-column:not(.p-datatable-column-sorted):hover {
+    color: var(--p-primary-800);
+}
+
+:host ::ng-deep .p-datatable-thead > tr > th.p-datatable-sortable-column:focus-visible {
+    outline: none;
+    box-shadow: none;
+    background-color: var(--p-datatable-header-cell-hover-background);
+    color: var(--p-primary-800);
+}
+
+:host ::ng-deep .p-datatable-filter.p-datatable-inline-filter {
+    height: 100%;
+    gap: 0;
+}
+
+:host ::ng-deep p-columnfilterformelement {
+    height: 100%;
+    flex: 1;
+}
+
+:host ::ng-deep p-columnfilterformelement p-input-number {
+    height: 100%;
+}
+
+:host ::ng-deep p-columnfilterformelement p-select {
+    border: none;
+    height: 100%;
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+    border-radius: 0;
+}
+
+:host ::ng-deep p-columnfilterformelement p-select:not(.p-disabled).p-focus {
+    border: none;
+    outline: none;
+    background-color: var(--p-datatable-header-cell-hover-background);
+}
+
+:host ::ng-deep .p-select-label {
+    padding: 0;
+}
+
+:host ::ng-deep p-columnfilterformelement p-select .p-select-dropdown {
+    display: none;
+}
+
+:host ::ng-deep p-columnfilterformelement p-date-picker {
+    height: 100%;
+}
+
+:host ::ng-deep p-columnfilterformelement .p-inputtext {
+    height: 100%;
+    padding-left: 0.75rem;
+    padding-right: 0.75rem;
+    padding-top: 0;
+    padding-bottom: 0;
+    border: none;
+}
+
+:host ::ng-deep p-columnfilterformelement .p-inputtext:focus {
+    border: none;
+    outline: none;
+}
+
+:host ::ng-deep .p-datatable-filter p-button {
+    height: 100%;
+}
+
+:host ::ng-deep .p-datatable-filter .p-datatable-column-filter-button {
+    height: 100%;
+    padding: 0;
+    color: var(--p-primary-400);
+    background-color: var(--p-surface-50);
+    border-radius: 0;
+    border-color: var(--border-color);
+    border-left: 1px solid var(--border-color);
+    border-top: 0;
+    border-bottom: 0;
+    border-right: 0;
+}
+
+:host ::ng-deep .p-datatable-filter .p-datatable-column-filter-button:not(:disabled):hover {
+    color: var(--p-primary-400);
+    background-color: var(--p-surface-100);
+    border-color: var(--border-color);
+    border-left: 1px solid var(--border-color);
+    border-top: 0;
+    border-bottom: 0;
+    border-right: 0;
+}
+
+:host ::ng-deep .p-datatable-filter .p-datatable-column-filter-button:not(:disabled):active {
+    color: var(--p-primary-400);
+    background-color: var(--p-surface-100);
+    border-color: var(--border-color);
+    border-left: 1px solid var(--border-color);
+    border-top: 0;
+    border-bottom: 0;
+    border-right: 0;
+}
+
+:host ::ng-deep .p-datatable-filter .p-datatable-column-filter-button:focus-visible {
+    color: var(--p-primary-400);
+    background-color: var(--p-surface-100);
+    border-color: var(--border-color);
+    border-left: 1px solid var(--border-color);
+    border-top: 0;
+    border-bottom: 0;
+    border-right: 0;
+}
+
+:host ::ng-deep .p-datatable.p-datatable-gridlines:has(.p-datatable-thead):has(.p-datatable-tbody) .p-datatable-tbody > tr > td {
+    border-width: 0 1px 1px 0;
+}
+
+:host ::ng-deep .p-datatable-tbody > tr > td {
+    padding: 0;
+}
+
+:host ::ng-deep .p-datatable-tbody > tr > td:not(.p-datatable-frozen-column) {
+    left: 0 !important;
+    right: 0 !important;
+}
+
+:host ::ng-deep .p-datatable-tbody > tr > td.p-datatable-frozen-column {
+    z-index: 1;
+}
+
+:host ::ng-deep .p-datatable.p-datatable-gridlines:has(.p-datatable-thead):has(.p-datatable-tbody) .p-datatable-tbody > tr > td:last-child {
+    border-left: 0;
+}
+
+:host ::ng-deep .p-datatable.p-datatable-gridlines:has(.p-datatable-thead):has(.p-datatable-tbody) .p-datatable-tbody > tr > td:nth-child(1 of .frozen-right) {
+    border-left: 1px solid var(--border-color);
+}
+
+
+:host ::ng-deep .p-datatable .p-datatable-tbody > tr:focus-visible {
+    box-shadow: none;
+}
+
+:host ::ng-deep .p-datatable .p-datatable-tbody > tr:not(.p-datatable-row-selected):hover:focus-visible {
+    background-color: var(--p-primary-50);
+}
+
+:host ::ng-deep .p-datatable .p-datatable-tbody > tr:not(.p-datatable-row-selected):focus-visible:nth-child(odd) {
+    background-color: var(--p-primary-50);
+}
+
+:host ::ng-deep .p-datatable .p-datatable-tbody > tr:not(.p-datatable-row-selected):focus-visible {
+    background-color: var(--p-primary-50);
+}

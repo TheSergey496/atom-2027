@@ -1,5 +1,6 @@
 package org.prolegacy.atom2027.services.user;
 
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.prolegacy.atom2027.common.auth.dto.UserDto;
 import org.prolegacy.atom2027.common.auth.repositories.UserRepository;
@@ -8,17 +9,22 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.Base64;
 import java.util.Locale;
 import java.util.Optional;
 
 @Service
-class UserUtilsService {
+public class UserUtilsService {
 
     @Autowired
     private UserRepository userRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    public String encodePasswordFromRawString(String rawPassword) {
+        return passwordEncoder.encode(Base64.getEncoder().encodeToString(DigestUtils.sha256(rawPassword)));
+    }
 
     public String encodeAndValidatePassword(String password) {
         return encodeAndValidatePassword(

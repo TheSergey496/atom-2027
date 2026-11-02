@@ -34,7 +34,7 @@
                     inputId="passwordInput"
                     name="password"
                     style="width: 100%"
-                    [inputStyle]="{width: '100%'}"
+                    [fluid]="true"
                     [toggleMask]="true"
                     [feedback]="false"
                     [maxlength]="50"
@@ -49,7 +49,7 @@
       <p-button iconPos="right"
                 [icon]="loading() ? 'pi pi-spin pi-spinner' : undefined"
                 [label]="loading() ? 'ВЫПОЛНЯЕТСЯ ВХОД...' : 'ВОЙТИ'"
-                [style]="{width: '100%'}"
+                [fluid]="true"
                 [disabled]="!!loginForm.invalid || loading()"
                 (onClick)="login()">
       </p-button>

@@ -1,10 +1,11 @@
 import { Routes } from '@angular/router';
 import { HomePageComponent } from './components/pages/home-page.component/home-page.component';
-import { TestPage1Component } from './components/pages/test-page-1.component/test-page-1.component';
 import { LoginPageComponent } from './components/pages/login-page/login-page.component';
 import { RegistrationPageComponent } from './components/pages/registration-page/registration-page.component';
 import { unauthorizedGuard } from './guards/unauthorized.guard';
 import { authorizedGuard } from './guards/authorized.guard';
+import { AdminUsersPageComponent } from './components/pages/admin-users-page/admin-users-page.component';
+import { adminGuard } from './guards/admin.guard';
 
 export const routes: Routes = [
   {
@@ -23,9 +24,14 @@ export const routes: Routes = [
     canActivate: [authorizedGuard],
   },
   {
-    component: TestPage1Component,
-    path: 'test-page-1',
-    canActivate: [authorizedGuard],
+    path: 'administration',
+    children: [
+      {
+        path: 'users',
+        component: AdminUsersPageComponent,
+        canActivate: [adminGuard],
+      },
+    ],
   },
   { path: '**', redirectTo: 'home' },
 ];

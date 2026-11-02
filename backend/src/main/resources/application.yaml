@@ -23,7 +23,5 @@ management:
     health:
       show-details: always
 auth:
-  admin-role: admin
-  default-role: user
   jwt-secret: sTcIbJgW4pmMl9EHCpHnw+fUz/vX7dr6LpK2AdoPiLNrTT0fLyAga1dktkeqwiBg
   jwt-expiration-minutes: 60

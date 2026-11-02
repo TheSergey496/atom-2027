@@ -1,0 +1,378 @@
+<p-table #table
+         scrollHeight="flex"
+         columnResizeMode="expand"
+         sortMode="multiple"
+         [selection]="tableSelection"
+         [selectionMode]="selectionMode()"
+         [rowSelectable]="tableRowSelectable"
+         [loading]="loading()"
+         [multiSortMeta]="tableDefaultSort"
+         [virtualScrollItemSize]="rowHeight()"
+         [dataKey]="tableDataKey()"
+         [stripedRows]="true"
+         [showGridlines]="true"
+         [scrollable]="true"
+         [virtualScroll]="true"
+         [resizableColumns]="true"
+         [reorderableColumns]="true"
+         [customSort]="true"
+         [metaKeySelection]="true"
+         [columns]="tableColumns"
+         [value]="tableValue"
+         (sortFunction)="onTableSort($event)"
+         (selectionChange)="tableSelection = $event; selectionChange.emit(tableSelection);"
+         (onFilter)="clearSelection()"
+>
+
+  <ng-template #header let-columns>
+    <tr>
+      @for (column of columns; track column.originalColumn.field) {
+        @if (column.originalColumn.field === indicatorColumnField) {
+
+          @if (tableCheckboxSelection()) {
+            <th pReorderableColumn
+                pResizableColumn
+                pFrozenColumn
+                alignFrozen="left"
+                [attr.data-column-field]="column.originalColumn.field"
+                [pSortableColumn]="column.originalColumn.field"
+                [pSortableColumnDisabled]="true"
+                [pReorderableColumnDisabled]="true"
+                [pResizableColumnDisabled]="true"
+                [style.height.px]="headerRowHeight()">
+              <div class="indicator-cell-content">
+                <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
+              </div>
+            </th>
+          } @else {
+            <th pReorderableColumn
+                pResizableColumn
+                pFrozenColumn
+                alignFrozen="left"
+                [attr.data-column-field]="column.originalColumn.field"
+                [pSortableColumn]="column.originalColumn.field"
+                [pSortableColumnDisabled]="true"
+                [pReorderableColumnDisabled]="true"
+                [pResizableColumnDisabled]="true"
+                [style.height.px]="headerRowHeight()"
+                (focus)="indicatorButton.focus()">
+              <div class="indicator-cell-content">
+                <button #indicatorButton
+                        pButton
+                        class="indicator-menu-button"
+                        [fluid]="true"
+                        (keydown.enter)="$event.stopPropagation();"
+                        (keydown.space)="$event.stopPropagation();"
+                        (click)="indicatorMenu.toggle($event); $event.stopPropagation();">
+                  <i pButtonIcon class="pi pi-bars"></i>
+                </button>
+              </div>
+              <p-menu #indicatorMenu
+                      appendTo="body"
+                      [model]="indicatorMenuOptions"
+                      [popup]="true">
+              </p-menu>
+            </th>
+          }
+        } @else {
+          <th pReorderableColumn
+              pResizableColumn
+              pFrozenColumn
+              [attr.data-column-field]="column.originalColumn.field"
+              [pReorderableColumnDisabled]="column.frozen != null"
+              [frozen]="column.frozen != null"
+              [alignFrozen]="column.frozen"
+              [class.frozen-right]="column.frozen === 'right'"
+              [pSortableColumn]="column.originalColumn.field"
+              [style.height.px]="headerRowHeight()">
+            <div #columnHeaderContent
+                 class="cell-content"
+                 (dragover)="onColumnHeaderContentDragOver($event, column.frozen != null, columnHeaderContent)">
+              <div class="cell-content-value">
+                {{ column.originalColumn.header }}
+                <p-sortIcon [field]="column.originalColumn.field" />
+              </div>
+
+              <button pButton
+                      class="column-menu-button"
+                      size="small"
+                      [text]="true"
+                      (keydown.enter)="$event.stopPropagation();"
+                      (keydown.space)="$event.stopPropagation();"
+                      (click)="columnMenu.toggle($event); $event.stopPropagation();">
+                <i pButtonIcon class="pi pi-bars"></i>
+              </button>
+
+              <p-menu #columnMenu
+                      appendTo="body"
+                      [model]="columnMenuOptions[column.originalColumn.field]"
+                      [popup]="true">
+              </p-menu>
+            </div>
+          </th>
+        }
+      }
+    </tr>
+    @if (filter()) {
+      <tr>
+        @for (column of columns; track column.originalColumn.field) {
+          @if (column.originalColumn.field === indicatorColumnField) {
+            <th pFrozenColumn
+                alignFrozen="left"
+                [attr.data-column-field]="column.originalColumn.field"
+                [style.height.px]="filterRowHeight()">
+            </th>
+          } @else {
+            <th pFrozenColumn
+                [attr.data-column-field]="column.originalColumn.field"
+                [style.height.px]="filterRowHeight()"
+                [frozen]="column.frozen != null"
+                [class.frozen-right]="column.frozen === 'right'"
+                [alignFrozen]="column.frozen">
+              <p-columnFilter #columnFilter
+                              [showClearButton]="false"
+                              [matchMode]="getDefaultMatchMode(column)"
+                              [matchModeOptions]="getMatchModeOptions(column)"
+                              [field]="column.originalColumn.field">
+                <ng-template pTemplate="filter" let-value let-filter="filterCallback">
+                  @switch (column.originalColumn.type) {
+                    @case ('number') {
+                      <p-input-number #numberInput
+                                      mode="decimal"
+                                      [ngModel]="value"
+                                      [fluid]="true"
+                                      [maxFractionDigits]="column.originalColumn.maxFractionDigits ?? 20"
+                                      (keydown.enter)="filter(numberInput.value)"
+                                      (focusout)="filter(numberInput.value)">
+                      </p-input-number>
+                    }
+                    @case ('int') {
+                      <p-input-number #intInput
+                                      [ngModel]="value"
+                                      [fluid]="true"
+                                      [useGrouping]="false"
+                                      (keydown.enter)="filter(intInput.value)"
+                                      (focusout)="filter(intInput.value)">
+                      </p-input-number>
+                    }
+                    @case ('currency') {
+                      <p-input-number #currencyInput
+                                      mode="decimal"
+                                      [ngModel]="value"
+                                      [fluid]="true"
+                                      [maxFractionDigits]="2"
+                                      (keydown.enter)="filter(currencyInput.value)"
+                                      (focusout)="filter(currencyInput.value)">
+                      </p-input-number>
+                    }
+                    @case ('boolean') {
+                      <p-select #booleanSelect
+                                optionLabel="label"
+                                optionValue="value"
+                                appendTo="body"
+                                [fluid]="true"
+                                [options]="column.originalColumn.allowEmpty ? booleanEqualsOptionsWithEmpty : booleanEqualsOptions"
+                                [ngModel]="value"
+                                [showClear]="true"
+                                (onChange)="filter($event.value)">
+                        <ng-template #selectedItem let-selectedOption>
+                          <div style="height: 100%; width: 100%; display: inline-flex; align-items: center">
+                            <div> {{ selectedOption.label }}</div>
+                          </div>
+                        </ng-template>
+                      </p-select>
+                    }
+                    @case ('enum') {
+                      <p-select #enumSelect
+                                optionLabel="label"
+                                optionValue="value"
+                                appendTo="body"
+                                [fluid]="true"
+                                [options]="getEnumEqualsOptions(column)"
+                                [ngModel]="value"
+                                [showClear]="true"
+                                (onChange)="filter($event.value)">
+                        <ng-template #selectedItem let-selectedOption>
+                          <div style="height: 100%; width: 100%; display: inline-flex; align-items: center">
+                            <div> {{ selectedOption.label }}</div>
+                          </div>
+                        </ng-template>
+                      </p-select>
+                    }
+                    @case ('date') {
+                      @switch (getFilterMatchMode(column)) {
+                        @case (FilterMatchMode.BETWEEN) {
+                          <p-date-picker #calendar
+                                         selectionMode="range"
+                                         dateFormat="dd.mm.yy"
+                                         appendTo="body"
+                                         [readonlyInput]="true"
+                                         [fluid]="true"
+                                         [showButtonBar]="true"
+                                         [ngModel]="value"
+                                         (onClose)="(calendar.value[0] == null || calendar.value[1] == null) ? filter(null) : filter(calendar.value)">
+                          </p-date-picker>
+                        }
+                        @default {
+                          <p-date-picker #calendar
+                                         dateFormat="dd.mm.yy"
+                                         pInputMask="99.99.9999"
+                                         appendTo="body"
+                                         [fluid]="true"
+                                         [showButtonBar]="true"
+                                         [ngModel]="value"
+                                         (onSelect)="filter($event)"
+                                         (keydown.enter)="filter(calendar.value)"
+                                         (focusout)="filter(calendar.value)">
+                          </p-date-picker>
+                        }
+                      }
+                    }
+                    @default {
+                      <input #input pInputText [fluid]="true" [ngModel]="value" (keydown.enter)="filter(input.value)"
+                             (focusout)="filter(input.value)" />
+                    }
+                  }
+
+                </ng-template>
+
+                <ng-template pTemplate="filtericon" let-value>
+                  <div style="display: flex; align-items: center">
+                    <div style="font-size: small">
+                      @switch (getFilterMatchMode(column)) {
+                        @case (FilterMatchMode.STARTS_WITH) {
+                          абв...
+                        }
+                        @case (FilterMatchMode.CONTAINS) {
+                          ..абв..
+                        }
+                        @case (FilterMatchMode.NOT_CONTAINS) {
+                          <s>..абв..</s>
+                        }
+                        @case (FilterMatchMode.ENDS_WITH) {
+                          ...абв
+                        }
+                        @case (FilterMatchMode.EQUALS)
+                        @case (FilterMatchMode.IS)
+                        @case (FilterMatchMode.DATE_IS)
+                        @case (CustomFilterMatchMode.NULLABLE_EQUALS) {
+                          =
+                        }
+                        @case (FilterMatchMode.NOT_EQUALS)
+                        @case (FilterMatchMode.IS_NOT)
+                        @case (FilterMatchMode.DATE_IS_NOT)
+                        @case (CustomFilterMatchMode.NULLABLE_NOT_EQUALS) {
+                          !=
+                        }
+                        @case (FilterMatchMode.IN) {
+                          а,б,в
+                        }
+                        @case (FilterMatchMode.LESS_THAN)
+                        @case (FilterMatchMode.BEFORE)
+                        @case (FilterMatchMode.DATE_BEFORE) {
+                          <
+                        }
+                        @case (FilterMatchMode.LESS_THAN_OR_EQUAL_TO) {
+                          <=
+                        }
+                        @case (FilterMatchMode.GREATER_THAN)
+                        @case (FilterMatchMode.AFTER)
+                        @case (FilterMatchMode.DATE_AFTER) {
+                          >
+                        }
+                        @case (FilterMatchMode.GREATER_THAN_OR_EQUAL_TO) {
+                          >=
+                        }
+                        @case (FilterMatchMode.BETWEEN) {
+                          (а-б)
+                        }
+                        @default {
+                          =
+                        }
+                      }
+                    </div>
+                  </div>
+                </ng-template>
+              </p-columnFilter>
+            </th>
+          }
+        }
+      </tr>
+    }
+  </ng-template>
+
+  <ng-template #body let-row let-cols="columns" let-rowIndex="rowIndex">
+
+    @if (row[deletedMessageField] != null) {
+      <tr>
+        <td pFrozenColumn
+            alignFrozen="left"
+            [attr.data-column-field]="indicatorColumnField"
+            [style.height.px]="rowHeight()">
+        </td>
+        <td [attr.colspan]="tableColumns.length - 1">
+          <div class="cell-content">
+            <div class="cell-content-value cell-content-value-left">
+              {{ row[deletedMessageField] }}
+            </div>
+          </div>
+        </td>
+      </tr>
+    } @else {
+      <tr [pSelectableRow]="row" [pSelectableRowIndex]="rowIndex" [pSelectableRowDisabled]="tableCheckboxSelection()">
+        @for (column of cols; track column.originalColumn.field) {
+          @if (column.originalColumn.field === indicatorColumnField) {
+            <td pFrozenColumn
+                alignFrozen="left"
+                [attr.data-column-field]="column.originalColumn.field"
+                [style.height.px]="rowHeight()">
+              @if (tableCheckboxSelection()) {
+                <div class="indicator-cell-content">
+                  <p-tableCheckbox [value]="row"></p-tableCheckbox>
+                </div>
+              }
+            </td>
+          } @else {
+            <td pFrozenColumn
+                [attr.data-column-field]="column.originalColumn.field"
+                [style.height.px]="rowHeight()"
+                [frozen]="column.frozen != null"
+                [class.frozen-right]="column.frozen === 'right'"
+                [alignFrozen]="column.frozen">
+              <div class="cell-content">
+                @switch (column.originalColumn.type) {
+                  @case ('boolean') {
+                    <div class="cell-content-value cell-content-value-center">
+                      @if (ColumnUtils.getColumnValue(row, column.originalColumn) != null) {
+                        <p-checkbox class="readonly-checkbox no-animation-checkbox"
+                                    [tabindex]="-1"
+                                    [binary]="true"
+                                    [readonly]="true"
+                                    [ngModel]="ColumnUtils.getColumnValue(row, column.originalColumn)" />
+                      } @else {
+                        {{ '' }}
+                      }
+                    </div>
+                  }
+                  @case ('number')
+                  @case ('int')
+                  @case ('currency') {
+                    <div class="cell-content-value cell-content-value-left">
+                      {{ ColumnUtils.getColumnValueFormatted(row, column.originalColumn, numberFormatters) }}
+                    </div>
+                  }
+                  @default {
+                    <div class="cell-content-value cell-content-value-center">
+                      {{ ColumnUtils.getColumnValueFormatted(row, column.originalColumn) }}
+                    </div>
+                  }
+                }
+              </div>
+            </td>
+          }
+        }
+      </tr>
+    }
+  </ng-template>
+
+</p-table>

@@ -50,54 +50,73 @@
       type="email"
       maxlength="40"
       [pattern]="'^[\\w-\.]+@([\\w-]+\.)+[\\w-]{2,4}$'"
-      [disabled]="disabled() || isEditMode()"
+      [disabled]="disabled() || !emailRequired()"
       [(ngModel)]="user().email">
-    <label for="emailInput" [class.required]="!isEditMode()">Адрес электронной почты</label>
+    <label for="emailInput" [class.required]="emailRequired()">Адрес электронной почты</label>
   </p-floatlabel>
 
-  @if (isEditMode()) {
-    <p-floatlabel proLegacyFloatLabelTransitionFix variant="on">
-      <p-password
-        required
-        inputId="currentPasswordInput"
-        name="currentPassword"
-        style="width: 100%"
-        [inputStyle]="{width: '100%'}"
-        [toggleMask]="true"
-        [feedback]="false"
-        [maxlength]="50"
-        [disabled]="disabled()"
-        [ngModel]="currentPassword"
-        (ngModelChange)="onCurrentPasswordChange($event)">
-      </p-password>
-      <label for="currentPasswordInput" class="required">Текущий пароль</label>
-    </p-floatlabel>
+  @switch (mode()) {
+    @case ('edit') {
+      <p-floatlabel proLegacyFloatLabelTransitionFix variant="on">
+        <p-password
+          required
+          inputId="currentPasswordInput"
+          name="currentPassword"
+          style="width: 100%"
+          [fluid]="true"
+          [toggleMask]="true"
+          [feedback]="false"
+          [maxlength]="50"
+          [disabled]="disabled()"
+          [ngModel]="currentPassword"
+          (ngModelChange)="onCurrentPasswordChange($event)">
+        </p-password>
+        <label for="currentPasswordInput" class="required">Текущий пароль</label>
+      </p-floatlabel>
 
-    <div class="change-password-select-wrapper">
-      <label id="changePasswordSwitchLabel" class="change-password-select-label">Изменить пароль?</label>
-      <p-selectbutton fluid
-                      name="changePassword"
-                      optionLabel="label"
-                      optionValue="value"
-                      ariaLabelledBy="changePasswordSwitchLabel"
-                      [class]="'change-password-select'"
-                      [styleClass]="'change-password-select-option'"
-                      [allowEmpty]="false"
-                      [options]="changePasswordOptions"
-                      [ngModel]="changePassword"
-                      (ngModelChange)="onChangePasswordChange($event)">
-      </p-selectbutton>
-    </div>
-
-    @if (changePassword) {
-      <div class="expand-container" animate.enter="expand" animate.leave="shrink">
-        <div class="expand-content prolegacy-form" style="padding-top: 5px">
-          <ng-container *ngTemplateOutlet="passwordInputs"></ng-container>
-        </div>
+      <div class="change-password-select-wrapper">
+        <label id="changePasswordSwitchLabel" class="change-password-select-label">Изменить пароль?</label>
+        <p-select-button name="changePassword"
+                         optionLabel="label"
+                         optionValue="value"
+                         ariaLabelledBy="changePasswordSwitchLabel"
+                         [class]="'change-password-select'"
+                         [styleClass]="'change-password-select-option'"
+                         [allowEmpty]="false"
+                         [fluid]="true"
+                         [options]="changePasswordOptions"
+                         [ngModel]="changePassword"
+                         (ngModelChange)="onChangePasswordChange($event)">
+        </p-select-button>
       </div>
+
+      @if (changePassword) {
+        <div class="expand-container" animate.enter="expand" animate.leave="shrink">
+          <div class="expand-content prolegacy-form" style="padding-top: 5px">
+            <ng-container *ngTemplateOutlet="passwordInputs"></ng-container>
+          </div>
+        </div>
+      }
     }
-  } @else {
-    <ng-container *ngTemplateOutlet="passwordInputs"></ng-container>
+    @case ('registration') {
+      <ng-container *ngTemplateOutlet="passwordInputs"></ng-container>
+    }
+    @case ('adminCreate')
+    @case ('adminEdit') {
+      <p-floatlabel proLegacyFloatLabelTransitionFix variant="on">
+        <p-select name="role"
+                  appendTo="body"
+                  optionLabel="localeName"
+                  inputId="roleSelect"
+                  [options]="roles()"
+                  [ngModel]="userRole"
+                  [fluid]="true"
+                  [required]="true"
+                  (ngModelChange)="$event != null ? user().roles = [$event] : user().roles = []">
+        </p-select>
+        <label for="roleSelect" class="required">Роль:</label>
+      </p-floatlabel>
+    }
   }
 
   <ng-template #passwordInputs>
@@ -108,7 +127,7 @@
                     inputId="passwordInput"
                     name="password"
                     style="width: 100%"
-                    [inputStyle]="{width: '100%'}"
+                    [fluid]="true"
                     [toggleMask]="true"
                     [feedback]="false"
                     [minlength]="8"
@@ -116,7 +135,7 @@
                     [disabled]="disabled()"
                     [(ngModel)]="user().password">
         </p-password>
-        <label for="passwordInput" class="required">{{ isEditMode() ? 'Новый пароль' : 'Пароль' }}</label>
+        <label for="passwordInput" class="required">{{ mode() === 'edit' ? 'Новый пароль' : 'Пароль' }}</label>
       </p-floatlabel>
       @if (passwordModel.dirty && passwordModel.hasError('minlength')) {
         <pro-legacy-form-message message="Пароль должен содержать минимум 8 символов"></pro-legacy-form-message>
@@ -131,14 +150,15 @@
                     name="passwordAgain"
                     style="width: 100%"
                     [proLegacyPasswordsMatch]="user().password"
-                    [inputStyle]="{width: '100%'}"
+                    [fluid]="true"
                     [toggleMask]="true"
                     [feedback]="false"
                     [maxlength]="50"
                     [disabled]="disabled()"
                     [(ngModel)]="passwordAgain">
         </p-password>
-        <label for="passwordAgainInput" class="required"> {{ isEditMode() ? 'Повторите новый пароль' : 'Повторите пароль' }}</label>
+        <label for="passwordAgainInput"
+               class="required"> {{ mode() === 'edit' ? 'Повторите новый пароль' : 'Повторите пароль' }}</label>
       </p-floatlabel>
       @if (passwordAgainModel.dirty && passwordAgainModel.hasError('passwordMismatch')) {
         <pro-legacy-form-message message="Пароли не совпадают"></pro-legacy-form-message>

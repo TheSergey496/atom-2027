@@ -40,15 +40,23 @@ body, html {
 main {
     width: 100%;
     height: 100%;
-    padding-top: var(--header-height);
+    padding-top: calc(var(--header-height) + 10px);
+    padding-bottom: 10px;
+    padding-left: 10px;
+    padding-right: 10px;
 }
 
 .p-card {
     border: 1px solid var(--border-color);
 }
 
-p-dialog .p-dialog-footer {
-    justify-content: center;
+.p-card-body {
+    height: 100%;
+    width: 100%;
+}
+
+.p-card-content {
+    flex: 1;
 }
 
 input:-webkit-autofill,
@@ -81,6 +89,35 @@ input:-webkit-autofill:disabled {
     display: flex;
     flex-flow: column;
     gap: 10px;
+}
+
+.splitter {
+    height: 1.25em;
+    display: inline-block;
+    width: 1px;
+    background-color: var(--border-color);
+    margin: 0 0.35em;
+}
+
+.table-title {
+    font-size: larger;
+    padding-right: 1em;
+    padding-left: 1em;
+    text-align: center;
+    min-width: 200px;
+}
+
+.no-animation-checkbox {
+    --p-checkbox-check-duration: 0ms;
+    --p-checkbox-check-delay: 0ms;
+}
+
+.no-animation-checkbox .p-checkbox-box {
+    transition: none;
+}
+
+.readonly-checkbox {
+    pointer-events: none;
 }
 
 .content-disabled {
@@ -127,4 +164,15 @@ label.required:after {
     cursor: pointer;
     color: var(--p-primary-color);
     border-bottom: 1px solid var(--p-primary-color)
+}
+
+.v-flex {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.v-flex-grow {
+    flex: 1;
 }

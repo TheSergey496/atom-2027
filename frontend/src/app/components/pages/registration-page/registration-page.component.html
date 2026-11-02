@@ -6,6 +6,7 @@
     </div>
     <div style="height: 40px"></div>
     <pro-legacy-user-edit-form
+      [mode]="'registration'"
       [user]="user"
       [disabled]="loading()"
       (validityChange)="formValid = $event">
@@ -16,7 +17,7 @@
         iconPos="right"
         [icon]="loading() ? 'pi pi-spin pi-spinner' : undefined"
         [label]="loading() ? 'РЕГИСТРАЦИЯ...' : 'ЗАРЕГИСТРИРОВАТЬСЯ'"
-        [style]="{width: '100%'}"
+        [fluid]="true"
         [disabled]="!formValid || loading()"
         (onClick)="createUser()">
       </p-button>

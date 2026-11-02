@@ -196,3 +196,7 @@
     color: var(--p-red-500);
 }
 
+:host ::ng-deep .sign-out-option.p-focus {
+    color: var(--p-red-500);
+}
+

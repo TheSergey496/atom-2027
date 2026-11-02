@@ -1,10 +1,13 @@
 package org.prolegacy.atom2027.services.user;
 
 import com.google.common.collect.Lists;
+import org.prolegacy.atom2027.common.auth.dto.RoleDto;
 import org.prolegacy.atom2027.common.auth.dto.UserDto;
+import org.prolegacy.atom2027.common.auth.entities.Role;
 import org.prolegacy.atom2027.common.auth.entities.User;
 import org.prolegacy.atom2027.common.auth.providers.UserProvider;
 import org.prolegacy.atom2027.common.auth.readers.UserReader;
+import org.prolegacy.atom2027.common.auth.repositories.RoleRepository;
 import org.prolegacy.atom2027.common.auth.repositories.UserRepository;
 import org.prolegacy.atom2027.common.exceptions.BusinessLogicException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,11 +16,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.function.Supplier;
+
 @Service
 public class UserService {
 
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private RoleRepository roleRepository;
     @Autowired
     private UserProvider userProvider;
     @Autowired
@@ -31,7 +38,13 @@ public class UserService {
     public UserDto registerUser(UserDto userDto) {
         userUtilsService.validateUserDoesntExist(userDto);
 
-        User user = new User(userDto, userUtilsService.encodeAndValidatePassword(userDto.getPassword()), Lists.newArrayList());
+        Role defaultRole = roleRepository.findByName(org.prolegacy.atom2027.enums.Role.USER.getRoleName())
+                .orElseThrow(() -> new BusinessLogicException("Не найдена роль по умолчанию"));
+        User user = new User(
+                userDto,
+                () -> userUtilsService.encodeAndValidatePassword(userDto.getPassword()),
+                Lists.newArrayList(defaultRole)
+        );
         userRepository.save(user);
 
         return userReader.getUser(user.getId());
@@ -45,9 +58,9 @@ public class UserService {
             throw new BusinessLogicException("Неверный пароль");
         }
 
-        String newPassword = null;
+        Supplier<String> newPassword = () -> null;
         if (userDto.getPassword() != null && !passwordEncoder.matches(userDto.getPassword(), user.getPassword())) {
-            newPassword = userUtilsService.encodeAndValidatePassword(
+            newPassword = () -> userUtilsService.encodeAndValidatePassword(
                     userDto.getPassword(),
                     "Новый пароль не может быть пустым",
                     "Отсутствует новый пароль"
