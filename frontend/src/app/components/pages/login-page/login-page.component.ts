@@ -1,10 +1,10 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, viewChild } from '@angular/core';
 import { ButtonModule } from '@openng/optimus-ui/button';
 import { CardModule } from '@openng/optimus-ui/card';
 import { FormsModule } from '@angular/forms';
 import { InputTextModule } from '@openng/optimus-ui/inputtext';
 import { ToastModule } from '@openng/optimus-ui/toast';
-import { PasswordModule } from '@openng/optimus-ui/password';
+import { Password, PasswordModule } from '@openng/optimus-ui/password';
 import { UserService } from '../../../services/auth/user.service';
 import { UserDto } from '../../../gen/auth-dto';
 import { Router } from '@angular/router';
@@ -35,18 +35,31 @@ export class LoginPageComponent {
   protected password: string | null = null;
   protected readonly loading = signal(false);
 
+  private readonly passwordInput = viewChild<Password>('passwordInput');
   private readonly userService = inject(UserService);
   private readonly router = inject(Router);
   private readonly messageService = inject(MessageService);
 
   constructor() {}
 
-  async login() {
+  protected async onPasswordKeydownEnter() {
+    if (this.password != null && this.password.length > 0) {
+      const res = await this.login();
+      if (!res) {
+        requestAnimationFrame(() => {
+        this.passwordInput()?.input?.nativeElement?.focus()
+        });
+      }
+    }
+  }
+
+  async login(): Promise<boolean> {
     this.loading.set(true);
     try {
       let user: UserDto | null = await this.userService.login(this.email!, this.password!);
       if (user == null) {
         this.showLoginErrorMessage();
+        return false;
       } else {
         this.messageService.add({
           severity: 'info',
@@ -54,6 +67,7 @@ export class LoginPageComponent {
           detail: 'Вы успешно авторизованы',
         });
         await this.router.navigate(['']);
+        return true;
       }
     } finally {
       this.loading.set(false);

@@ -210,7 +210,7 @@
                                          [fluid]="true"
                                          [showButtonBar]="true"
                                          [ngModel]="value"
-                                         (onClose)="(calendar.value[0] == null || calendar.value[1] == null) ? filter(null) : filter(calendar.value)">
+                                         (onClose)="(calendar.value == null || calendar.value[0] == null || calendar.value[1] == null) ? filter(null) : filter(calendar.value)">
                           </p-date-picker>
                         }
                         @default {

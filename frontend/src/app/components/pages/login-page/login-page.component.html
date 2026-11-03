@@ -30,7 +30,8 @@
       </div>
 
       <p-floatlabel proLegacyFloatLabelTransitionFix variant="on">
-        <p-password required
+        <p-password #passwordInput
+                    required
                     inputId="passwordInput"
                     name="password"
                     style="width: 100%"
@@ -39,7 +40,8 @@
                     [feedback]="false"
                     [maxlength]="50"
                     [disabled]="loading()"
-                    [(ngModel)]="password">
+                    [(ngModel)]="password"
+                    (keydown.enter)="onPasswordKeydownEnter()">
         </p-password>
         <label for="passwordInput">Пароль</label>
       </p-floatlabel>
@@ -54,11 +56,11 @@
                 (onClick)="login()">
       </p-button>
 
-            <div style="margin-top: 20px">
+      <div style="margin-top: 20px">
               <span class="link" [class.content-disabled]="loading()" (click)="restorePassword()">
                 Забыли пароль?
               </span>
-            </div>
+      </div>
     </p-footer>
   </p-card>
 </div>

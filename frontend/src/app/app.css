@@ -1,6 +1,7 @@
 :host ::ng-deep .toast-ok-wrapper.p-toast {
     width: auto;
     max-width: 500px;
+    min-width: 500px;
 }
 
 :host ::ng-deep .toast-ok-wrapper .p-toast-message-content {
