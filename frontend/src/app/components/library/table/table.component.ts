@@ -103,6 +103,14 @@ export class TableComponent {
     return this.selectionMode() === 'multiple' && this.checkboxSelection();
   });
 
+  protected get tableFrozenLeftColumns() {
+    return this.tableColumns.filter(c => c.frozen === 'left');
+  }
+
+  protected get tableFrozenRightColumns() {
+    return this.tableColumns.filter(c => c.frozen === 'right');
+  }
+
   protected readonly tableRowSelectable = (row: { data: any; index: number }) =>
     row?.data != null && row.data[this.deletedMessageField] == null;
 

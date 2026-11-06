@@ -363,6 +363,6 @@
     background: var(--p-datatable-row-selected-background);
 }
 
-:host ::ng-deep .p-datatable-striped.p-datatable-hoverable .p-datatable-tbody > tr:not(.p-datatable-row-selected):hover > td {
+:host ::ng-deep .p-datatable-striped.p-datatable-hoverable .p-datatable-tbody > tr:not(.p-datatable-row-selected):not(.not-hoverable-row):hover > td {
     background: var(--p-datatable-row-hover-background);
 }

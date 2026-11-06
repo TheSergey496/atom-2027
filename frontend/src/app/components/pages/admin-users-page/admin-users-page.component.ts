@@ -94,7 +94,6 @@ export class AdminUsersPageComponent implements OnInit {
     try {
       const users = await lastValueFrom(this.userAdminService.getUsers());
       this.users.set(users);
-      console.log('load');
     } finally {
       this.loading.set(false);
     }

@@ -22,8 +22,7 @@
          (onColResize)="onColResize()"
          (sortFunction)="onTableSort($event)"
          (selectionChange)="tableSelection = $event; selectionChange.emit(tableSelection);"
-         (onFilter)="onFilter()"
->
+         (onFilter)="onFilter()">
 
   <ng-template #header let-columns>
     <tr>
@@ -305,19 +304,29 @@
   <ng-template #body let-row let-cols="columns" let-rowIndex="rowIndex">
 
     @if (row[deletedMessageField] != null) {
-      <tr>
-        <td pFrozenColumn
-            alignFrozen="left"
-            [attr.data-column-field]="indicatorColumnField"
-            [style.height.px]="rowHeight()">
-        </td>
-        <td [attr.colspan]="tableColumns.length - 1">
+      <tr class="not-hoverable-row">
+        @for (column of tableFrozenLeftColumns; track column.originalColumn.field) {
+          <td pFrozenColumn
+              alignFrozen="left"
+              [attr.data-column-field]="column.originalColumn.field"
+              [style.height.px]="rowHeight()">
+          </td>
+        }
+        <td [attr.colspan]="tableColumns.length - tableFrozenLeftColumns.length - tableFrozenRightColumns.length">
           <div class="cell-content">
             <div class="cell-content-value cell-content-value-left">
               {{ row[deletedMessageField] }}
             </div>
           </div>
         </td>
+        @for (column of tableFrozenRightColumns; track column.originalColumn.field) {
+          <td pFrozenColumn
+              alignFrozen="right"
+              class="frozen-right"
+              [attr.data-column-field]="column.originalColumn.field"
+              [style.height.px]="rowHeight()">
+          </td>
+        }
       </tr>
     } @else {
       <tr [pSelectableRow]="row" [pSelectableRowIndex]="rowIndex" [pSelectableRowDisabled]="tableCheckboxSelection()">
@@ -375,5 +384,38 @@
       </tr>
     }
   </ng-template>
+
+  <ng-template #emptymessage>
+    <tr class="not-hoverable-row">
+      @for (column of tableFrozenLeftColumns; track column.originalColumn.field) {
+        <td pFrozenColumn
+            alignFrozen="left"
+            [attr.data-column-field]="column.originalColumn.field"
+            [style.height.px]="rowHeight()">
+        </td>
+      }
+      <td [style.height.px]="rowHeight()" [attr.colspan]="tableColumns.length - tableFrozenLeftColumns.length - tableFrozenRightColumns.length">
+        <div class="cell-content">
+          Ничего не найдено
+        </div>
+      </td>
+      @for (column of tableFrozenRightColumns; track column.originalColumn.field) {
+        <td pFrozenColumn
+            alignFrozen="right"
+            class="frozen-right"
+            [attr.data-column-field]="column.originalColumn.field"
+            [style.height.px]="rowHeight()">
+        </td>
+      }
+    </tr>
+  </ng-template>
+
+  <!--  <ng-template #summary>-->
+  <!--    <tr>-->
+  <!--      <td [attr.colspan]="tableColumns.length">-->
+
+  <!--      </td>-->
+  <!--    </tr>-->
+  <!--  </ng-template>-->
 
 </p-table>
