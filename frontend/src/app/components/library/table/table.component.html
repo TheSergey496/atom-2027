@@ -19,9 +19,10 @@
          [metaKeySelection]="true"
          [columns]="tableColumns"
          [value]="tableValue"
+         (onColResize)="onColResize()"
          (sortFunction)="onTableSort($event)"
          (selectionChange)="tableSelection = $event; selectionChange.emit(tableSelection);"
-         (onFilter)="clearSelection()"
+         (onFilter)="onFilter()"
 >
 
   <ng-template #header let-columns>

@@ -16,6 +16,7 @@ import {
 } from '@angular/core';
 import {
   ColumnFilter,
+  FrozenColumn,
   ReorderableColumn,
   SelectableRow,
   SortableColumn,
@@ -140,6 +141,7 @@ export class TableComponent {
   private readonly table = viewChild.required(Table);
   private readonly rows = viewChildren(SelectableRow);
   private readonly reorderableColumns = viewChildren(ReorderableColumn);
+  private readonly frozenColumns = viewChildren(FrozenColumn);
   private readonly columnFilters = viewChildren(ColumnFilter);
   private readonly sortableColumns = viewChildren(SortableColumn);
   private readonly sortableColumnIcons = viewChildren(SortIcon);
@@ -293,6 +295,13 @@ export class TableComponent {
     });
 
     effect(() => {
+      for (let frozenColumn of this.frozenColumns()) {
+        frozenColumn.updateStickyPosition =
+          ColumnOverrides.frozenColumnUpdateStickyPosition.bind(frozenColumn);
+      }
+    });
+
+    effect(() => {
       for (let reorderableColumn of this.reorderableColumns()) {
         reorderableColumn.onChanges =
           ColumnOverrides.onReorderableColumnChanges.bind(reorderableColumn);
@@ -422,8 +431,21 @@ export class TableComponent {
     });
   }
 
-  protected checkEvent(event?: any) {
-    console.log(event ?? 'wtf');
+  protected onColResize() {
+    for (let frozenColumn of this.frozenColumns()) {
+      if (frozenColumn.alignFrozen === 'right') {
+        frozenColumn.updateStickyPosition();
+      }
+    }
+  }
+
+  protected onFilter() {
+    this.clearSelection();
+    for (let frozenColumn of this.frozenColumns()) {
+      if (frozenColumn.alignFrozen === 'right') {
+        frozenColumn.recalculateColumns();
+      }
+    }
   }
 
   private defineRowId(row: any): any {
@@ -597,9 +619,7 @@ export class TableComponent {
   }
 
   private resetColumnFilter(column: TableColumn) {
-    this.table().filters[column.originalColumn.field] = {
-
-    };
+    this.table().filters[column.originalColumn.field] = {};
     this.table()._filter();
   }
 

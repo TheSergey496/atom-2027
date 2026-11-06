@@ -92,12 +92,17 @@
 }
 
 :host ::ng-deep .column-menu-button {
+    visibility: hidden;
     height: 100%;
     padding: 0;
     color: inherit;
     background-color: transparent;
     border: 0;
     border-radius: 0;
+}
+
+:host ::ng-deep th:hover .column-menu-button {
+    visibility: visible;
 }
 
 :host ::ng-deep .column-menu-button:not(:disabled):hover {
@@ -129,15 +134,19 @@
     border-width: 1px 1px 1px 0;
 }
 
+:host ::ng-deep .p-datatable-thead > tr > th.frozen-right {
+    will-change: transform;
+}
+
 :host ::ng-deep .p-datatable-thead > tr > th:not(.p-datatable-frozen-column) {
     left: 0 !important;
     right: 0 !important;
+    transform: none !important;
 }
 
 :host ::ng-deep .p-datatable-thead > th > th.p-datatable-frozen-column {
     z-index: 1;
 }
-
 
 :host ::ng-deep .p-datatable-gridlines .p-datatable-thead > tr > th:last-child {
     border-left: 0;
@@ -146,7 +155,6 @@
 :host ::ng-deep .p-datatable-gridlines .p-datatable-thead > tr > th:nth-child(1 of .frozen-right) {
     border-left: 1px solid var(--border-color);
 }
-
 
 :host ::ng-deep .p-datatable-thead > tr > th.p-datatable-sortable-column:not(.p-datatable-column-sorted):hover {
     color: var(--p-primary-800);
@@ -268,9 +276,14 @@
     padding: 0;
 }
 
+:host ::ng-deep .p-datatable-tbody > tr > td.frozen-right {
+    will-change: transform;
+}
+
 :host ::ng-deep .p-datatable-tbody > tr > td:not(.p-datatable-frozen-column) {
     left: 0 !important;
     right: 0 !important;
+    transform: none !important;
 }
 
 :host ::ng-deep .p-datatable-tbody > tr > td.p-datatable-frozen-column {
@@ -291,13 +304,65 @@
 }
 
 :host ::ng-deep .p-datatable .p-datatable-tbody > tr:not(.p-datatable-row-selected):hover:focus-visible {
-    background-color: var(--p-primary-50);
+    background-color: transparent;
 }
 
 :host ::ng-deep .p-datatable .p-datatable-tbody > tr:not(.p-datatable-row-selected):focus-visible:nth-child(odd) {
-    background-color: var(--p-primary-50);
+    background-color: transparent;
 }
 
 :host ::ng-deep .p-datatable .p-datatable-tbody > tr:not(.p-datatable-row-selected):focus-visible {
+    background-color: transparent;
+}
+
+:host ::ng-deep .p-datatable-tbody > tr {
+    background: transparent;
+}
+
+:host ::ng-deep .p-datatable.p-datatable-striped .p-datatable-tbody > tr:nth-child(odd) {
+    background: transparent;
+}
+
+:host ::ng-deep .p-datatable-tbody > tr.p-datatable-row-selected {
+    background: transparent;
+}
+
+:host ::ng-deep .p-datatable.p-datatable-striped .p-datatable-tbody > tr:nth-child(odd).p-datatable-row-selected {
+    background: transparent;
+}
+
+:host ::ng-deep .p-datatable-striped.p-datatable-hoverable .p-datatable-tbody > tr:not(.p-datatable-row-selected):hover {
+    background: transparent;
+}
+
+:host ::ng-deep .p-datatable .p-datatable-tbody > tr:not(.p-datatable-row-selected):hover:focus-visible > td {
     background-color: var(--p-primary-50);
+}
+
+:host ::ng-deep .p-datatable .p-datatable-tbody > tr:not(.p-datatable-row-selected):focus-visible:nth-child(odd) > td {
+    background-color: var(--p-primary-50);
+}
+
+:host ::ng-deep .p-datatable .p-datatable-tbody > tr:not(.p-datatable-row-selected):focus-visible > td {
+    background-color: var(--p-primary-50);
+}
+
+:host ::ng-deep .p-datatable-tbody > tr > td {
+    background: var(--p-datatable-row-background);
+}
+
+:host ::ng-deep .p-datatable.p-datatable-striped .p-datatable-tbody > tr:nth-child(odd) > td {
+    background: var(--p-datatable-row-striped-background);
+}
+
+:host ::ng-deep .p-datatable.p-datatable-striped .p-datatable-tbody > tr:nth-child(odd).p-datatable-row-selected > td {
+    background: var(--p-datatable-row-selected-background);
+}
+
+:host ::ng-deep .p-datatable-tbody > tr.p-datatable-row-selected > td {
+    background: var(--p-datatable-row-selected-background);
+}
+
+:host ::ng-deep .p-datatable-striped.p-datatable-hoverable .p-datatable-tbody > tr:not(.p-datatable-row-selected):hover > td {
+    background: var(--p-datatable-row-hover-background);
 }

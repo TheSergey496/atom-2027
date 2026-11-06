@@ -188,7 +188,13 @@ export const DefaultTheme = definePreset(Material, {
       root: {
         secondary: {
           background: '{surface.200}',
+          borderColor: '{surface.200}',
           hoverBackground: '{surface.300}',
+          hoverBorderColor: '{surface.300}',
+        },
+        success: {
+          activeBackground: '{green.600}',
+          activeBorderColor: '{green.600}',
         },
       },
     },
