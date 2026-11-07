@@ -22,7 +22,7 @@
          (onColResize)="onColResize()"
          (sortFunction)="onTableSort($event)"
          (selectionChange)="tableSelection = $event; selectionChange.emit(tableSelection);"
-         (onFilter)="onFilter()">
+         (onFilter)="onFilter($event)">
 
   <ng-template #header let-columns>
     <tr>
@@ -394,7 +394,8 @@
             [style.height.px]="rowHeight()">
         </td>
       }
-      <td [style.height.px]="rowHeight()" [attr.colspan]="tableColumns.length - tableFrozenLeftColumns.length - tableFrozenRightColumns.length">
+      <td [style.height.px]="rowHeight()"
+          [attr.colspan]="tableColumns.length - tableFrozenLeftColumns.length - tableFrozenRightColumns.length">
         <div class="cell-content">
           Ничего не найдено
         </div>
@@ -410,12 +411,30 @@
     </tr>
   </ng-template>
 
-  <!--  <ng-template #summary>-->
-  <!--    <tr>-->
-  <!--      <td [attr.colspan]="tableColumns.length">-->
-
-  <!--      </td>-->
-  <!--    </tr>-->
-  <!--  </ng-template>-->
+  <ng-template #summary>
+    <div class="table-summary">
+      @if (tableHasFilter()) {
+        <div class="active-filters">
+          @for (filter of tableAppliedFilters; track filter.column.originalColumn.field) {
+            <div class="filter-chip">
+              <span class="filter-label">{{ filter.label }}</span>
+              <span class="filter-value">{{ filter.valueLocale }}</span>
+              <button
+                type="button"
+                class="filter-remove"
+                aria-label="Снять фильтр"
+                (click)="resetColumnFilter(filter.column)">
+                <i class="pi pi-times"></i>
+              </button>
+            </div>
+          }
+        </div>
+      } @else {
+        <div class="no-active-filters">
+          Фильтр не задан
+        </div>
+      }
+    </div>
+  </ng-template>
 
 </p-table>

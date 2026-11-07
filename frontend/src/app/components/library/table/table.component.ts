@@ -1,6 +1,5 @@
 import {
   afterRenderEffect,
-  ChangeDetectorRef,
   Component,
   computed,
   DestroyRef,
@@ -10,6 +9,7 @@ import {
   input,
   output,
   Renderer2,
+  signal,
   untracked,
   viewChild,
   viewChildren,
@@ -22,6 +22,7 @@ import {
   SortableColumn,
   SortIcon,
   Table,
+  TableFilterEvent,
   TableModule,
 } from '@openng/optimus-ui/table';
 import { ObjectUtils } from '@openng/optimus-ui/utils';
@@ -50,6 +51,7 @@ import { ButtonModule } from '@openng/optimus-ui/button';
 import { ListUtils } from '../../../utils/list-utils';
 import { ColumnOverrides } from './column-overrides';
 import { SkeletonModule } from '@openng/optimus-ui/skeleton';
+import { ScrollPanelModule } from '@openng/optimus-ui/scrollpanel';
 
 interface TableColumn {
   originalColumn: Column;
@@ -69,6 +71,7 @@ interface TableColumn {
     InputMaskModule,
     ButtonModule,
     SkeletonModule,
+    ScrollPanelModule,
   ],
   selector: 'pro-legacy-table',
   styleUrl: './table.component.css',
@@ -92,7 +95,6 @@ export class TableComponent {
   public readonly selectionChange = output<(any | undefined) | any[]>();
 
   protected columnsByField: { [key: string]: TableColumn } = {};
-  protected tableColumns: TableColumn[] = [];
   protected tableValue: any[] = [];
   protected tableDefaultSort: SortMeta[] | undefined = undefined;
   protected tableSelection: (any | undefined) | any[] = undefined;
@@ -103,13 +105,16 @@ export class TableComponent {
     return this.selectionMode() === 'multiple' && this.checkboxSelection();
   });
 
+  protected tableColumns: TableColumn[] = [];
   protected get tableFrozenLeftColumns() {
     return this.tableColumns.filter(c => c.frozen === 'left');
   }
-
   protected get tableFrozenRightColumns() {
     return this.tableColumns.filter(c => c.frozen === 'right');
   }
+
+  protected readonly tableHasFilter = signal<boolean>(false);
+  protected tableAppliedFilters: { column: TableColumn; label: string; valueLocale: string }[] = [];
 
   protected readonly tableRowSelectable = (row: { data: any; index: number }) =>
     row?.data != null && row.data[this.deletedMessageField] == null;
@@ -447,8 +452,235 @@ export class TableComponent {
     }
   }
 
-  protected onFilter() {
+  protected onFilter(event: TableFilterEvent) {
     this.clearSelection();
+    const filters = event?.filters ?? {};
+    console.log(filters);
+    this.tableHasFilter.set(
+      Object.values(filters).reduce((agg, filter) => {
+        return agg || (filter?.value != null && filter?.value !== '' && filter?.matchMode != null);
+      }, false),
+    );
+    this.tableAppliedFilters = Object.keys(filters).reduce(
+      (agg, filterField) => {
+        const filter = filters[filterField];
+        if (filter?.value == null || filter?.value === '' || filter?.matchMode == null) {
+          return agg;
+        }
+
+        const column = this.columnsByField[filterField];
+        if (column == null) {
+          return agg;
+        }
+
+        let matchModeLocale = '';
+        switch (filter.matchMode) {
+          case FilterMatchMode.STARTS_WITH: {
+            matchModeLocale = 'начинается с';
+            break;
+          }
+          case FilterMatchMode.CONTAINS: {
+            matchModeLocale = 'содержит';
+            break;
+          }
+          case FilterMatchMode.NOT_CONTAINS: {
+            matchModeLocale = 'не содержит';
+            break;
+          }
+          case FilterMatchMode.ENDS_WITH: {
+            matchModeLocale = 'заканчивается на';
+            break;
+          }
+          case FilterMatchMode.EQUALS:
+          case FilterMatchMode.IS:
+          case FilterMatchMode.DATE_IS:
+          case CustomFilterMatchMode.NULLABLE_EQUALS: {
+            matchModeLocale = 'равно';
+            break;
+          }
+          case FilterMatchMode.NOT_EQUALS:
+          case FilterMatchMode.IS_NOT:
+          case FilterMatchMode.DATE_IS_NOT:
+          case CustomFilterMatchMode.NULLABLE_NOT_EQUALS: {
+            matchModeLocale = 'не равно';
+            break;
+          }
+          case FilterMatchMode.IN: {
+            matchModeLocale = 'одно из';
+            break;
+          }
+          case FilterMatchMode.LESS_THAN:
+          case FilterMatchMode.BEFORE:
+          case FilterMatchMode.DATE_BEFORE: {
+            matchModeLocale = 'меньше';
+            break;
+          }
+          case FilterMatchMode.LESS_THAN_OR_EQUAL_TO: {
+            matchModeLocale = 'меньше или равно';
+            break;
+          }
+          case FilterMatchMode.GREATER_THAN:
+          case FilterMatchMode.AFTER:
+          case FilterMatchMode.DATE_AFTER: {
+            matchModeLocale = 'больше';
+            break;
+          }
+          case FilterMatchMode.GREATER_THAN_OR_EQUAL_TO: {
+            matchModeLocale = 'больше или равно';
+            break;
+          }
+          case FilterMatchMode.BETWEEN: {
+            matchModeLocale = 'между';
+            break;
+          }
+        }
+
+        const fieldLocale = column?.originalColumn?.header;
+
+        let valueLocale = '';
+
+        switch (column?.originalColumn?.type) {
+          case 'int':
+          case 'currency':
+          case 'number': {
+            const formatter = ColumnUtils.getNumberFormatter(
+              this.numberFormatters,
+              undefined,
+              20,
+              true,
+            );
+            valueLocale = formatter.format(filter.value as number);
+            break;
+          }
+          case 'boolean': {
+            switch (filter.value) {
+              case true: {
+                valueLocale = 'Да';
+                break;
+              }
+              case CustomFilterMatchMode.nullReservedFilterWord: {
+                valueLocale = 'Не указано';
+                break;
+              }
+              default: {
+                valueLocale = 'Нет';
+                break;
+              }
+            }
+            break;
+          }
+          case 'text': {
+            valueLocale = `${filter.value}`;
+            break;
+          }
+          case 'date': {
+            switch (filter.matchMode) {
+              case FilterMatchMode.BETWEEN: {
+                const firstDate =
+                  filter.value[0] != null
+                    ? filter.value[0].toLocaleDateString('ru-RU', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric',
+                      })
+                    : '';
+                const secondDate =
+                  filter.value[1] != null
+                    ? filter.value[1].toLocaleDateString('ru-RU', {
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric',
+                      })
+                    : '';
+                valueLocale = `${firstDate} и ${secondDate}`;
+                break;
+              }
+              default: {
+                valueLocale = filter.value.toLocaleDateString('ru-RU', {
+                  day: '2-digit',
+                  month: '2-digit',
+                  year: 'numeric',
+                });
+                break;
+              }
+            }
+            break;
+          }
+          case 'enum': {
+            switch (filter.value) {
+              case CustomFilterMatchMode.nullReservedFilterWord: {
+                valueLocale = 'Не указано';
+                break;
+              }
+              default: {
+                valueLocale = `${((column?.originalColumn as Extract<Column, { type: 'enum' }>)?.locale ?? {})[filter.value]}`;
+                break;
+              }
+            }
+            break;
+          }
+        }
+
+        switch (filter.matchMode) {
+          case FilterMatchMode.STARTS_WITH:
+          case FilterMatchMode.CONTAINS:
+          case FilterMatchMode.NOT_CONTAINS:
+          case FilterMatchMode.ENDS_WITH: {
+            break;
+          }
+          case FilterMatchMode.EQUALS:
+          case FilterMatchMode.IS:
+          case FilterMatchMode.DATE_IS:
+          case CustomFilterMatchMode.NULLABLE_EQUALS: {
+            matchModeLocale = 'равно';
+            break;
+          }
+          case FilterMatchMode.NOT_EQUALS:
+          case FilterMatchMode.IS_NOT:
+          case FilterMatchMode.DATE_IS_NOT:
+          case CustomFilterMatchMode.NULLABLE_NOT_EQUALS: {
+            matchModeLocale = 'не равно';
+            break;
+          }
+          case FilterMatchMode.IN: {
+            matchModeLocale = 'одно из';
+            break;
+          }
+          case FilterMatchMode.LESS_THAN:
+          case FilterMatchMode.BEFORE:
+          case FilterMatchMode.DATE_BEFORE: {
+            matchModeLocale = 'меньше';
+            break;
+          }
+          case FilterMatchMode.LESS_THAN_OR_EQUAL_TO: {
+            matchModeLocale = 'меньше или равно';
+            break;
+          }
+          case FilterMatchMode.GREATER_THAN:
+          case FilterMatchMode.AFTER:
+          case FilterMatchMode.DATE_AFTER: {
+            matchModeLocale = 'больше';
+            break;
+          }
+          case FilterMatchMode.GREATER_THAN_OR_EQUAL_TO: {
+            matchModeLocale = 'больше или равно';
+            break;
+          }
+          case FilterMatchMode.BETWEEN: {
+            matchModeLocale = 'между';
+            break;
+          }
+        }
+
+        agg.push({
+          column: column,
+          label: `${fieldLocale} ${matchModeLocale}`,
+          valueLocale: valueLocale,
+        });
+        return agg;
+      },
+      [] as typeof this.tableAppliedFilters,
+    );
     for (let frozenColumn of this.frozenColumns()) {
       if (frozenColumn.alignFrozen === 'right') {
         frozenColumn.recalculateColumns();
@@ -626,8 +858,10 @@ export class TableComponent {
     this.table()._filter();
   }
 
-  private resetColumnFilter(column: TableColumn) {
-    this.table().filters[column.originalColumn.field] = {};
+  protected resetColumnFilter(column: TableColumn) {
+    this.table().filters[column.originalColumn.field] = {
+      matchMode: this.getDefaultMatchMode(column)
+    };
     this.table()._filter();
   }
 

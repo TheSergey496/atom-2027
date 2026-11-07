@@ -6,9 +6,11 @@
 }
 
 :host ::ng-deep .p-datatable-table-container {
-    border: 1px solid var(--border-color);
-    border-bottom-left-radius: var(--p-border-radius-sm);
-    border-bottom-right-radius: var(--p-border-radius-sm);
+    border-top: 1px solid var(--border-color);
+    border-left: 1px solid var(--border-color);
+    border-right: 1px solid var(--border-color);
+    border-bottom: 0;
+    border-radius: 0;
     background-color: var(--p-surface-50);
     box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
 }
@@ -272,6 +274,14 @@
     border-width: 0 1px 1px 0;
 }
 
+:host ::ng-deep .p-datatable.p-datatable-gridlines:has(.p-datatable-tbody):has(.p-datatable-tfoot) .p-datatable-tbody > tr:last-child > td {
+    border-width: 0 1px 1px 0;
+}
+
+:host ::ng-deep .p-datatable.p-datatable-gridlines:has(.p-datatable-tbody):has(.p-datatable-tfoot) .p-datatable-tbody > tr:last-child > td:last-child {
+    border-width: 0 1px 1px 0;
+}
+
 :host ::ng-deep .p-datatable-tbody > tr > td {
     padding: 0;
 }
@@ -365,4 +375,76 @@
 
 :host ::ng-deep .p-datatable-striped.p-datatable-hoverable .p-datatable-tbody > tr:not(.p-datatable-row-selected):not(.not-hoverable-row):hover > td {
     background: var(--p-datatable-row-hover-background);
+}
+
+:host ::ng-deep .table-summary {
+    border-bottom-left-radius: var(--p-border-radius-sm);
+    border-bottom-right-radius: var(--p-border-radius-sm);
+    width: 100%;
+    background-color: var(--p-surface-0);
+    border: 1px solid var(--border-color);
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+    display: inline-flex;
+    align-items: center;
+    min-height: 52px;
+
+    padding: 0.5rem 1rem;
+}
+
+:host ::ng-deep .no-active-filters {
+    color: var(--p-text-muted-color);
+    font-weight: var(--p-datatable-column-title-font-weight);
+}
+
+:host ::ng-deep .active-filters {
+    width: 100%;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+:host ::ng-deep .filter-chip {
+    max-width: 100%;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 2rem;
+    padding: 0.25rem 0.375rem 0.25rem 0.625rem;
+
+    background: var(--p-surface-100);
+    border: 1px solid var(--p-surface-200);
+    border-radius: var(--p-border-radius-md);
+
+    font-size: 0.8125rem;
+}
+
+:host ::ng-deep .filter-label {
+    white-space: nowrap;
+    color: var(--p-text-muted-color);
+}
+
+:host ::ng-deep .filter-value {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--p-text-color);
+    font-weight: 600;
+}
+
+:host ::ng-deep .filter-remove {
+    display: grid;
+    place-items: center;
+    width: 1.5rem;
+    height: 1.5rem;
+    padding: 0;
+    border: 0;
+
+    color: var(--p-text-muted-color);
+    background: transparent;
+    cursor: pointer;
+}
+
+:host ::ng-deep .filter-remove:hover {
+    color: var(--p-red-600);
 }

@@ -120,7 +120,7 @@ export class ColumnUtils {
     }
   }
 
-  private static getNumberFormatter(
+  public static getNumberFormatter(
     numberFormatterCache: { [key: string]: Intl.NumberFormat } | undefined,
     minFractionDigits: number | undefined,
     maxFractionDigits: number | undefined,
