@@ -26,6 +26,9 @@ services:
       app.db-schema: *schema
       server.port: 8085
       spring.datasource.url: "jdbc:postgresql://db:5432/postgres?currentSchema=$${APP_DB_SCHEMA}"
+      app.dynamic-datasources.secondary.url: "jdbc:postgresql://db:5432/postgres?currentSchema=dummy_schema"
+      app.dynamic-datasources.secondary.username: postgres
+      app.dynamic-datasources.secondary.password: postgres
     ports:
       - "${BACKEND_PORT:-8496}:8085"
     depends_on:
