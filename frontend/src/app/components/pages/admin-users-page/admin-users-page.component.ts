@@ -1,9 +1,6 @@
 import { Component, inject, OnInit, signal, viewChild } from '@angular/core';
-import { CardModule } from '@openng/optimus-ui/card';
 import { TableComponent } from '../../library/table/table.component';
 import { ButtonModule } from '@openng/optimus-ui/button';
-import { InputNumberModule } from '@openng/optimus-ui/inputnumber';
-import { FormsModule } from '@angular/forms';
 import { Column } from '../../library/table/column';
 import { ToolbarModule } from '@openng/optimus-ui/toolbar';
 import { UserDto } from '../../../gen/auth-dto';
@@ -15,17 +12,16 @@ import { AdminUserEditDialogComponent } from '../../forms/admin-user-edit-dialog
 import { MessageService } from '@openng/optimus-ui/api';
 import { SyncConfirmationService } from '../../../services/sync-confirmation.service';
 import { BlockUIModule } from '@openng/optimus-ui/blockui';
+import { TableFastSearchComponent } from '../../library/table/table-fast-search/table-fast-search.component';
 
 @Component({
   imports: [
-    CardModule,
     TableComponent,
     ButtonModule,
-    InputNumberModule,
-    FormsModule,
     ToolbarModule,
     TooltipModule,
     BlockUIModule,
+    TableFastSearchComponent,
   ],
   selector: 'pro-legacy-admin-users-page',
   styleUrl: './admin-users-page.component.css',
@@ -72,6 +68,7 @@ export class AdminUsersPageComponent implements OnInit {
   protected readonly getRowId = (row: UserDto) => `${row?.id}`;
   protected readonly filter = signal<boolean>(false);
   protected readonly loading = signal<boolean>(false);
+  protected readonly exporting = signal<boolean>(false);
   protected readonly users = signal<UserDto[]>([]);
   protected selectedUser = signal<UserDto | null>(null);
   protected readonly blockingMask = signal<boolean>(false);
@@ -235,6 +232,15 @@ export class AdminUsersPageComponent implements OnInit {
       this.selectedUser.set(updatedUser);
     } finally {
       this.blockingMask.set(false);
+    }
+  }
+
+  protected async exportToExcel() {
+    this.exporting.set(true);
+    try {
+      await this.table()?.exportToExcel();
+    } finally {
+      this.exporting.set(false);
     }
   }
 }

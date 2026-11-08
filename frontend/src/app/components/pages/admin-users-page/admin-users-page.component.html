@@ -3,7 +3,7 @@
   <p-toolbar>
     <ng-template #start>
       <div class="table-title">
-        {{table.getTitle('Пользователи')}}
+        {{ table.getTitle('Пользователи') }}
       </div>
 
       <p-button icon="pi pi-sync"
@@ -56,6 +56,22 @@
                   (onClick)="archiveUser()">
         </p-button>
       }
+
+      <div class="splitter"></div>
+
+      <p-button size="small"
+                severity="success"
+                icon="pi pi-file-excel"
+                loadingIcon="pi pi-spin pi-spinner-dotted"
+                [loading]="exporting()"
+                [disabled]="loading()"
+                (onClick)="exportToExcel()">
+      </p-button>
+    </ng-template>
+
+    <ng-template #end>
+      <pro-legacy-table-fast-search [table]="table">
+      </pro-legacy-table-fast-search>
     </ng-template>
   </p-toolbar>
   <pro-legacy-table #table

@@ -196,7 +196,15 @@ export const DefaultTheme = definePreset(Material, {
           activeBackground: '{green.600}',
           activeBorderColor: '{green.600}',
         },
+        sm: {
+          fontSize: '1rem',
+        },
       },
+      css: `
+        .p-button-sm.p-button-icon-only {
+          height: var(--p-button-sm-icon-only-width);;
+        }
+      `,
     },
     checkbox: {
       css: `

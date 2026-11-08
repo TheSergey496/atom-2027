@@ -1,3 +1,4 @@
+<p-blockUI [blocked]="blockingMask()"></p-blockUI>
 <p-table #table
          scrollHeight="flex"
          columnResizeMode="expand"
@@ -18,6 +19,7 @@
          [customSort]="true"
          [metaKeySelection]="true"
          [columns]="tableColumns"
+         [globalFilterFields]="tableGlobalFilterFields"
          [value]="tableValue"
          (onColResize)="onColResize()"
          (sortFunction)="onTableSort($event)"

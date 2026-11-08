@@ -1,0 +1,11 @@
+<p-iconfield>
+  <p-inputicon class="pi pi-search" />
+  <input #globalSearchInput
+         pInputText
+         pSize="small"
+         type="text"
+         placeholder="Быстрый поиск"
+         style="min-width: 300px"
+         (keydown.enter)="applyGlobalFilter(globalSearchInput.value)"
+         (focusout)="applyGlobalFilter(globalSearchInput.value)" />
+</p-iconfield>
