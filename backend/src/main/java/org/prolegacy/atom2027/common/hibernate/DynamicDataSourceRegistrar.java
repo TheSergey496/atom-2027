@@ -11,6 +11,8 @@ import org.springframework.context.EnvironmentAware;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.core.env.Environment;
 import org.springframework.core.type.AnnotationMetadata;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
@@ -39,6 +41,8 @@ public class DynamicDataSourceRegistrar implements ImportBeanDefinitionRegistrar
             String emfName = name + "EntityManagerFactory";
             String tmName = name + "TransactionManager";
             String adapterNm = name + "JpaVendorAdapter";
+            String jdbcTemplateName = name + "JdbcTemplate";
+            String namedJdbcTemplateName = name + "NamedParameterJdbcTemplate";
 
             registry.registerBeanDefinition(
                     dsName,
@@ -77,6 +81,22 @@ public class DynamicDataSourceRegistrar implements ImportBeanDefinitionRegistrar
                     BeanDefinitionBuilder
                             .genericBeanDefinition(JpaTransactionManager.class)
                             .addConstructorArgReference(emfName)
+                            .getBeanDefinition()
+            );
+
+            registry.registerBeanDefinition(
+                    jdbcTemplateName,
+                    BeanDefinitionBuilder
+                            .genericBeanDefinition(JdbcTemplate.class)
+                            .addConstructorArgReference(dsName)
+                            .getBeanDefinition()
+            );
+
+            registry.registerBeanDefinition(
+                    namedJdbcTemplateName,
+                    BeanDefinitionBuilder
+                            .genericBeanDefinition(NamedParameterJdbcTemplate.class)
+                            .addConstructorArgReference(dsName)
                             .getBeanDefinition()
             );
         });

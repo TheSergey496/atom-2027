@@ -10,6 +10,7 @@ import org.prolegacy.atom2027.entities.QDummyEntityA;
 import org.prolegacy.atom2027.entities.ids.DummyEntityAId;
 import org.prolegacy.atom2027.repositories.DummyEntityARepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -21,6 +22,8 @@ public class DefaultConnectionValidator implements HealthValidator {
     private DummyEntityARepository dummyEntityARepository;
     @Autowired
     private JPAQueryFactory queryFactory;
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     @Override
     public String name() {
@@ -41,11 +44,15 @@ public class DefaultConnectionValidator implements HealthValidator {
         }
         final List<DummyEntityA> refList = dummyEntityARepository.saveAll(Instancio.ofList(dummyEntityAInstancioApi.toModel()).size(15).create());
 
-        final List<DummyEntityA> resList = queryFactory.from(QDummyEntityA.dummyEntityA).orderBy(QDummyEntityA.dummyEntityA.id.asc()).selectDto(DummyEntityA.class).fetch();
+        List<DummyEntityA> resList = queryFactory.from(QDummyEntityA.dummyEntityA).orderBy(QDummyEntityA.dummyEntityA.id.asc()).selectDto(DummyEntityA.class).fetch();
         if (!refList.equals(resList)) {
             return ValidationResult.fail("Default datasource doesn't return the expected value");
         }
 
+        resList = jdbcTemplate.query("select * from dummy_entitya order by id", (rs, _) -> new DummyEntityA(new DummyEntityAId(rs.getLong("id")), rs.getString("dummy_string"), rs.getLong("dummy_long")));
+        if (!refList.equals(resList)) {
+            return ValidationResult.fail("Default jdbcTemplate doesn't return the expected value");
+        }
         return ValidationResult.ok();
     }
 }
