@@ -1,11 +1,13 @@
 package org.prolegacy.atom2027.health;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.instancio.Instancio;
 import org.instancio.InstancioApi;
 import org.instancio.Select;
 import org.jspecify.annotations.NonNull;
 import org.prolegacy.atom2027.common.health.HealthValidator;
 import org.prolegacy.atom2027.common.hibernate.JdbcTemplateFactory;
+import org.prolegacy.atom2027.common.hibernate.JsonRowMapper;
 import org.prolegacy.atom2027.common.query.query.JPAQueryFactory;
 import org.prolegacy.atom2027.second_datasource.entities.DummyEntityB;
 import org.prolegacy.atom2027.second_datasource.entities.QDummyEntityB;
@@ -37,6 +39,8 @@ public class SecondaryConnectionValidator implements HealthValidator {
     private JdbcTemplate secondaryJdbcTemplate;
     @Autowired
     private JdbcTemplateFactory jdbcTemplateFactory;
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @Value("${app.dynamic-datasources.secondary.url}")
     private String datasourceUrl;
@@ -71,7 +75,8 @@ public class SecondaryConnectionValidator implements HealthValidator {
                 this.datasourcePassword,
                 null
         ));
-        resList = jdbcTemplate.query("select * from dummy_entityb order by id", (rs, _) -> new DummyEntityB(new DummyEntityBId(rs.getLong("id")), rs.getString("dummy_string"), rs.getLong("dummy_long")));
+
+        resList = jdbcTemplate.query("select * from dummy_entityb order by id", new JsonRowMapper<>(DummyEntityB.class, objectMapper));
         if (!refList.equals(resList)) {
             return ValidationResult.fail("Dynamic jdbcTemplate doesn't return the expected value");
         }

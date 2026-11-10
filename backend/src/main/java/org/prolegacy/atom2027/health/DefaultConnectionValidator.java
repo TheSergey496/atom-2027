@@ -1,9 +1,11 @@
 package org.prolegacy.atom2027.health;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.instancio.Instancio;
 import org.instancio.InstancioApi;
 import org.instancio.Select;
 import org.prolegacy.atom2027.common.health.HealthValidator;
+import org.prolegacy.atom2027.common.hibernate.JsonRowMapper;
 import org.prolegacy.atom2027.common.query.query.JPAQueryFactory;
 import org.prolegacy.atom2027.entities.DummyEntityA;
 import org.prolegacy.atom2027.entities.QDummyEntityA;
@@ -24,6 +26,8 @@ public class DefaultConnectionValidator implements HealthValidator {
     private JPAQueryFactory queryFactory;
     @Autowired
     private JdbcTemplate jdbcTemplate;
+    @Autowired
+    private ObjectMapper objectMapper;
 
     @Override
     public String name() {
@@ -49,7 +53,7 @@ public class DefaultConnectionValidator implements HealthValidator {
             return ValidationResult.fail("Default datasource doesn't return the expected value");
         }
 
-        resList = jdbcTemplate.query("select * from dummy_entitya order by id", (rs, _) -> new DummyEntityA(new DummyEntityAId(rs.getLong("id")), rs.getString("dummy_string"), rs.getLong("dummy_long")));
+        resList = jdbcTemplate.query("select * from dummy_entitya order by id", new JsonRowMapper<>(DummyEntityA.class, objectMapper));
         if (!refList.equals(resList)) {
             return ValidationResult.fail("Default jdbcTemplate doesn't return the expected value");
         }
