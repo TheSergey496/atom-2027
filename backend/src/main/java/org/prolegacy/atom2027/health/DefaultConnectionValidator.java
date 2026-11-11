@@ -40,7 +40,13 @@ public class DefaultConnectionValidator implements HealthValidator {
         final boolean hasData = !dummyEntityARepository.findAll().isEmpty();
 
         InstancioApi<DummyEntityA> dummyEntityAInstancioApi = Instancio.of(DummyEntityA.class)
-                .generate(Select.field(DummyEntityA::getDummyString), gen -> gen.string().mixedCase());
+                .generate(Select.field(DummyEntityA::getDummyString), gen -> gen.string().mixedCase())
+                .ignore(Select.all(
+                        Select.field(DummyEntityA::getCreatedBy),
+                        Select.field(DummyEntityA::getCreatedDate),
+                        Select.field(DummyEntityA::getModifiedBy),
+                        Select.field(DummyEntityA::getModifiedDate)
+                ));
         if (hasData) {
             dummyEntityAInstancioApi = dummyEntityAInstancioApi.generate(Select.field(DummyEntityA::getId), generators -> generators.longSeq().as(DummyEntityAId::new));
         } else {

@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.instancio.Instancio;
 import org.instancio.InstancioApi;
 import org.instancio.Select;
-import org.jspecify.annotations.NonNull;
 import org.prolegacy.atom2027.common.health.HealthValidator;
 import org.prolegacy.atom2027.common.hibernate.JdbcTemplateFactory;
 import org.prolegacy.atom2027.common.hibernate.JsonRowMapper;
@@ -17,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.data.domain.Sort;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -58,8 +58,10 @@ public class SecondaryConnectionValidator implements HealthValidator {
 
     @Override
     public ValidationResult validate() {
-        final List<DummyEntityB> refList = self.populateData();
+        self.populateData();
+        self.mutate();
 
+        List<DummyEntityB> refList = this.dummyEntityBRepository.findAll(Sort.by(Sort.Direction.ASC, DummyEntityB::getId));
         List<DummyEntityB> resList = queryFactory.from(QDummyEntityB.dummyEntityB).orderBy(QDummyEntityB.dummyEntityB.id.asc()).selectDto(DummyEntityB.class).fetch();
         if (!refList.equals(resList)) {
             return ValidationResult.fail("Secondary datasource doesn't return the expected value");
@@ -85,17 +87,27 @@ public class SecondaryConnectionValidator implements HealthValidator {
     }
 
     @Transactional(transactionManager = "secondaryTransactionManager")
-    protected @NonNull List<DummyEntityB> populateData() {
+    protected void populateData() {
         final boolean hasData = !dummyEntityBRepository.findAll().isEmpty();
 
         InstancioApi<DummyEntityB> dummyEntityBInstancioApi = Instancio.of(DummyEntityB.class)
-                .generate(Select.field(DummyEntityB::getDummyString), gen -> gen.string().mixedCase());
+                .generate(Select.field(DummyEntityB::getDummyString), gen -> gen.string().mixedCase())
+                .ignore(Select.all(
+                        Select.field(DummyEntityB::getCreatedBy),
+                        Select.field(DummyEntityB::getCreatedDate),
+                        Select.field(DummyEntityB::getModifiedBy),
+                        Select.field(DummyEntityB::getModifiedDate)
+                ));
         if (hasData) {
             dummyEntityBInstancioApi = dummyEntityBInstancioApi.generate(Select.field(DummyEntityB::getId), generators -> generators.longSeq().as(DummyEntityBId::new));
         } else {
             dummyEntityBInstancioApi = dummyEntityBInstancioApi.ignore(Select.field(DummyEntityB::getId));
         }
-        final List<DummyEntityB> refList = dummyEntityBRepository.saveAll(Instancio.ofList(dummyEntityBInstancioApi.toModel()).size(15).create());
-        return refList;
+        dummyEntityBRepository.saveAll(Instancio.ofList(dummyEntityBInstancioApi.toModel()).size(15).create());
+    }
+
+    @Transactional(transactionManager = "secondaryTransactionManager")
+    protected void mutate() {
+        dummyEntityBRepository.findById(new DummyEntityBId(1L)).ifPresent(dummyEntityB -> dummyEntityB.setDummyString("menya menyali"));
     }
 }
