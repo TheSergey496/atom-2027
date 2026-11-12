@@ -1,6 +1,6 @@
 package org.prolegacy.atom2027.services.user;
 
-import org.apache.commons.codec.digest.DigestUtils;
+import org.prolegacy.atom2027.common.auth.config.UserDetails;
 import org.prolegacy.atom2027.common.auth.dto.RoleDto;
 import org.prolegacy.atom2027.common.auth.dto.UserDto;
 import org.prolegacy.atom2027.common.auth.entities.Role;
@@ -13,12 +13,14 @@ import org.prolegacy.atom2027.common.auth.repositories.RoleRepository;
 import org.prolegacy.atom2027.common.auth.repositories.UserRepository;
 import org.prolegacy.atom2027.common.exceptions.BusinessLogicException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 
 @Service
 public class UserAdminService {
@@ -126,7 +128,7 @@ public class UserAdminService {
     }
 
     private void validateIsNotSelfChange(UserId userId, String errorMessage) {
-        if (Optional.ofNullable(userProvider.get()).map(User::getId).map(userId1 -> Objects.equals(userId, userId1)).orElse(false)) {
+        if (Optional.ofNullable(userProvider.get()).map(UserDetails::getId).map(userId1 -> Objects.equals(userId, userId1)).orElse(false)) {
             throw new BusinessLogicException(errorMessage);
         }
     }

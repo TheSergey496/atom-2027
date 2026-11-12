@@ -1,7 +1,6 @@
 package org.prolegacy.atom2027.services.user;
 
 import com.google.common.collect.Lists;
-import org.prolegacy.atom2027.common.auth.dto.RoleDto;
 import org.prolegacy.atom2027.common.auth.dto.UserDto;
 import org.prolegacy.atom2027.common.auth.entities.Role;
 import org.prolegacy.atom2027.common.auth.entities.User;
@@ -52,7 +51,7 @@ public class UserService {
 
     @Transactional(isolation = Isolation.SERIALIZABLE)
     public UserDto updateUser(String password, UserDto userDto) {
-        User user = userProvider.get();
+        User user = userRepository.findById(userProvider.get().getId()).orElseThrow();
 
         if (!passwordEncoder.matches(password, user.getPassword())) {
             throw new BusinessLogicException("Неверный пароль");

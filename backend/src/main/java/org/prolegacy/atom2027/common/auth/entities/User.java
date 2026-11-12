@@ -5,7 +5,9 @@ import com.querydsl.core.annotations.PropertyType;
 import com.querydsl.core.annotations.QueryType;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.Audited;
 import org.prolegacy.atom2027.common.annotation.LongIdGenerator;
+import org.prolegacy.atom2027.common.audit.Auditable;
 import org.prolegacy.atom2027.common.auth.dto.UserDto;
 import org.prolegacy.atom2027.common.auth.entities.id.UserId;
 import org.prolegacy.atom2027.common.exceptions.BusinessLogicException;
@@ -18,10 +20,11 @@ import java.util.regex.Pattern;
 @Entity
 @Getter
 @Setter(AccessLevel.PRIVATE)
-@EqualsAndHashCode
+@EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor
 @Table(name = "\"user\"")
-public class User {
+@Audited
+public class User extends Auditable {
     @Id
     @LongIdGenerator
     private UserId id;
