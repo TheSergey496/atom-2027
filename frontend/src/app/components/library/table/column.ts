@@ -46,6 +46,11 @@ export type Column =
       locale: { [key: string]: string };
     });
 
+export interface TableColumn {
+  originalColumn: Column;
+  frozen?: 'left' | 'right';
+}
+
 export class ColumnUtils {
   public static getColumnValue(
     row: any,

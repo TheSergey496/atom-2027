@@ -3,7 +3,7 @@ import { ObjectUtils } from '@openng/optimus-ui/utils';
 import { Table } from '@openng/optimus-ui/table';
 import { ElementRef } from '@angular/core';
 import { FilterMatchMode, FilterMetadata, FilterOperator } from '@openng/optimus-ui/api';
-import { Column, ColumnUtils } from './column';
+import { Column, ColumnUtils } from '../column';
 
 export class TableOverrides {
   static onColumnDrop(this: Table, event: Event, dropColumn: any) {

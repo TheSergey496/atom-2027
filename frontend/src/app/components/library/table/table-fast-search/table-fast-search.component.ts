@@ -1,5 +1,5 @@
 import { Component, input } from '@angular/core';
-import { TableComponent } from '../table.component';
+import { TableComponent } from '../table/table.component';
 import { InputTextModule } from '@openng/optimus-ui/inputtext';
 import { IconFieldModule } from '@openng/optimus-ui/iconfield';
 import { InputIconModule } from '@openng/optimus-ui/inputicon';

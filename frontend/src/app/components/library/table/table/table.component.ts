@@ -44,24 +44,20 @@ import { RowOverrides } from './row-overrides';
 import { InputTextModule } from '@openng/optimus-ui/inputtext';
 import { InputNumberModule } from '@openng/optimus-ui/inputnumber';
 import { SelectModule } from '@openng/optimus-ui/select';
-import { Column, ColumnUtils } from './column';
+import { Column, ColumnUtils, TableColumn } from '../column';
 import { DatePickerModule } from '@openng/optimus-ui/datepicker';
 import { InputMaskModule } from '@openng/optimus-ui/inputmask';
 import { FilterOverrides } from './filter-overrides';
 import { ButtonModule } from '@openng/optimus-ui/button';
-import { ListUtils } from '../../../utils/list-utils';
+import { ListUtils } from '../../../../utils/list-utils';
 import { ColumnOverrides } from './column-overrides';
 import { SkeletonModule } from '@openng/optimus-ui/skeleton';
 import { ScrollPanelModule } from '@openng/optimus-ui/scrollpanel';
-import { ExcelExportService } from '../../../services/excel-export.service';
-import { LargeExcelExportService } from '../../../services/large-excel-export.service';
-import { MessageServiceKey } from '../../../app';
+import { ExcelExportService } from '../../../../services/excel-export.service';
+import { LargeExcelExportService } from '../../../../services/large-excel-export.service';
+import { MessageServiceKey } from '../../../../app';
 import { BlockUI } from '@openng/optimus-ui/blockui';
-
-interface TableColumn {
-  originalColumn: Column;
-  frozen?: 'left' | 'right';
-}
+import { CustomFilterMatchMode } from '../custom-filter-match-mode';
 
 @Component({
   imports: [
@@ -1359,30 +1355,4 @@ interface SortEvent {
   multiSortMeta: SortMeta[];
 }
 
-class CustomFilterMatchMode {
-  public static readonly nullReservedFilterWord = '__nullReservedWord';
-  public static readonly NULLABLE_EQUALS = 'nullableEquals';
-  public static readonly NULLABLE_NOT_EQUALS = 'nullableNotEquals';
 
-  public static nullableEqualsFilter(
-    defaultEquals: Function,
-  ): (value: any, filter: any, filterLocale?: any) => boolean {
-    return (value, filter, filterLocale) => {
-      if (filter === CustomFilterMatchMode.nullReservedFilterWord) {
-        return value == null;
-      }
-      return defaultEquals(value, filter, filterLocale);
-    };
-  }
-
-  public static nullableNotEqualsFilter(
-    defaultNotEquals: Function,
-  ): (value: any, filter: any, filterLocale?: any) => boolean {
-    return (value, filter, filterLocale) => {
-      if (filter === CustomFilterMatchMode.nullReservedFilterWord) {
-        return value != null;
-      }
-      return defaultNotEquals(value, filter, filterLocale);
-    };
-  }
-}
