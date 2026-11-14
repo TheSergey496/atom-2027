@@ -31,6 +31,11 @@ import { UserService } from '../../services/auth/user.service';
   templateUrl: './header.html',
 })
 export class Header {
+  protected readonly logo = '/assets/images/just_works_logo.png';
+  protected readonly logoHover = '/assets/images/just_works_logo_hover.png';
+  protected readonly logoHoverAlt = '/assets/images/just_works_logo_hover_alt.png';
+  protected logoSrc = this.logo;
+
   protected menuTabs: MenuTab[] = [];
   protected activeRoute? = '/home';
   protected alertsCount = 0;
@@ -84,6 +89,10 @@ export class Header {
             label: 'Пользователи',
             route: '/administration/users',
           },
+          {
+            label: 'Дерево',
+            route: '/administration/tree-table',
+          },
         ];
       } else {
         this.menuTabs = [];
@@ -115,7 +124,7 @@ export class Header {
   }
 
   protected async navigate(route: string) {
-      await this.router.navigate([route]);
+    await this.router.navigate([route]);
   }
 
   private editUser() {

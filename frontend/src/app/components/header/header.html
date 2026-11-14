@@ -2,11 +2,13 @@
   <a class="logo" [routerLink]="'/'">
     <img id="logo"
          priority=""
-         ngSrc="/assets/images/logo.png"
-         alt="ProLegacy"
+         [ngSrc]="logoSrc"
+         (mouseover)="logoSrc = logoHover"
+         (mouseout)="logoSrc = logo"
+         alt="Just Works"
          style="height: 100%; width: auto"
-         height="123"
-         width="330" />
+         height="218"
+         width="656" />
   </a>
 
   <div class="tabmenu-wrapper">
