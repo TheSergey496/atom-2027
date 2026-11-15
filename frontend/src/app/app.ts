@@ -40,7 +40,7 @@ export class App implements OnInit {
   ngOnInit(): void {
     setTimeout(() => {
       this.loading.set(false);
-    }, 750);
+    }, 1500);
   }
 
   getToastIconClass(message: ToastMessageOptions) {
