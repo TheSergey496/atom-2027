@@ -1,8 +1,9 @@
 import { Component, input } from '@angular/core';
-import { TableComponent } from '../table.component';
+import { TableComponent } from '../table/table.component';
 import { InputTextModule } from '@openng/optimus-ui/inputtext';
 import { IconFieldModule } from '@openng/optimus-ui/iconfield';
 import { InputIconModule } from '@openng/optimus-ui/inputicon';
+import { TreeTableComponent } from '../tree-table/tree-table.component';
 
 @Component({
   imports: [InputTextModule, IconFieldModule, InputIconModule],
@@ -11,7 +12,7 @@ import { InputIconModule } from '@openng/optimus-ui/inputicon';
   templateUrl: './table-fast-search.component.html',
 })
 export class TableFastSearchComponent {
-  public readonly table = input.required<TableComponent>();
+  public readonly table = input.required<TableComponent | TreeTableComponent>();
 
   protected applyGlobalFilter(value: string) {
     this.table()?.applyGlobalFilter(value);

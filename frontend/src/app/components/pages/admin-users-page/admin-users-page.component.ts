@@ -1,5 +1,5 @@
 import { Component, inject, OnInit, signal, viewChild } from '@angular/core';
-import { TableComponent } from '../../library/table/table.component';
+import { TableComponent } from '../../library/table/table/table.component';
 import { ButtonModule } from '@openng/optimus-ui/button';
 import { Column } from '../../library/table/column';
 import { ToolbarModule } from '@openng/optimus-ui/toolbar';

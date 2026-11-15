@@ -1,0 +1,184 @@
+<p-tree-table #table
+              scrollHeight="flex"
+              columnResizeMode="expand"
+              sortMode="multiple"
+              frozenWidth="32px"
+              [selection]="tableSelection"
+              [selectionMode]="selectionMode()"
+              [loading]="loading()"
+              [multiSortMeta]="tableDefaultSort"
+              [virtualScrollItemSize]="rowHeight()"
+              [dataKey]="tableDataKey()"
+              [showGridlines]="true"
+              [scrollable]="true"
+              [virtualScroll]="true"
+              [resizableColumns]="true"
+              [reorderableColumns]="true"
+              [customSort]="true"
+              [metaKeySelection]="true"
+              [columns]="tableScrollableColumns"
+              [frozenColumns]="tableFrozenColumns"
+              [globalFilterFields]="tableGlobalFilterFields"
+              [value]="tableValue"
+              (sortFunction)="onTableSort($event)"
+              (selectionChange)="tableSelection = $event; selectionChange.emit(tableSelection);"
+              (onFilter)="onFilter($event)">
+  <ng-template #colgroup let-columns>
+    <colgroup>
+      @for (col of columns; track col) {
+        <col />
+      }
+    </colgroup>
+  </ng-template>
+
+  <ng-template #header let-columns>
+    <tr>
+      @for (column of columns; track column.originalColumn.field) {
+        @if (column.originalColumn.field === indicatorColumnField) {
+          <th ttReorderableColumn
+              ttResizableColumn
+              [attr.data-column-field]="column.originalColumn.field"
+              [ttSortableColumn]="column.originalColumn.field"
+              [ttSortableColumnDisabled]="true"
+              [ttReorderableColumnDisabled]="true"
+              [ttResizableColumnDisabled]="true"
+              [style.height.px]="headerRowHeight()"
+              (focus)="indicatorButton.focus()">
+            <div class="indicator-cell-content">
+              <button #indicatorButton
+                      pButton
+                      class="indicator-menu-button"
+                      [fluid]="true"
+                      (keydown.enter)="$event.stopPropagation();"
+                      (keydown.space)="$event.stopPropagation();"
+                      (click)="indicatorMenu.toggle($event); $event.stopPropagation();">
+                <i pButtonIcon class="pi pi-bars"></i>
+              </button>
+            </div>
+            <p-menu #indicatorMenu
+                    appendTo="body"
+                    [model]="indicatorMenuOptions"
+                    [popup]="true">
+            </p-menu>
+          </th>
+        } @else {
+          <th ttReorderableColumn
+              ttResizableColumn
+              [attr.data-column-field]="column.originalColumn.field"
+              [ttReorderableColumnDisabled]="column.frozen != null"
+              [ttSortableColumn]="column.originalColumn.field"
+              [style.height.px]="headerRowHeight()">
+            <div #columnHeaderContent
+                 class="cell-content"
+                 (dragover)="onColumnHeaderContentDragOver($event, column.frozen != null, columnHeaderContent)">
+              <div class="cell-content-value">
+                {{ column.originalColumn.header }}
+                <p-treetable-sort-icon [field]="column.originalColumn.field" />
+              </div>
+
+              <button pButton
+                      class="column-menu-button"
+                      size="small"
+                      [text]="true"
+                      (keydown.enter)="$event.stopPropagation();"
+                      (keydown.space)="$event.stopPropagation();"
+                      (click)="columnMenu.toggle($event); $event.stopPropagation();">
+                <i pButtonIcon class="pi pi-bars"></i>
+              </button>
+
+              <p-menu #columnMenu
+                      appendTo="body"
+                      [model]="columnMenuOptions[column.originalColumn.field]"
+                      [popup]="true">
+              </p-menu>
+            </div>
+          </th>
+        }
+      }
+    </tr>
+  </ng-template>
+
+  <ng-template #body let-rowNode let-row="rowData" let-columns="columns">
+    <tr [ttRow]="rowNode" [ttSelectableRow]="rowNode">
+      @for (column of columns; let first = $first; track column.originalColumn.field) {
+        @if (column.originalColumn.field === indicatorColumnField) {
+          <td [attr.data-column-field]="column.originalColumn.field"
+              [style.height.px]="rowHeight()">
+          </td>
+        } @else {
+          <td [attr.data-column-field]="column.originalColumn.field"
+              [style.height.px]="rowHeight()">
+            <div class="cell-content">
+              @if (first) {
+                <p-treetable-toggler [rowNode]="rowNode"></p-treetable-toggler>
+              }
+              @switch (column.originalColumn.type) {
+                @case ('boolean') {
+                  <div class="cell-content-value cell-content-value-center">
+                    @if (ColumnUtils.getColumnValue(row, column.originalColumn) != null) {
+                      <p-checkbox class="readonly-checkbox no-animation-checkbox"
+                                  [tabindex]="-1"
+                                  [binary]="true"
+                                  [readonly]="true"
+                                  [ngModel]="ColumnUtils.getColumnValue(row, column.originalColumn)" />
+                    } @else {
+                      {{ '' }}
+                    }
+                  </div>
+                }
+                @case ('number')
+                @case ('int')
+                @case ('currency') {
+                  <div class="cell-content-value cell-content-value-left">
+                    {{ ColumnUtils.getColumnValueFormatted(row, column.originalColumn, numberFormatters) }}
+                  </div>
+                }
+                @default {
+                  <div class="cell-content-value cell-content-value-center">
+                    {{ ColumnUtils.getColumnValueFormatted(row, column.originalColumn) }}
+                  </div>
+                }
+              }
+            </div>
+          </td>
+        }
+      }
+    </tr>
+  </ng-template>
+
+  <ng-template #frozenbody let-rowNode let-row="rowData">
+    <tr [ttRow]="rowNode" [ttSelectableRow]="rowNode">
+      <td [attr.data-column-field]="this.indicatorColumnField"
+          [style.height.px]="rowHeight()">
+      </td>
+    </tr>
+  </ng-template>
+
+  <ng-template #summary>
+    <div class="table-summary">
+      @if (tableHasFilter()) {
+        <div class="active-filters">
+          @for (filter of tableAppliedFilters; track filter.column.originalColumn.field) {
+            <div class="filter-chip">
+              <span class="filter-label">{{ filter.label }}</span>
+              <span class="filter-value">{{ filter.valueLocale }}</span>
+              <button
+                type="button"
+                class="filter-remove"
+                aria-label="Снять фильтр"
+                (click)="resetColumnFilter(filter.column)">
+                <i class="pi pi-times"></i>
+              </button>
+            </div>
+          }
+        </div>
+      } @else {
+        <div class="no-active-filters">
+          Фильтр не задан
+        </div>
+      }
+    </div>
+  </ng-template>
+
+
+</p-tree-table>

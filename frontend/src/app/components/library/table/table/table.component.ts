@@ -44,24 +44,21 @@ import { RowOverrides } from './row-overrides';
 import { InputTextModule } from '@openng/optimus-ui/inputtext';
 import { InputNumberModule } from '@openng/optimus-ui/inputnumber';
 import { SelectModule } from '@openng/optimus-ui/select';
-import { Column, ColumnUtils } from './column';
+import { Column, ColumnUtils, TableColumn } from '../column';
 import { DatePickerModule } from '@openng/optimus-ui/datepicker';
 import { InputMaskModule } from '@openng/optimus-ui/inputmask';
 import { FilterOverrides } from './filter-overrides';
 import { ButtonModule } from '@openng/optimus-ui/button';
-import { ListUtils } from '../../../utils/list-utils';
+import { ListUtils } from '../../../../utils/list-utils';
 import { ColumnOverrides } from './column-overrides';
 import { SkeletonModule } from '@openng/optimus-ui/skeleton';
 import { ScrollPanelModule } from '@openng/optimus-ui/scrollpanel';
-import { ExcelExportService } from '../../../services/excel-export.service';
-import { LargeExcelExportService } from '../../../services/large-excel-export.service';
-import { MessageServiceKey } from '../../../app';
+import { ExcelExportService } from '../../../../services/excel-export.service';
+import { LargeExcelExportService } from '../../../../services/large-excel-export.service';
+import { MessageServiceKey } from '../../../../app';
 import { BlockUI } from '@openng/optimus-ui/blockui';
-
-interface TableColumn {
-  originalColumn: Column;
-  frozen?: 'left' | 'right';
-}
+import { CustomFilterMatchMode } from '../custom-filter-match-mode';
+import { SortEvent, TableUtils } from '../table-utils';
 
 @Component({
   imports: [
@@ -154,8 +151,8 @@ export class TableComponent {
 
   protected columnMenuOptions: { [key: string]: MenuItem[] } = {};
   private readonly freezeLeftMenuOptionId = 'freezeLeft';
-  private readonly freezeRightMenuOptionId = 'freezeLeft';
-  private readonly unfreezeMenuOptionId = 'freezeLeft';
+  private readonly freezeRightMenuOptionId = 'freezeRight';
+  private readonly unfreezeMenuOptionId = 'unfreeze';
 
   private readonly renderer = inject(Renderer2);
   private readonly filterService = inject(FilterService);
@@ -465,239 +462,15 @@ export class TableComponent {
 
   protected onFilter(event: TableFilterEvent) {
     this.clearSelection();
-    const filters = event?.filters ?? {};
-    this.tableHasFilter.set(
-      Object.values(filters).reduce((agg, filter) => {
-        return agg || (filter?.value != null && filter?.value !== '' && filter?.matchMode != null);
-      }, false),
+
+    const filterCalc = TableUtils.generateAppliedFilters(
+      event,
+      this.numberFormatters,
+      this.columnsByField
     );
-    let hasFilter = false;
-    let appliedFilters = [];
 
-    for (let filterField of Object.keys(filters)) {
-      if (filterField === 'global') {
-        continue;
-      }
-
-      const filter = filters[filterField];
-      if (filter?.value == null || filter?.value === '' || filter?.matchMode == null) {
-        continue;
-      }
-
-      const column = this.columnsByField[filterField];
-      if (column == null) {
-        continue;
-      }
-      hasFilter = true;
-
-      let matchModeLocale = '';
-      switch (filter.matchMode) {
-        case FilterMatchMode.STARTS_WITH: {
-          matchModeLocale = 'начинается с';
-          break;
-        }
-        case FilterMatchMode.CONTAINS: {
-          matchModeLocale = 'содержит';
-          break;
-        }
-        case FilterMatchMode.NOT_CONTAINS: {
-          matchModeLocale = 'не содержит';
-          break;
-        }
-        case FilterMatchMode.ENDS_WITH: {
-          matchModeLocale = 'заканчивается на';
-          break;
-        }
-        case FilterMatchMode.EQUALS:
-        case FilterMatchMode.IS:
-        case FilterMatchMode.DATE_IS:
-        case CustomFilterMatchMode.NULLABLE_EQUALS: {
-          matchModeLocale = 'равно';
-          break;
-        }
-        case FilterMatchMode.NOT_EQUALS:
-        case FilterMatchMode.IS_NOT:
-        case FilterMatchMode.DATE_IS_NOT:
-        case CustomFilterMatchMode.NULLABLE_NOT_EQUALS: {
-          matchModeLocale = 'не равно';
-          break;
-        }
-        case FilterMatchMode.IN: {
-          matchModeLocale = 'одно из';
-          break;
-        }
-        case FilterMatchMode.LESS_THAN:
-        case FilterMatchMode.BEFORE:
-        case FilterMatchMode.DATE_BEFORE: {
-          matchModeLocale = 'меньше';
-          break;
-        }
-        case FilterMatchMode.LESS_THAN_OR_EQUAL_TO: {
-          matchModeLocale = 'меньше или равно';
-          break;
-        }
-        case FilterMatchMode.GREATER_THAN:
-        case FilterMatchMode.AFTER:
-        case FilterMatchMode.DATE_AFTER: {
-          matchModeLocale = 'больше';
-          break;
-        }
-        case FilterMatchMode.GREATER_THAN_OR_EQUAL_TO: {
-          matchModeLocale = 'больше или равно';
-          break;
-        }
-        case FilterMatchMode.BETWEEN: {
-          matchModeLocale = 'между';
-          break;
-        }
-      }
-
-      const fieldLocale = column?.originalColumn?.header;
-
-      let valueLocale = '';
-
-      switch (column?.originalColumn?.type) {
-        case 'int':
-        case 'currency':
-        case 'number': {
-          const formatter = ColumnUtils.getNumberFormatter(
-            this.numberFormatters,
-            undefined,
-            20,
-            true,
-          );
-          valueLocale = formatter.format(filter.value as number);
-          break;
-        }
-        case 'boolean': {
-          switch (filter.value) {
-            case true: {
-              valueLocale = 'Да';
-              break;
-            }
-            case CustomFilterMatchMode.nullReservedFilterWord: {
-              valueLocale = 'Не указано';
-              break;
-            }
-            default: {
-              valueLocale = 'Нет';
-              break;
-            }
-          }
-          break;
-        }
-        case 'text': {
-          valueLocale = `${filter.value}`;
-          break;
-        }
-        case 'date': {
-          switch (filter.matchMode) {
-            case FilterMatchMode.BETWEEN: {
-              const firstDate =
-                filter.value[0] != null
-                  ? filter.value[0].toLocaleDateString('ru-RU', {
-                      day: '2-digit',
-                      month: '2-digit',
-                      year: 'numeric',
-                    })
-                  : '';
-              const secondDate =
-                filter.value[1] != null
-                  ? filter.value[1].toLocaleDateString('ru-RU', {
-                      day: '2-digit',
-                      month: '2-digit',
-                      year: 'numeric',
-                    })
-                  : '';
-              valueLocale = `${firstDate} и ${secondDate}`;
-              break;
-            }
-            default: {
-              valueLocale = filter.value.toLocaleDateString('ru-RU', {
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric',
-              });
-              break;
-            }
-          }
-          break;
-        }
-        case 'enum': {
-          switch (filter.value) {
-            case CustomFilterMatchMode.nullReservedFilterWord: {
-              valueLocale = 'Не указано';
-              break;
-            }
-            default: {
-              valueLocale = `${((column?.originalColumn as Extract<Column, { type: 'enum' }>)?.locale ?? {})[filter.value]}`;
-              break;
-            }
-          }
-          break;
-        }
-      }
-
-      switch (filter.matchMode) {
-        case FilterMatchMode.STARTS_WITH:
-        case FilterMatchMode.CONTAINS:
-        case FilterMatchMode.NOT_CONTAINS:
-        case FilterMatchMode.ENDS_WITH: {
-          break;
-        }
-        case FilterMatchMode.EQUALS:
-        case FilterMatchMode.IS:
-        case FilterMatchMode.DATE_IS:
-        case CustomFilterMatchMode.NULLABLE_EQUALS: {
-          matchModeLocale = 'равно';
-          break;
-        }
-        case FilterMatchMode.NOT_EQUALS:
-        case FilterMatchMode.IS_NOT:
-        case FilterMatchMode.DATE_IS_NOT:
-        case CustomFilterMatchMode.NULLABLE_NOT_EQUALS: {
-          matchModeLocale = 'не равно';
-          break;
-        }
-        case FilterMatchMode.IN: {
-          matchModeLocale = 'одно из';
-          break;
-        }
-        case FilterMatchMode.LESS_THAN:
-        case FilterMatchMode.BEFORE:
-        case FilterMatchMode.DATE_BEFORE: {
-          matchModeLocale = 'меньше';
-          break;
-        }
-        case FilterMatchMode.LESS_THAN_OR_EQUAL_TO: {
-          matchModeLocale = 'меньше или равно';
-          break;
-        }
-        case FilterMatchMode.GREATER_THAN:
-        case FilterMatchMode.AFTER:
-        case FilterMatchMode.DATE_AFTER: {
-          matchModeLocale = 'больше';
-          break;
-        }
-        case FilterMatchMode.GREATER_THAN_OR_EQUAL_TO: {
-          matchModeLocale = 'больше или равно';
-          break;
-        }
-        case FilterMatchMode.BETWEEN: {
-          matchModeLocale = 'между';
-          break;
-        }
-      }
-
-      appliedFilters.push({
-        column: column,
-        label: `${fieldLocale} ${matchModeLocale}`,
-        valueLocale: valueLocale,
-      });
-    }
-
-    this.tableHasFilter.set(hasFilter);
-    this.tableAppliedFilters = appliedFilters;
+    this.tableHasFilter.set(filterCalc.hasFilter);
+    this.tableAppliedFilters = filterCalc.appliedFilters;
     for (let frozenColumn of this.frozenColumns()) {
       if (frozenColumn.alignFrozen === 'right') {
         frozenColumn.recalculateColumns();
@@ -1067,7 +840,7 @@ export class TableComponent {
   }
 
   protected onTableSort(event: SortEvent) {
-    if ((event.sortMode ?? []).length == 0) {
+    if ((event.multiSortMeta ?? []).length == 0) {
     }
     event.data.sort((data1, data2) => {
       for (let sortMeta of event.multiSortMeta ?? []) {
@@ -1351,38 +1124,3 @@ export class TableComponent {
   }
 }
 
-interface SortEvent {
-  data: any[];
-  sortMode: 'single' | 'multiple';
-  field: string;
-  order: number;
-  multiSortMeta: SortMeta[];
-}
-
-class CustomFilterMatchMode {
-  public static readonly nullReservedFilterWord = '__nullReservedWord';
-  public static readonly NULLABLE_EQUALS = 'nullableEquals';
-  public static readonly NULLABLE_NOT_EQUALS = 'nullableNotEquals';
-
-  public static nullableEqualsFilter(
-    defaultEquals: Function,
-  ): (value: any, filter: any, filterLocale?: any) => boolean {
-    return (value, filter, filterLocale) => {
-      if (filter === CustomFilterMatchMode.nullReservedFilterWord) {
-        return value == null;
-      }
-      return defaultEquals(value, filter, filterLocale);
-    };
-  }
-
-  public static nullableNotEqualsFilter(
-    defaultNotEquals: Function,
-  ): (value: any, filter: any, filterLocale?: any) => boolean {
-    return (value, filter, filterLocale) => {
-      if (filter === CustomFilterMatchMode.nullReservedFilterWord) {
-        return value != null;
-      }
-      return defaultNotEquals(value, filter, filterLocale);
-    };
-  }
-}
