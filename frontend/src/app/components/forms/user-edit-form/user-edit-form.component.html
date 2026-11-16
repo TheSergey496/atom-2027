@@ -49,7 +49,7 @@
       name="email"
       type="email"
       maxlength="40"
-      [pattern]="'^[\\w-\.]+@([\\w-]+\.)+[\\w-]{2,4}$'"
+      [pattern]="'^[\\w.\\-]+@([\\w\\-]+\\.)+[\\w\\-]{2,4}$'"
       [disabled]="disabled() || !emailRequired()"
       [(ngModel)]="user().email">
     <label for="emailInput" [class.required]="emailRequired()">Адрес электронной почты</label>

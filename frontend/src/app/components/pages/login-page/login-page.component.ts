@@ -47,7 +47,7 @@ export class LoginPageComponent {
       const res = await this.login();
       if (!res) {
         requestAnimationFrame(() => {
-        this.passwordInput()?.input?.nativeElement?.focus()
+          this.passwordInput()?.input?.nativeElement?.focus();
         });
       }
     }

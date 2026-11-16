@@ -18,7 +18,7 @@
                  maxlength="50"
                  type="email"
                  style="width: 100%"
-                 [pattern]="'^[\\w.\\-]+@([\\w\\-]+.)+[\\w\\-]{2,4}$'"
+                 [pattern]="'^[\\w.\\-]+@([\\w\\-]+\\.)+[\\w\\-]{2,4}$'"
                  [autofocus]="true"
                  [disabled]="loading()"
                  [(ngModel)]="email">

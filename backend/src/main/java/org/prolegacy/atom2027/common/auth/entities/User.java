@@ -22,7 +22,6 @@ import java.util.regex.Pattern;
 @Setter(AccessLevel.PRIVATE)
 @EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor
-@Table(name = "\"user\"")
 @Audited
 public class User extends Auditable {
     @Id
