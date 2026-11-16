@@ -13,6 +13,7 @@ import { MessageService } from '@openng/optimus-ui/api';
 import { SyncConfirmationService } from '../../../services/sync-confirmation.service';
 import { BlockUIModule } from '@openng/optimus-ui/blockui';
 import { TableFastSearchComponent } from '../../library/table/table-fast-search/table-fast-search.component';
+import { GlobalLoadingService } from '../../../services/loading.service';
 
 @Component({
   imports: [
@@ -71,13 +72,13 @@ export class AdminUsersPageComponent implements OnInit {
   protected readonly exporting = signal<boolean>(false);
   protected readonly users = signal<UserDto[]>([]);
   protected selectedUser = signal<UserDto | null>(null);
-  protected readonly blockingMask = signal<boolean>(false);
 
   private readonly table = viewChild<TableComponent>('table');
   private readonly userAdminService = inject(UserAdminService);
   private readonly dialogService = inject(DialogService);
   private readonly messageService = inject(MessageService);
   private readonly syncConfirmationService = inject(SyncConfirmationService);
+  private readonly globalLoadingService = inject(GlobalLoadingService);
 
   constructor() {}
 
@@ -162,17 +163,14 @@ export class AdminUsersPageComponent implements OnInit {
       return;
     }
 
-    this.blockingMask.set(true);
-    try {
+    await this.globalLoadingService.withLoader(async () => {
       await lastValueFrom(this.userAdminService.resetPassword(userId));
       this.messageService.add({
         severity: 'success',
         summary: 'Выполнено',
         detail: 'Пароль пользователя сброшен',
       });
-    } finally {
-      this.blockingMask.set(false);
-    }
+    });
   }
 
   protected async archiveUser() {
@@ -189,8 +187,7 @@ export class AdminUsersPageComponent implements OnInit {
       return;
     }
 
-    this.blockingMask.set(true);
-    try {
+    await this.globalLoadingService.withLoader(async () => {
       const updatedUser = await lastValueFrom(this.userAdminService.archiveUser(userId));
       this.messageService.add({
         severity: 'success',
@@ -200,9 +197,7 @@ export class AdminUsersPageComponent implements OnInit {
 
       this.table()?.updateRows([updatedUser]);
       this.selectedUser.set(updatedUser);
-    } finally {
-      this.blockingMask.set(false);
-    }
+    });
   }
 
   protected async unarchiveUser() {
@@ -219,8 +214,7 @@ export class AdminUsersPageComponent implements OnInit {
       return;
     }
 
-    this.blockingMask.set(true);
-    try {
+    await this.globalLoadingService.withLoader(async () => {
       const updatedUser = await lastValueFrom(this.userAdminService.unarchiveUser(userId));
       this.messageService.add({
         severity: 'success',
@@ -230,9 +224,7 @@ export class AdminUsersPageComponent implements OnInit {
 
       this.table()?.updateRows([updatedUser]);
       this.selectedUser.set(updatedUser);
-    } finally {
-      this.blockingMask.set(false);
-    }
+    });
   }
 
   protected async exportToExcel() {

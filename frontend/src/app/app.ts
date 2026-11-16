@@ -10,6 +10,8 @@ import { BlockedForLiveDirective } from './directives/blocked-for-live.directive
 import { Optimus } from '@openng/optimus-ui/config';
 import { ScrollPanelModule } from '@openng/optimus-ui/scrollpanel';
 import { ConfirmDialogModule } from '@openng/optimus-ui/confirmdialog';
+import { FocusTrap } from '@openng/optimus-ui/focustrap';
+import { AutoFocus } from '@openng/optimus-ui/autofocus';
 
 @Component({
   selector: 'pro-legacy-root',
@@ -23,6 +25,8 @@ import { ConfirmDialogModule } from '@openng/optimus-ui/confirmdialog';
     BlockedForLiveDirective,
     ScrollPanelModule,
     ConfirmDialogModule,
+    FocusTrap,
+    AutoFocus,
   ],
   templateUrl: './app.html',
   styleUrl: './app.css',

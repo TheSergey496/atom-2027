@@ -176,3 +176,7 @@ label.required:after {
 .v-flex-grow {
     flex: 1;
 }
+
+.confirm-inverse-button-order .p-dialog-footer {
+    flex-direction: row-reverse;
+}

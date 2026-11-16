@@ -11,7 +11,7 @@
 
 <p-toast position="center" key="{{MessageServiceKey.OK}}" class="toast-ok-wrapper">
   <ng-template let-message pTemplate="message">
-    <div class="toast-ok">
+    <div pFocusTrap class="toast-ok">
       <div>
         <i [class]="getToastIconClass(message)" style="font-size: 3em"></i>
         <div class="toast-ok-summary">{{ message.summary }}</div>
@@ -21,7 +21,9 @@
       </div>
 
       <div>
-        <p-button label="OK" [severity]="getSeverity(message)"
+        <p-button label="OK"
+                  [severity]="getSeverity(message)"
+                  [pAutoFocus]="true"
                   (click)="onToastButtonClick()">
         </p-button>
       </div>
@@ -31,5 +33,8 @@
   </ng-template>
 </p-toast>
 
-<p-confirm-dialog key="confirm" header="Требуется подтверждение" icon="pi pi-question-circle" [rtl]="true">
+<p-confirm-dialog key="confirm"
+                  header="Требуется подтверждение"
+                  icon="pi pi-question-circle"
+                  [styleClass]="'confirm-inverse-button-order'">
 </p-confirm-dialog>

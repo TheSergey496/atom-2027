@@ -11,7 +11,7 @@ import {
 } from '@angular/core';
 import { Dialog } from '@openng/optimus-ui/dialog';
 import { Subject, Subscription } from 'rxjs';
-import { LoadingService } from '../services/loading.service';
+import { LocalLoadingService } from '../services/loading.service';
 
 export type DialogCallback<Res> = CallbackFunction<Res> | CallbackClass<Res>;
 export type CallbackFunction<Res> = (
@@ -30,7 +30,7 @@ export abstract class DialogComponent<Res, Callbacks extends string>
 {
   private readonly dialogRef = viewChild.required(Dialog);
 
-  public loadingService: LoadingService;
+  public loadingService: LocalLoadingService;
 
   private readonly onHide = new Subject<void>();
 
@@ -87,7 +87,7 @@ export abstract class DialogComponent<Res, Callbacks extends string>
   }
 
   protected constructor() {
-    this.loadingService = new LoadingService(
+    this.loadingService = new LocalLoadingService(
       computed(() => {
         const dialogRef = this.dialogRef();
         if (!this.isInitialized()) {

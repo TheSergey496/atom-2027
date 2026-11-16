@@ -4,15 +4,29 @@ import {
   ComponentRef,
   createComponent,
   effect,
+  ElementRef,
   EnvironmentInjector,
+  inject,
   Injector,
   Renderer2,
+  RendererFactory2,
+  Service,
   Signal,
   signal,
+  viewChild,
 } from '@angular/core';
 import { ProgressSpinner } from '@openng/optimus-ui/progressspinner';
+import { FocusTrap } from '@openng/optimus-ui/focustrap';
 
-export class LoadingService {
+interface ILoadingService {
+  get loading(): boolean;
+  beginLoading(): void;
+  stopLoading(): void;
+  withLoader(f: () => void | Promise<void>): Promise<void>;
+  stopLoadingImmediate(): void;
+}
+
+export class LocalLoadingService implements ILoadingService {
   private targetNativeElement?: unknown;
   private readonly environmentInjector;
   private readonly applicationRef;
@@ -24,7 +38,8 @@ export class LoadingService {
   constructor(targetNativeElement: Signal<unknown>, injector: Injector) {
     this.environmentInjector = injector.get(EnvironmentInjector);
     this.applicationRef = injector.get(ApplicationRef);
-    this.renderer2 = injector.get(Renderer2);
+    const rendererFactory = injector.get(RendererFactory2);
+    this.renderer2 = rendererFactory.createRenderer(null, null);
 
     effect(() => {
       this.hideLoader();
@@ -100,6 +115,9 @@ export class LoadingService {
 
   private showLoader() {
     if (this.loaderComponentRef == null) return;
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
 
     this.loaderComponentRef.instance.visible = true;
     this.renderer2.addClass(this.targetNativeElement, 'disabled');
@@ -113,13 +131,41 @@ export class LoadingService {
   }
 }
 
+@Service()
+export class GlobalLoadingService implements ILoadingService {
+  private readonly documentLoadingService: LocalLoadingService = new LocalLoadingService(
+    signal(document.body),
+    inject(Injector)
+  );
+
+  get loading(): boolean {
+    return this.documentLoadingService.loading;
+  }
+  beginLoading(): void {
+    this.documentLoadingService.beginLoading();
+  }
+  stopLoading(): void {
+    this.documentLoadingService.stopLoading();
+  }
+  withLoader(f: () => void | Promise<void>): Promise<void> {
+    return this.documentLoadingService.withLoader(f);
+  }
+  stopLoadingImmediate(): void {
+    this.documentLoadingService.stopLoadingImmediate();
+  }
+}
+
 @Component({
   template: ` @if (_visible()) {
-    <div class="loader">
+    <div class="loader" pFocusTrap>
+      <input
+        #fakeInput
+        style="width:0 !important; height: 0 !important; padding: 0 !important; border: 0 !important;"
+      />
       <p-progressSpinner [style]="{ width: '75px', height: '75px' }"></p-progressSpinner>
     </div>
   }`,
-  imports: [ProgressSpinner],
+  imports: [ProgressSpinner, FocusTrap],
   styles: `
     .loader {
       position: absolute;
@@ -136,6 +182,13 @@ export class LoadingService {
 })
 class Loader {
   protected readonly _visible = signal(false);
+  private readonly input = viewChild<ElementRef>('fakeInput');
+
+  constructor() {
+    effect(() => {
+      this.input()?.nativeElement?.focus();
+    });
+  }
 
   public set visible(value: boolean) {
     this._visible.set(value);
