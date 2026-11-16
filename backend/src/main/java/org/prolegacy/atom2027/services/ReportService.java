@@ -1,5 +1,6 @@
 package org.prolegacy.atom2027.services;
 
+import lombok.extern.log4j.Log4j2;
 import net.sf.jasperreports.engine.*;
 import net.sf.jasperreports.engine.export.JRPdfExporter;
 import net.sf.jasperreports.engine.export.ooxml.JRDocxExporter;
@@ -27,6 +28,7 @@ import java.util.Locale;
 import java.util.Map;
 
 @Service
+@Log4j2
 public class ReportService {
 
     public enum ExportFormat {
@@ -44,6 +46,7 @@ public class ReportService {
         try {
             return jasperToResponseEntity(List.of(createTestInternal()), "test", exportFormat);
         } catch (Exception e) {
+            log.error(e);
             throw new BusinessLogicException("Ошибка генерации печатной формы", e);
         }
     }

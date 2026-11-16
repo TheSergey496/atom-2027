@@ -4,7 +4,7 @@ import { LoaderComponent } from './components/library/loader/loader.component';
 import { Header } from './components/header/header';
 import { ToastModule } from '@openng/optimus-ui/toast';
 import { ButtonModule, ButtonSeverity } from '@openng/optimus-ui/button';
-import { ConfirmationService, MessageService, ToastMessageOptions } from '@openng/optimus-ui/api';
+import { MessageService, ToastMessageOptions } from '@openng/optimus-ui/api';
 import { BlockUIModule } from '@openng/optimus-ui/blockui';
 import { BlockedForLiveDirective } from './directives/blocked-for-live.directive';
 import { Optimus } from '@openng/optimus-ui/config';
