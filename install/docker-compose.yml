@@ -3,7 +3,7 @@ services:
     image: postgres:18.6-alpine
     container_name: db
     ports:
-      - "${DB_PORT:-5496}:5432"
+      - "${DB_PORT:-5497}:5432"
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
