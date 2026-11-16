@@ -2,7 +2,7 @@ import { Component, inject } from '@angular/core';
 import { DummyDialogComponent } from '../../forms/dummy-dialog.component/dummy-dialog.component';
 import { DialogService } from '../../../services/dialog.service';
 import { ButtonModule } from '@openng/optimus-ui/button';
-import { ReportService } from '../../../services/report.service';
+import { ExportFormat, ReportService } from '../../../services/report.service';
 import { lastValueFrom } from 'rxjs';
 import FileSaver from 'file-saver';
 
@@ -16,9 +16,24 @@ export class HomePageComponent {
   private readonly dialogService = inject(DialogService);
   private readonly reportService = inject(ReportService);
 
-  async testReport() {
-    const blob = await lastValueFrom(this.reportService.testReport());
-    FileSaver.saveAs(blob, 'Тест.pdf');
+  protected readonly ExportFormat = ExportFormat;
+
+  async testReport(format: ExportFormat) {
+    const blob = await lastValueFrom(this.reportService.testReport(format));
+    let filename = "Тест";
+    switch (format) {
+      case ExportFormat.PDF:
+        filename += ".pdf"
+        break;
+      case ExportFormat.XLSX:
+        filename += ".xlsx"
+        break;
+      case ExportFormat.DOCX:
+        filename += ".docx"
+        break;
+
+    }
+    FileSaver.saveAs(blob, filename);
   }
 
   onClick() {

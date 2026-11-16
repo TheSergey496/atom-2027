@@ -3,10 +3,7 @@ package org.prolegacy.atom2027.controllers;
 import org.prolegacy.atom2027.services.ReportService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @CrossOrigin("*")
@@ -17,7 +14,7 @@ public class ReportController {
     private ReportService reportService;
 
     @GetMapping("test")
-    public ResponseEntity<byte[]> test() {
-        return reportService.createTest();
+    public ResponseEntity<byte[]> test(@RequestParam ReportService.ExportFormat exportFormat) {
+        return reportService.createTest(exportFormat);
     }
 }
