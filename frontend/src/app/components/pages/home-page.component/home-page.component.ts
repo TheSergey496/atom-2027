@@ -5,6 +5,7 @@ import { ButtonModule } from '@openng/optimus-ui/button';
 import { ExportFormat, ReportService } from '../../../services/report.service';
 import { lastValueFrom } from 'rxjs';
 import FileSaver from 'file-saver';
+import { TestXlsxServiceService } from '../../../services/test-xlsx-service.service';
 
 @Component({
   selector: 'pro-legacy-home-page.component',
@@ -15,6 +16,7 @@ import FileSaver from 'file-saver';
 export class HomePageComponent {
   private readonly dialogService = inject(DialogService);
   private readonly reportService = inject(ReportService);
+  private readonly testXlsxService = inject(TestXlsxServiceService);
 
   protected readonly ExportFormat = ExportFormat;
 
@@ -34,6 +36,11 @@ export class HomePageComponent {
 
     }
     FileSaver.saveAs(blob, filename);
+  }
+
+  async testXlsx() {
+    const blob = await lastValueFrom(this.testXlsxService.foo());
+    FileSaver.saveAs(blob, 'Тест.xlsx');
   }
 
   onClick() {
