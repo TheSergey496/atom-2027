@@ -4,7 +4,6 @@ import { Dialog } from '@openng/optimus-ui/dialog';
 import { UserEditFormComponent } from '../user-edit-form/user-edit-form.component';
 import { RoleDto, UserDto } from '../../../gen/auth-dto';
 import { DialogComponent } from '../../../utils/dialogComponent';
-import { UserEditDialogResult } from '../user-edit-dialog/user-edit-dialog.component';
 import { UserAdminService } from '../../../gen/controllers-user';
 import { lastValueFrom } from 'rxjs';
 

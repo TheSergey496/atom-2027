@@ -13,13 +13,13 @@ export class FormMessageComponent {
   protected icon = computed<string>(() => {
     const severity = this.severity();
     switch (severity) {
-      case "success":
+      case 'success':
         return 'pi pi-check-circle';
-      case "info":
+      case 'info':
         return 'pi pi-info-circle';
-      case "warn":
+      case 'warn':
         return 'pi pi-exclamation-triangle';
-      case "error":
+      case 'error':
         return 'pi pi-exclamation-triangle';
     }
   });

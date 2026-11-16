@@ -1,5 +1,5 @@
 import { TreeTable } from '@openng/optimus-ui/treetable';
-import { calculateScrollbarWidth, findSingle, getIndex } from '@openng/optimus-ui-utils';
+import { findSingle, getIndex } from '@openng/optimus-ui-utils';
 import { DomHandler } from '@openng/optimus-ui/dom';
 import { ElementRef } from '@angular/core';
 
@@ -46,7 +46,7 @@ export class TreeTableOverrides {
       return [];
     }
     const headers = DomHandler.find(tableHead, 'tr > th[ttreorderablecolumn]');
-    return (headers ?? []);
+    return headers ?? [];
   }
 
   public static onColumnResizeEnd(this: TreeTable, event: MouseEvent, column: any) {

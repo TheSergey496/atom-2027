@@ -1,4 +1,4 @@
-import { TTRow, TTSelectableRow } from '@openng/optimus-ui/treetable';
+import { TTRow } from '@openng/optimus-ui/treetable';
 
 export class RowOverrides {
   public static onArrowDownKey(this: TTRow, event: KeyboardEvent) {

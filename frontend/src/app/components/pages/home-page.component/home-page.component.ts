@@ -22,18 +22,17 @@ export class HomePageComponent {
 
   async testReport(format: ExportFormat) {
     const blob = await lastValueFrom(this.reportService.testReport(format));
-    let filename = "Тест";
+    let filename = 'Тест';
     switch (format) {
       case ExportFormat.PDF:
-        filename += ".pdf"
+        filename += '.pdf';
         break;
       case ExportFormat.XLSX:
-        filename += ".xlsx"
+        filename += '.xlsx';
         break;
       case ExportFormat.DOCX:
-        filename += ".docx"
+        filename += '.docx';
         break;
-
     }
     FileSaver.saveAs(blob, filename);
   }

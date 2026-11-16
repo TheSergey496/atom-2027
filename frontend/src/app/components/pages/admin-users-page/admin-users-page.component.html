@@ -61,10 +61,8 @@
       <p-button size="small"
                 severity="success"
                 icon="pi pi-file-excel"
-                loadingIcon="pi pi-spin pi-spinner-dotted"
-                [loading]="exporting()"
                 [disabled]="loading()"
-                (onClick)="exportToExcel()">
+                (onClick)="table.exportToExcel()">
       </p-button>
     </ng-template>
 

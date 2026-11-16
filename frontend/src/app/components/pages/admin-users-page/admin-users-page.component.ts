@@ -69,7 +69,6 @@ export class AdminUsersPageComponent implements OnInit {
   protected readonly getRowId = (row: UserDto) => `${row?.id}`;
   protected readonly filter = signal<boolean>(false);
   protected readonly loading = signal<boolean>(false);
-  protected readonly exporting = signal<boolean>(false);
   protected readonly users = signal<UserDto[]>([]);
   protected selectedUser = signal<UserDto | null>(null);
 
@@ -225,14 +224,5 @@ export class AdminUsersPageComponent implements OnInit {
       this.table()?.updateRows([updatedUser]);
       this.selectedUser.set(updatedUser);
     });
-  }
-
-  protected async exportToExcel() {
-    this.exporting.set(true);
-    try {
-      await this.table()?.exportToExcel();
-    } finally {
-      this.exporting.set(false);
-    }
   }
 }

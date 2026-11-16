@@ -56,9 +56,9 @@ import { ScrollPanelModule } from '@openng/optimus-ui/scrollpanel';
 import { ExcelExportService } from '../../../../services/excel-export.service';
 import { LargeExcelExportService } from '../../../../services/large-excel-export.service';
 import { MessageServiceKey } from '../../../../app';
-import { BlockUI } from '@openng/optimus-ui/blockui';
 import { CustomFilterMatchMode } from '../custom-filter-match-mode';
 import { SortEvent, TableUtils } from '../table-utils';
+import { GlobalLoadingService } from '../../../../services/loading.service';
 
 @Component({
   imports: [
@@ -74,7 +74,6 @@ import { SortEvent, TableUtils } from '../table-utils';
     ButtonModule,
     SkeletonModule,
     ScrollPanelModule,
-    BlockUI,
   ],
   selector: 'pro-legacy-table',
   styleUrl: './table.component.css',
@@ -117,7 +116,6 @@ export class TableComponent {
     return this.tableColumns.filter(c => c.frozen === 'right');
   }
 
-  protected readonly blockingMask = signal<boolean>(false);
   protected readonly tableHasFilter = signal<boolean>(false);
   protected tableAppliedFilters: { column: TableColumn; label: string; valueLocale: string }[] = [];
 
@@ -159,6 +157,7 @@ export class TableComponent {
   private readonly excelExportService = inject(ExcelExportService);
   private readonly largeExcelExportService = inject(LargeExcelExportService);
   private readonly messageService = inject(MessageService);
+  private readonly globalLoadingService = inject(GlobalLoadingService);
   private readonly table = viewChild.required(Table);
   private readonly rows = viewChildren(SelectableRow);
   private readonly reorderableColumns = viewChildren(ReorderableColumn);
@@ -466,7 +465,7 @@ export class TableComponent {
     const filterCalc = TableUtils.generateAppliedFilters(
       event,
       this.numberFormatters,
-      this.columnsByField
+      this.columnsByField,
     );
 
     this.tableHasFilter.set(filterCalc.hasFilter);
@@ -1076,7 +1075,7 @@ export class TableComponent {
     if (dataToExport.length > 500_000) {
       if (this.largeExcelExportService.isSupported()) {
         showLargeExportMessage();
-        this.blockingMask.set(true);
+        this.globalLoadingService.beginLoading();
         try {
           await this.largeExcelExportService.export(
             this.tableColumns.slice(1).map(c => c.originalColumn),
@@ -1088,7 +1087,7 @@ export class TableComponent {
         } catch (e) {
           showErrorMessage();
         } finally {
-          this.blockingMask.set(false);
+          this.globalLoadingService.stopLoading();
         }
       } else {
         this.messageService.add({
@@ -1102,7 +1101,7 @@ export class TableComponent {
       }
     } else {
       showLargeExportMessage();
-      this.blockingMask.set(true);
+      this.globalLoadingService.beginLoading();
       try {
         await this.excelExportService.export(
           this.tableColumns.slice(1).map(c => c.originalColumn),
@@ -1114,7 +1113,7 @@ export class TableComponent {
       } catch (e) {
         showErrorMessage();
       } finally {
-        this.blockingMask.set(false);
+        this.globalLoadingService.stopLoading();
       }
     }
   }

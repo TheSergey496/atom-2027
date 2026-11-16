@@ -1,16 +1,11 @@
 import {
-  afterRenderEffect,
   Component,
   computed,
-  DestroyRef,
   effect,
-  ElementRef,
   inject,
   input,
   output,
-  Renderer2,
   signal,
-  untracked,
   viewChild,
   viewChildren,
 } from '@angular/core';
@@ -33,14 +28,9 @@ import {
   TreeTable,
   TreeTableModule,
   TreeTableSortEvent,
-  TTReorderableColumn,
   TTRow,
-  TTSelectableRow,
-  TTSortableColumn,
-  TTSortIcon,
 } from '@openng/optimus-ui/treetable';
 import { DomHandler } from '@openng/optimus-ui/dom';
-import { ListUtils } from '../../../../utils/list-utils';
 import { ObjectUtils } from '@openng/optimus-ui/utils';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { TableUtils } from '../table-utils';
