@@ -7,13 +7,13 @@ import org.prolegacy.atom2027.common.query.query.JPAQueryFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-@Configuration
+//@Configuration
 public class SecondaryJpaQueryFactoryConfig {
-    @PersistenceContext(unitName = "secondary")
-    private EntityManager entityManager;
-
-    @Bean(name = "secondaryJPAQueryFactory")
-    public JPAQueryFactory jpaQueryFactory() {
-        return new JPAQueryFactory(JPQLTemplates.DEFAULT, entityManager);
-    }
+//    @PersistenceContext(unitName = "secondary")
+//    private EntityManager entityManager;
+//
+//    @Bean(name = "secondaryJPAQueryFactory")
+//    public JPAQueryFactory jpaQueryFactory() {
+//        return new JPAQueryFactory(JPQLTemplates.DEFAULT, entityManager);
+//    }
 }

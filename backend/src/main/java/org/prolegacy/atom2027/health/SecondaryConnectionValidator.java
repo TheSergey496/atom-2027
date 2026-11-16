@@ -23,7 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-@Component
+//@Component
 public class SecondaryConnectionValidator implements HealthValidator {
     @Autowired
     @Lazy
