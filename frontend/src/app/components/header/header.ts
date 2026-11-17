@@ -22,7 +22,6 @@ import { NgDiagramModelService, provideNgDiagram } from 'ng-diagram';
   imports: [
     TabsModule,
     FormsModule,
-    Tooltip,
     RouterLink,
     NgOptimizedImage,
     OverlayBadgeModule,

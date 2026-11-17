@@ -2,7 +2,7 @@
     <p-toolbar>
         <ng-template #start>
             <div class="table-title">
-                {{ table.getTitle('События') }}
+                {{ this.edifice() == null ? table.getTitle('События') : table.getTitle('События на объекте: ' + this.edifice()!.name) }}
             </div>
 
             <p-button icon="pi pi-sync"
@@ -25,6 +25,18 @@
         </ng-template>
 
         <ng-template #end>
+
+            <p-select-button optionLabel="label"
+                             optionValue="value"
+                             size="small"
+                             [allowEmpty]="false"
+                             [options]="showArchivedOptions"
+                             [ngModel]="showArchived"
+                             (ngModelChange)="onShowArchivedChange($event)">
+            </p-select-button>
+
+            <div class="splitter"></div>
+
             <pro-legacy-table-fast-search [table]="table">
             </pro-legacy-table-fast-search>
         </ng-template>

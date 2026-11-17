@@ -8,9 +8,18 @@ import { EdificeDto, EventDto } from '../../../gen/atom2027-dto';
 import { UserDto } from '../../../gen/auth-dto';
 import { EventService } from '../../../gen/atom2027-controllers';
 import { lastValueFrom } from 'rxjs';
+import { FormsModule } from '@angular/forms';
+import {SelectButtonModule} from "@openng/optimus-ui/selectbutton";
 
 @Component({
-  imports: [Button, TableComponent, TableFastSearchComponent, Toolbar],
+  imports: [
+    Button,
+    TableComponent,
+    TableFastSearchComponent,
+    Toolbar,
+    SelectButtonModule,
+    FormsModule,
+  ],
   selector: 'pro-legacy-events',
   styleUrl: './events.component.css',
   templateUrl: './events.component.html',
@@ -94,6 +103,18 @@ export class EventsComponent implements AfterViewInit {
   public forEdifice = input(false);
   public edifice = input<EdificeDto | null>(null);
 
+  protected showArchived = false;
+  protected showArchivedOptions = [
+    {
+      label: 'Активные',
+      value: false,
+    },
+    {
+      label: 'Архив',
+      value: true,
+    },
+  ];
+
   constructor() {
     effect(() => {
       const _ = this.edifice();
@@ -113,11 +134,16 @@ export class EventsComponent implements AfterViewInit {
       if (this.forEdifice() && this.edifice() == null) {
         return;
       }
-      const events = await lastValueFrom(this.eventService.getEvents(this.edifice()?.id));
+      const events = await lastValueFrom(this.eventService.getEvents(this.edifice()?.id, this.showArchived));
       this.events.set(events);
     } finally {
       this.loading.set(false);
     }
+  }
+
+  protected onShowArchivedChange(newValue: boolean) {
+    this.showArchived = newValue;
+    this.loadData().then();
   }
 }
 

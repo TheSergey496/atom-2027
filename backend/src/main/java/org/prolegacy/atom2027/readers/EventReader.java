@@ -26,7 +26,7 @@ public class EventReader {
     @Autowired
     private JPAQueryFactory queryFactory;
 
-    public List<EventDto> getEvents(EdificeId edificeId) {
+    public List<EventDto> getEvents(EdificeId edificeId, boolean showArchived) {
 
         JPAQuery<?> maxWaterTimeQuery = queryFactory.from(ev1)
                 .where(ev1.edificeId.eq(event.edificeId))
@@ -37,6 +37,13 @@ public class EventReader {
                 .where(ev2.edificeId.eq(event.edificeId))
                 .where(ev2.resourceType.eq("energy"));
         var maxEnergyTime = maxEnergyTimeQuery.select(ev2.occurredAt.max());
+
+        BooleanExpression isArchived = Expressions.cases()
+                .when(event.resourceType.eq("water"))
+                .<BooleanExpression>then(ev1.id.isNotNull().and(event.id.ne(ev1.id)))
+                .when(event.resourceType.eq("energy"))
+                .<BooleanExpression>then(ev2.id.isNotNull().and(event.id.ne(ev2.id)))
+                .otherwise(false);
 
         var query = queryFactory.from(event)
                 .leftJoin(edifice).on(edifice.id.eq(event.edificeId))
@@ -56,17 +63,17 @@ public class EventReader {
                 )
                 .selectDto(
                         EventDto.class,
-                        Expressions.cases()
-                                .when(event.resourceType.eq("water"))
-                                .<BooleanExpression>then(ev1.id.isNotNull().and(event.id.ne(ev1.id)))
-                                .when(event.resourceType.eq("energy"))
-                                .<BooleanExpression>then(ev2.id.isNotNull().and(event.id.ne(ev2.id)))
-                                .otherwise(false)
-                                .as("isArchived")
+                        isArchived.as("isArchived")
                 );
 
         if (edificeId != null) {
             query = query.where(event.edificeId.eq(edificeId));
+        }
+
+        if (showArchived) {
+            query = query.where(isArchived.isTrue());
+        } else {
+            query = query.where(isArchived.isFalse());
         }
 
         return query.fetch();

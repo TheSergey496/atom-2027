@@ -19,7 +19,8 @@ public class EventController {
     private EventReader eventReader;
 
     @GetMapping
-    public List<EventDto> getEvents(@RequestParam(required = false) EdificeId edificeId) {
-        return eventReader.getEvents(edificeId);
+    public List<EventDto> getEvents(@RequestParam(required = false) EdificeId edificeId,
+                                    @RequestParam(required = false, defaultValue = "false") boolean showArchived) {
+        return eventReader.getEvents(edificeId, showArchived);
     }
 }

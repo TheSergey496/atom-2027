@@ -56,10 +56,14 @@ export class EventService {
     this.httpService = inject(HttpClient);
   }
 
- public getEvents(edificeId?: number): Observable<EventDto[]>  {
+ public getEvents(edificeId?: number, showArchived: boolean = false): Observable<EventDto[]>  {
     const queryParamsList: { name: string, value: string }[] = [];
     if (edificeId !== undefined && edificeId !== null) {
       queryParamsList.push({name: 'edificeId', value: edificeId.toString()});
+    }
+
+    if (showArchived !== undefined && showArchived !== null) {
+      queryParamsList.push({name: 'showArchived', value: showArchived.toString()});
     }
     let params = new HttpParams();
     for (const queryParam of queryParamsList) {
