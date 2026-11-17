@@ -1,22 +1,14 @@
-<div style="width: 100%; height: 100%;">
-  <p-button size="small"
-            severity="success"
-            icon="pi pi-file-word"
-            (onClick)="testReport(ExportFormat.DOCX)">
-  </p-button>
-  <p-button size="small"
-            severity="success"
-            icon="pi pi-file-pdf"
-            (onClick)="testReport(ExportFormat.PDF)">
-  </p-button>
-  <p-button size="small"
-            severity="success"
-            icon="pi pi-file-pdf"
-            (onClick)="testReport(ExportFormat.XLSX)">
-  </p-button>
-  <p-button size="small"
-            severity="success"
-            icon="pi pi-file-excel"
-            (onClick)="testXlsx()">
-  </p-button>
+<div #wrapper style="width: 100%; height: 100%;">
+    <p-splitter style="width: 100%; height: 100%" [class.hidden-right]="selectedNode() == null">
+        <ng-template #panel>
+            <ng-diagram
+
+                    [model]="model"
+                    [edgeTemplateMap]="edgeTemplateMap"
+                    [config]="config"
+                    (selectionChanged)="selectionChange($event)"/>
+        </ng-template>
+        <ng-template #panel>
+        </ng-template>
+    </p-splitter>
 </div>

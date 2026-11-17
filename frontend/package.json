@@ -24,11 +24,13 @@
     "@openng/optimus-ui-locale": "2.0.2",
     "@openng/optimus-ui-themes": "2.0.2",
     "@types/file-saver": "^2.0.7",
+    "chart.js": "^4.6.1",
+    "elkjs": "^0.12.1",
     "exceljs": "^4.4.0",
     "file-saver": "^2.0.5",
+    "ng-diagram": "^1.4.0",
     "rxjs": "~7.8.0",
-    "tslib": "^2.3.0",
-    "chart.js": "^4.6.1"
+    "tslib": "^2.3.0"
   },
   "devDependencies": {
     "@angular/build": "^22.0.0",

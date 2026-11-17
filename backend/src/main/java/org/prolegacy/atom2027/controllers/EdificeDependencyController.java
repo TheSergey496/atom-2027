@@ -13,7 +13,7 @@ import java.util.List;
 
 @RestController
 @TypescriptEndpoint
-@RequestMapping("edifices")
+@RequestMapping("edifice-dependencies")
 @CrossOrigin("*")
 public class EdificeDependencyController {
     @Autowired

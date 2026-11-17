@@ -1,72 +1,146 @@
-import { Component, inject } from '@angular/core';
-import { DummyDialogComponent } from '../../forms/dummy-dialog.component/dummy-dialog.component';
-import { DialogService } from '../../../services/dialog.service';
-import { ButtonModule } from '@openng/optimus-ui/button';
-import { ExportFormat, ReportService } from '../../../services/report.service';
+import {
+  AfterViewInit,
+  Component,
+  computed,
+  ElementRef,
+  inject,
+  Injector,
+  OnInit,
+  signal,
+  Signal,
+  viewChild,
+} from '@angular/core';
+import {
+  initializeModel,
+  LinkingConfig,
+  NgDiagramComponent,
+  NgDiagramConfig,
+  NgDiagramModelService,
+  NgDiagramService,
+  SelectionChangedEvent,
+} from 'ng-diagram';
+import { provideNgDiagram } from 'ng-diagram';
+import ELK from 'elkjs/lib/elk.bundled.js';
+import { ColoredEdgeComponent } from '../../graph/colored-edge/colored-edge.component';
+import { LocalLoadingService } from '../../../services/loading.service';
+import { CardModule } from '@openng/optimus-ui/card';
+import { SplitterModule } from '@openng/optimus-ui/splitter';
+import { EdificeDependencyService, EdificeService } from '../../../gen/atom2027-controllers';
+import { EdificeDependencyDto, EdificeDto } from '../../../gen/atom2027-dto';
 import { lastValueFrom } from 'rxjs';
-import FileSaver from 'file-saver';
-import { TestXlsxServiceService } from '../../../services/test-xlsx-service.service';
 
 @Component({
   selector: 'pro-legacy-home-page.component',
-  imports: [ButtonModule],
+  providers: [provideNgDiagram()],
+  imports: [NgDiagramComponent, SplitterModule],
   templateUrl: './home-page.component.html',
   styleUrl: './home-page.component.css',
 })
-export class HomePageComponent {
-  private readonly dialogService = inject(DialogService);
-  private readonly reportService = inject(ReportService);
-  private readonly testXlsxService = inject(TestXlsxServiceService);
+export class HomePageComponent implements OnInit {
+  private readonly wrapper: Signal<any> = viewChild.required('wrapper');
+  private readonly injector = inject(Injector);
 
-  protected readonly ExportFormat = ExportFormat;
+  private loadingService?: LocalLoadingService;
 
-  async testReport(format: ExportFormat) {
-    const blob = await lastValueFrom(this.reportService.testReport(format));
-    let filename = 'Тест';
-    switch (format) {
-      case ExportFormat.PDF:
-        filename += '.pdf';
-        break;
-      case ExportFormat.XLSX:
-        filename += '.xlsx';
-        break;
-      case ExportFormat.DOCX:
-        filename += '.docx';
-        break;
-    }
-    FileSaver.saveAs(blob, filename);
+  selectedNode: any | null = signal<any | null>(null);
+
+  private readonly ngDiagramModelService = inject(NgDiagramModelService);
+  private readonly ngDiagramService = inject(NgDiagramService);
+  private readonly elk = new ELK();
+  private readonly edificeService = inject(EdificeService);
+  private readonly edificeDependencyService = inject(EdificeDependencyService);
+
+  edificies: EdificeDto[] = [];
+  dependencies: EdificeDependencyDto[] = [];
+
+  linkingConfig: Partial<LinkingConfig> = {
+    validateConnection: () => false,
+  };
+
+  config: NgDiagramConfig = {
+    linking: this.linkingConfig,
+  };
+
+  protected readonly edgeTemplateMap = new Map([['colored', ColoredEdgeComponent]]);
+
+  model = initializeModel({ nodes: [], edges: [] });
+
+  constructor() {
+    this.loadingService = new LocalLoadingService(
+      computed(() => this.wrapper()?.nativeElement),
+      this.injector,
+    );
+    this.loadingService.beginLoading();
   }
 
-  async testXlsx() {
-    const blob = await lastValueFrom(this.testXlsxService.foo());
-    FileSaver.saveAs(blob, 'Тест.xlsx');
+  async ngOnInit() {
+    this.edificies = await lastValueFrom(
+      this.edificeService.getEdifices(<any>new Date().toISOString()),
+    );
+    this.dependencies = await lastValueFrom(this.edificeDependencyService.getEdificeDependencies());
+
+    await this.ngDiagramModelService.addNodes(
+      this.edificies.map(e => ({
+        id: String(e.id),
+        position: { x: 0, y: 0 }, // временная позиция, ELK перезапишет
+        data: e,
+        groupId: e.district,
+      })),
+    );
+    await this.ngDiagramModelService.addEdges(
+      this.dependencies.map(d => ({
+        id: String(d.id),
+        source: String(d.sourceEdificeId),
+        target: String(d.targetEdificeId),
+        type: 'colored',
+        data: { hasWater: d.hasWater, hasEnergy: d.hasEnergy },
+      })),
+    );
+
+    await this.applyLayout();
+    this.loadingService?.stopLoading();
   }
 
-  onClick() {
-    const dialog = this.dialogService.createDialog(DummyDialogComponent);
-    dialog.callbacks = {
-      ok: async (d, r) => {
-        d.loading = true;
-        await new Promise<void>(resolve =>
-          setTimeout(() => {
-            resolve();
-          }, 1000),
-        );
-        console.log(r);
-        d.visible = false;
+  private async applyLayout() {
+    const model = this.ngDiagramModelService.getModel();
+    const nodes = model.getNodes();
+    const edges = model.getEdges();
+
+    const graph = {
+      id: 'root',
+      layoutOptions: {
+        'elk.algorithm': 'layered',
+        'elk.direction': 'DOWN',
+        'elk.spacing.nodeNode': '80',
       },
-      enableLoading: {
-        async callback(dialog) {
-          await dialog.loadingService.withLoader(async () => {
-            await new Promise<void>(resolve =>
-              setTimeout(() => {
-                dialog.loading = false;
-                resolve();
-              }, 1500),
-            );
-          });
-        },
-      },
+      children: nodes.map(n => ({
+        id: n.id,
+        width: n.size?.width ?? 160,
+        height: n.size?.height ?? 60,
+      })),
+      edges: edges.map(e => ({
+        id: e.id,
+        sources: [e.source],
+        targets: [e.target],
+      })),
     };
+
+    const result = await this.elk.layout(graph);
+    const placed = new Map<string, any>((result.children ?? []).map((c: any) => [c.id, c]));
+
+    await this.ngDiagramModelService.updateNodes(
+      nodes.map(n => ({
+        id: n.id,
+        position: {
+          x: placed.get(n.id)?.x ?? 0,
+          y: placed.get(n.id)?.y ?? 0,
+        },
+      })),
+      // { transaction: true },
+    );
+  }
+
+  protected selectionChange(event: SelectionChangedEvent) {
+    this.selectedNode.set((event?.selectedNodes ?? [])[0] ?? null);
   }
 }

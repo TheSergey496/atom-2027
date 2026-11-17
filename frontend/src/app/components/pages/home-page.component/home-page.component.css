@@ -1,0 +1,7 @@
+:host ::ng-deep .hidden-right .p-splitter-gutter {
+    display: none;
+}
+
+:host ::ng-deep .hidden-right .p-splitterpanel:last-child {
+    max-width: 0 !important;
+}

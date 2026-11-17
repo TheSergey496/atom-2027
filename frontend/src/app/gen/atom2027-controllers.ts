@@ -15,7 +15,7 @@ export class EdificeDependencyService {
   }
 
  public getEdificeDependencies(): Observable<EdificeDependencyDto[]>  {
-    return this.httpService.get<EdificeDependencyDto[]>('edifices', {responseType: 'json'});
+    return this.httpService.get<EdificeDependencyDto[]>('edifice-dependencies', {responseType: 'json'});
   }
 
 }

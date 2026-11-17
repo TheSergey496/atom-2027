@@ -4,6 +4,7 @@ import org.prolegacy.atom2027.common.annotation.TypescriptEndpoint;
 import org.prolegacy.atom2027.dto.EdificeDto;
 import org.prolegacy.atom2027.readers.EdificeReader;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
@@ -18,7 +19,9 @@ public class EdificeController {
     private EdificeReader edificeReader;
 
     @GetMapping
-    public List<EdificeDto> getEdifices(@RequestParam Instant instantAt) {
+    public List<EdificeDto> getEdifices(@RequestParam
+                                        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+                                        Instant instantAt) {
         return edificeReader.getEdifices(instantAt);
     }
 }

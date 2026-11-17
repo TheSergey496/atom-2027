@@ -4,6 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.prolegacy.atom2027.common.annotation.TypescriptModel;
+import org.prolegacy.atom2027.entities.EdificeDependency;
+import org.prolegacy.atom2027.entities.ids.EdificeDependencyId;
 import org.prolegacy.atom2027.entities.ids.EdificeId;
 
 @Data
@@ -11,7 +13,7 @@ import org.prolegacy.atom2027.entities.ids.EdificeId;
 @AllArgsConstructor
 @TypescriptModel
 public class EdificeDependencyDto {
-    private Long id;
+    private EdificeDependencyId id;
     private Boolean hasWater;
     private Boolean hasEnergy;
     private EdificeId targetEdificeId;
