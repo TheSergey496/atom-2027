@@ -128,6 +128,9 @@ public class DataStructureLoader {
                 if (index == 10 && ind < maxIndex) {
                     index = 9;
                 }
+                if (index == 0 && ind > 0) {
+                    index = 1;
+                }
                 e.setCriticalIndex(index);
                 edificeRepository.save(e);
             }
