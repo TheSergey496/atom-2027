@@ -29,10 +29,12 @@ export class EdificeService {
     this.httpService = inject(HttpClient);
   }
 
- public getEdifices(instantAt: Date): Observable<EdificeDto[]>  {
+ public getEdifices(instantAt?: Date): Observable<EdificeDto[]>  {
     const queryParamsList: { name: string, value: string }[] = [];
-    queryParamsList.push({name: 'instantAt', value: instantAt.toString()});
-      let params = new HttpParams();
+    if (instantAt !== undefined && instantAt !== null) {
+      queryParamsList.push({name: 'instantAt', value: instantAt.toString()});
+    }
+    let params = new HttpParams();
     for (const queryParam of queryParamsList) {
       params = params.append(queryParam.name, queryParam.value);
     }

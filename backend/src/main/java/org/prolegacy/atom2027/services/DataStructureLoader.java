@@ -1,5 +1,6 @@
 package org.prolegacy.atom2027.services;
 
+import org.apache.commons.lang3.tuple.Pair;
 import org.prolegacy.atom2027.entities.Edifice;
 import org.prolegacy.atom2027.entities.EdificeDependency;
 import org.prolegacy.atom2027.entities.EventStatus;
@@ -17,9 +18,15 @@ import org.prolegacy.atom2027.second_datasource.repositories.ForeignDependencies
 import org.prolegacy.atom2027.second_datasource.repositories.ForeignEdificeRepository;
 import org.prolegacy.atom2027.second_datasource.repositories.ForeignEventStatusRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class DataStructureLoader {
@@ -39,6 +46,9 @@ public class DataStructureLoader {
     @Autowired
     private EventStatusRepository eventStatusRepository;
 
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
     public void reloadData() {
         edificeRepository.deleteAll();
         edificeDependenciesRepository.deleteAll();
@@ -49,7 +59,7 @@ public class DataStructureLoader {
         final List<ForeignDependencies> foreignDependencies = foreignDependenciesRepository.findAll();
         final List<ForeignEventStatus> foreignEventStatuses = foreignEventStatusRepository.findAll();
 
-        edificeRepository.saveAll(foreignEdifices.stream().map(
+        List<Edifice> edifices = edificeRepository.saveAll(foreignEdifices.stream().map(
                 f -> new Edifice(
                         new EdificeId(f.getId()),
                         f.getName(),
@@ -57,7 +67,8 @@ public class DataStructureLoader {
                         f.getResourceType().contains("energy"),
                         f.getDistrict(),
                         f.getStreet(),
-                        f.getHouseNumber()
+                        f.getHouseNumber(),
+                        0L
                 )
         ).toList());
         edificeDependenciesRepository.saveAll(foreignDependencies.stream().map(
@@ -75,5 +86,51 @@ public class DataStructureLoader {
                         f.getName()
                 )
         ).toList());
+
+        edificeDependenciesRepository.flush();
+
+        Map<Long, Long> cr = jdbcTemplate.queryForStream(
+                """
+                        with recursive deps as (
+                            select
+                                source_edifice_id as parent,
+                                target_edifice_id as child
+                            from edifice_dependency
+
+                            union
+
+                            select
+                                d.parent as parent,
+                                t.target_edifice_id as child
+                            from deps d
+                            join edifice_dependency t on t.source_edifice_id = d.child
+                        )
+                        select
+                            parent,
+                            count(distinct child) as count
+                        from deps
+                        group by parent
+                        """,
+                (rs, rowNum) -> {
+                        Long sourceId =  rs.getLong("parent");
+                        Long depCount = rs.getLong("count");
+                        return Pair.of(sourceId, depCount);
+                }
+        ).collect(Collectors.toMap(Pair::getLeft, Pair::getRight));
+
+        Long maxIndex = cr.values().stream().max(Long::compareTo).orElse(0L);
+
+        edifices.forEach(e -> {
+
+            if (cr.containsKey(e.getId().longValue())) {
+                Long ind = cr.get(e.getId().longValue());
+                var index = Math.round((ind + 0.0) / maxIndex * 10);
+                if (index == 10 && ind < maxIndex) {
+                    index = 9;
+                }
+                e.setCriticalIndex(index);
+                edificeRepository.save(e);
+            }
+        });
     }
 }

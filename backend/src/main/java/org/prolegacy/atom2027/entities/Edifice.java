@@ -19,4 +19,6 @@ public class Edifice {
     private String district;
     private String street;
     private String houseNumber;
+    @Setter(AccessLevel.PUBLIC)
+    private Long criticalIndex;
 }
