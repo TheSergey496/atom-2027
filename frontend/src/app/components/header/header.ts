@@ -110,7 +110,7 @@ export class Header {
             route: '/administration/users',
           },
         ];
-      } else {
+      } else if (this.userService.currentUser != null) {
         this.menuTabs = [
           {
             label: 'Объекты',
@@ -121,6 +121,8 @@ export class Header {
             route: '/events',
           },
         ];
+      } else {
+        this.menuTabs = [];
       }
 
       const routes = this.menuTabs.map(t => t.route);

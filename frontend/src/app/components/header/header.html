@@ -23,7 +23,11 @@
     </p-tabs>
   </div>
 
-  <p-button label="Сбросить" (onClick)="resetData()"></p-button>
+    @if (userService.currentUser != null) {
+        <p-button label="Сбросить" (onClick)="resetData()"></p-button>
+    }
+
+
     <p-button class="theme-toggle"
               (click)="switchTheme()">
         <i class="pi" [class.pi-sun]="isDarkTheme" [class.pi-moon]="!isDarkTheme"></i>
