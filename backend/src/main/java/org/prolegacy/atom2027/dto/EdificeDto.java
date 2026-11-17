@@ -22,4 +22,6 @@ public class EdificeDto {
 
     private EventDto waterActiveEvent;
     private EventDto energyActiveEvent;
+
+    private String accidentTooltip;
 }

@@ -8,6 +8,7 @@ export class EdificeDependencyDto {
 }
 
 export class EdificeDto {
+  accidentTooltip?: string;
   criticalIndex?: number;
   district?: string;
   energyActiveEvent?: EventDto;

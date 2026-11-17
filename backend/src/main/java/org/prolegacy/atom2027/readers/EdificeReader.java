@@ -7,6 +7,7 @@ import org.prolegacy.atom2027.dto.EdificeDto;
 import org.prolegacy.atom2027.entities.QEdifice;
 import org.prolegacy.atom2027.entities.QEvent;
 import org.prolegacy.atom2027.entities.QEventStatus;
+import org.prolegacy.atom2027.entities.ids.EventStatusId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -64,7 +65,11 @@ public class EdificeReader {
                 .leftJoin(energyEventStatus).on(energyEventStatus.id.eq(energyActiveEvent.eventStatusId))
                 .orderBy(edifice.id.asc())
                 .selectDto(
-                        EdificeDto.class
+                        EdificeDto.class,
+                        Expressions.cases()
+                                .when(waterActiveEvent.eventStatusId.eq(new EventStatusId(1L)).or(energyActiveEvent.eventStatusId.eq(new EventStatusId(1L))))
+                                .then(Expressions.asString("Затронуто объектов: ").concat(edifice.waterDependantCount.add(edifice.energyDependantCount).stringValue()))
+                                .otherwise(Expressions.nullExpression()).as("accidentTooltip")
                 )
                 .fetch();
     }

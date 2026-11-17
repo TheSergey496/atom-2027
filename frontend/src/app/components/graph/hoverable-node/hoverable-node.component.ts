@@ -1,6 +1,7 @@
 import { Component, computed, input, output } from '@angular/core';
 import { NgDiagramNodeSelectedDirective, NgDiagramNodeTemplate, Node } from 'ng-diagram';
 import { EdificeDto, EventDto } from '../../../gen/atom2027-dto';
+import { Tooltip, TooltipModule } from '@openng/optimus-ui/tooltip';
 
 type StatusKind = 'accident' | 'repair' | 'normal';
 type ResourceKind = 'energy' | 'water';
@@ -17,6 +18,7 @@ interface EdificeVm {
   title: string;
   subtitle: string;
   criticalIndex: number | null;
+  accidentTooltip: string | undefined;
   status: StatusKind;
   resources: ResourceVm[];
 }
@@ -52,7 +54,7 @@ const RESOURCE_LABEL: Record<ResourceKind, string> = {
     >
       <span class="accent-bar" aria-hidden="true"></span>
 
-      <div class="body">
+      <div class="body" [pTooltip]="vm().accidentTooltip">
         <div class="header">
           @if (vm().criticalIndex !== null) {
             <span class="critical-index" [title]="'Критический индекс: ' + vm().criticalIndex">
@@ -313,6 +315,7 @@ const RESOURCE_LABEL: Record<ResourceKind, string> = {
       }
     `,
   ],
+  imports: [TooltipModule],
 })
 export class HoverableNodeComponent implements NgDiagramNodeTemplate {
   node = input.required<Node<EdificeNodeData>>();
@@ -352,6 +355,7 @@ export class HoverableNodeComponent implements NgDiagramNodeTemplate {
       title,
       subtitle: subtitleParts.join(' · '),
       criticalIndex: data.criticalIndex ?? null,
+      accidentTooltip: data.accidentTooltip ?? undefined,
       status,
       resources,
     };

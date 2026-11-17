@@ -21,4 +21,8 @@ public class Edifice {
     private String houseNumber;
     @Setter(AccessLevel.PUBLIC)
     private Long criticalIndex;
+    @Setter(AccessLevel.PUBLIC)
+    private Long waterDependantCount;
+    @Setter(AccessLevel.PUBLIC)
+    private Long energyDependantCount;
 }

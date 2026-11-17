@@ -1,5 +1,6 @@
 package org.prolegacy.atom2027.services;
 
+import org.apache.commons.collections4.SetUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.prolegacy.atom2027.entities.Edifice;
 import org.prolegacy.atom2027.entities.EdificeDependency;
@@ -19,11 +20,8 @@ import org.prolegacy.atom2027.second_datasource.repositories.ForeignEdificeRepos
 import org.prolegacy.atom2027.second_datasource.repositories.ForeignEventStatusRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Service;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -68,6 +66,8 @@ public class DataStructureLoader {
                         f.getDistrict(),
                         f.getStreet(),
                         f.getHouseNumber(),
+                        0L,
+                        0L,
                         0L
                 )
         ).toList());
@@ -89,21 +89,22 @@ public class DataStructureLoader {
 
         edificeDependenciesRepository.flush();
 
-        Map<Long, Long> cr = jdbcTemplate.queryForStream(
+        Map<Long, Long> waterCr = jdbcTemplate.queryForStream(
                 """
                         with recursive deps as (
                             select
                                 source_edifice_id as parent,
                                 target_edifice_id as child
                             from edifice_dependency
-
+                            where has_water = true
+                        
                             union
-
+                        
                             select
                                 d.parent as parent,
                                 t.target_edifice_id as child
                             from deps d
-                            join edifice_dependency t on t.source_edifice_id = d.child
+                            inner join edifice_dependency t on t.source_edifice_id = d.child and t.has_water = true
                         )
                         select
                             parent,
@@ -112,26 +113,67 @@ public class DataStructureLoader {
                         group by parent
                         """,
                 (rs, rowNum) -> {
-                        Long sourceId =  rs.getLong("parent");
-                        Long depCount = rs.getLong("count");
-                        return Pair.of(sourceId, depCount);
+                    Long sourceId = rs.getLong("parent");
+                    Long depCount = rs.getLong("count");
+                    return Pair.of(sourceId, depCount);
                 }
         ).collect(Collectors.toMap(Pair::getLeft, Pair::getRight));
 
-        Long maxIndex = cr.values().stream().max(Long::compareTo).orElse(0L);
+        Map<Long, Long> energyCr = jdbcTemplate.queryForStream(
+                """
+                        with recursive deps as (
+                            select
+                                source_edifice_id as parent,
+                                target_edifice_id as child
+                            from edifice_dependency
+                            where has_energy = true
+                        
+                            union
+                        
+                            select
+                                d.parent as parent,
+                                t.target_edifice_id as child
+                            from deps d
+                            inner join edifice_dependency t on t.source_edifice_id = d.child and t.has_energy = true
+                        )
+                        select
+                            parent,
+                            count(distinct child) as count
+                        from deps
+                        group by parent
+                        """,
+                (rs, rowNum) -> {
+                    Long sourceId = rs.getLong("parent");
+                    Long depCount = rs.getLong("count");
+                    return Pair.of(sourceId, depCount);
+                }
+        ).collect(Collectors.toMap(Pair::getLeft, Pair::getRight));
+
+        long maxIndex = SetUtils.union(
+                        waterCr.keySet(),
+                        energyCr.keySet()
+                ).stream()
+                .map(k -> waterCr.getOrDefault(k, 0L) + energyCr.getOrDefault(k, 0L))
+                .max(Long::compareTo)
+                .orElse(0L);
 
         edifices.forEach(e -> {
 
-            if (cr.containsKey(e.getId().longValue())) {
-                Long ind = cr.get(e.getId().longValue());
-                var index = Math.round((ind + 0.0) / maxIndex * 10);
-                if (index == 10 && ind < maxIndex) {
+
+            Long water = waterCr.getOrDefault(e.getId().longValue(), 0L);
+            Long energy = energyCr.getOrDefault(e.getId().longValue(), 0L);
+            long total = water + energy;
+            if (maxIndex > 0 && total > 0) {
+                var index = Math.round((total + 0.0) / maxIndex * 10);
+                if (index == 10 && total < maxIndex) {
                     index = 9;
                 }
-                if (index == 0 && ind > 0) {
+                if (index == 0) {
                     index = 1;
                 }
                 e.setCriticalIndex(index);
+                e.setWaterDependantCount(water);
+                e.setEnergyDependantCount(energy);
                 edificeRepository.save(e);
             }
         });
