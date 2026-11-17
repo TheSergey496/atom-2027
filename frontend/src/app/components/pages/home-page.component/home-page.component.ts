@@ -14,7 +14,7 @@ import {
   initializeModel,
   LinkingConfig,
   NgDiagramComponent,
-  NgDiagramConfig,
+  NgDiagramConfig, NgDiagramMinimapComponent,
   NgDiagramModelService,
   NgDiagramService,
   SelectionChangedEvent,
@@ -32,7 +32,7 @@ import { lastValueFrom } from 'rxjs';
 @Component({
   selector: 'pro-legacy-home-page.component',
   providers: [provideNgDiagram()],
-  imports: [NgDiagramComponent, SplitterModule],
+  imports: [NgDiagramComponent, SplitterModule, NgDiagramMinimapComponent],
   templateUrl: './home-page.component.html',
   styleUrl: './home-page.component.css',
 })
