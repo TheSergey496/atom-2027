@@ -5,6 +5,7 @@ interface BaseColumn {
   field: string;
   width?: number;
   frozen?: 'left' | 'right';
+  decoration?: 'tag';
 }
 
 export type Column =

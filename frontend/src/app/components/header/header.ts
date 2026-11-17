@@ -86,16 +86,21 @@ export class Header {
       if (this.userService.hasRole('ROLE_admin')) {
         this.menuTabs = [
           {
+            label: 'Объекты',
+            route: '/edificies',
+          },
+          {
             label: 'Пользователи',
             route: '/administration/users',
           },
-          {
-            label: 'Дерево',
-            route: '/administration/tree-table',
-          },
         ];
       } else {
-        this.menuTabs = [];
+        this.menuTabs = [
+          {
+            label: 'Объекты',
+            route: '/edificies',
+          },
+        ];
       }
 
       const routes = this.menuTabs.map(t => t.route);

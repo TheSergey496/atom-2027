@@ -7,6 +7,7 @@ import { authorizedGuard } from './guards/authorized.guard';
 import { AdminUsersPageComponent } from './components/pages/admin-users-page/admin-users-page.component';
 import { adminGuard } from './guards/admin.guard';
 import { TreeTableDemoComponent } from './components/pages/tree-table-demo/tree-table-demo.component';
+import { EdificesComponent } from './components/pages/edifices/edifices.component';
 
 export const routes: Routes = [
   {
@@ -32,12 +33,11 @@ export const routes: Routes = [
         component: AdminUsersPageComponent,
         canActivate: [adminGuard],
       },
-      {
-        path: 'tree-table',
-        component: TreeTableDemoComponent,
-        canActivate: [adminGuard],
-      },
     ],
+  },
+  {
+    path: 'edificies',
+    component: EdificesComponent
   },
   { path: '**', redirectTo: 'home' },
 ];

@@ -59,6 +59,7 @@ import { MessageServiceKey } from '../../../../app';
 import { CustomFilterMatchMode } from '../custom-filter-match-mode';
 import { SortEvent, TableUtils } from '../table-utils';
 import { GlobalLoadingService } from '../../../../services/loading.service';
+import { TagModule } from '@openng/optimus-ui/tag';
 
 @Component({
   imports: [
@@ -74,6 +75,7 @@ import { GlobalLoadingService } from '../../../../services/loading.service';
     ButtonModule,
     SkeletonModule,
     ScrollPanelModule,
+    TagModule,
   ],
   selector: 'pro-legacy-table',
   styleUrl: './table.component.css',

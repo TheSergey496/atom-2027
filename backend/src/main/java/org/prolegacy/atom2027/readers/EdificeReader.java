@@ -44,7 +44,7 @@ public class EdificeReader {
                 .orderBy(edifice.id.asc())
                 .selectDto(
                         EdificeDto.class,
-                        eventStatus.name.as("activeEvent$eventStatusName")
+                        eventStatus.name.coalesce("Норма").as("activeEvent$eventStatusName")
                 )
                 .fetch();
     }
