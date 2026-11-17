@@ -200,3 +200,34 @@
     color: var(--p-red-500);
 }
 
+
+.theme-toggle {
+    display: grid;
+    place-items: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    border: 1px solid var(--p-surface-300, #d1d5db);
+    border-radius: 50%;
+    background: var(--p-surface-0, #ffffff);
+    color: var(--p-text-color, #374151);
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s, transform 0.15s;
+}
+
+.theme-toggle:hover {
+    background: var(--p-surface-100, #f3f4f6);
+    color: var(--p-primary-color, #3b82f6);
+}
+
+.theme-toggle:active {
+    transform: scale(0.9);
+}
+
+.theme-toggle i {
+    font-size: 1.1rem;
+    transition: transform 0.35s ease;
+}
+
+.theme-toggle:hover i {
+    transform: rotate(25deg);
+}

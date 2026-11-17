@@ -1,4 +1,4 @@
-import { Component, effect, inject, viewChild } from '@angular/core';
+import { Component, effect, inject, Renderer2, viewChild } from '@angular/core';
 import { NavigationEnd, NavigationError, Router, RouterLink } from '@angular/router';
 import { Tabs, TabsModule } from '@openng/optimus-ui/tabs';
 import { filter } from 'rxjs';
@@ -72,6 +72,10 @@ export class Header {
   private readonly globalLoadingService = inject(GlobalLoadingService);
   private readonly graphSaveService = inject(GraphSaveStateService);
   private readonly modelService = inject(NgDiagramModelService);
+
+  private readonly renderer = inject(Renderer2);
+
+  public isDarkTheme = false;
 
   private descSortedRoutes: string[] = [];
 
@@ -175,6 +179,15 @@ export class Header {
     await this.globalLoadingService.withLoader(() => {
       this.graphSaveService.clear();
     });
+  }
+
+  public switchTheme() {
+    this.isDarkTheme = !this.isDarkTheme;
+    if (this.isDarkTheme) {
+      this.renderer.addClass(document.body, 'darkTheme');
+    } else {
+      this.renderer.removeClass(document.body, 'darkTheme');
+    }
   }
 }
 

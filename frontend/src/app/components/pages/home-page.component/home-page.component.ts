@@ -17,6 +17,7 @@ import {
   NgDiagramConfig,
   NgDiagramMinimapComponent,
   NgDiagramModelService,
+  NgDiagramViewportService,
   Node,
   provideNgDiagram,
   SelectionChangedEvent,
@@ -52,6 +53,7 @@ export class HomePageComponent implements OnInit {
   hoveredNodeId: string | null = null;
 
   private readonly ngDiagramModelService = inject(NgDiagramModelService);
+  private readonly viewportService = inject(NgDiagramViewportService);
   private readonly elk = new ELK();
   private readonly edificeService = inject(EdificeService);
   private readonly edificeDependencyService = inject(EdificeDependencyService);
