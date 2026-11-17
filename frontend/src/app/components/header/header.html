@@ -23,6 +23,8 @@
     </p-tabs>
   </div>
 
+  <p-button label="Сбросить" (onClick)="resetData()"></p-button>
+
   @if (userService.currentUser != null) {
     <div class="alert-wrapper">
       <p-overlaybadge pTooltip="Уведомления"

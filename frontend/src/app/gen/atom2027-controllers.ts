@@ -41,6 +41,10 @@ export class EdificeService {
     return this.httpService.get<EdificeDto[]>('edifices', {params, responseType: 'json'});
   }
 
+ public resetData(): Observable<void>  {
+    return this.httpService.delete<void>('edifices/reset');
+  }
+
 }
 
 @Service()

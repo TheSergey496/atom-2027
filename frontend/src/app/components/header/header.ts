@@ -13,6 +13,10 @@ import { ButtonModule } from '@openng/optimus-ui/button';
 import { DialogService } from '../../services/dialog.service';
 import { UserEditDialogComponent } from '../forms/user-edit-dialog/user-edit-dialog.component';
 import { UserService } from '../../services/auth/user.service';
+import { EdificeService } from '../../gen/atom2027-controllers';
+import { GlobalLoadingService } from '../../services/loading.service';
+import { GraphSaveStateService } from '../../services/graph/save.service';
+import { NgDiagramModelService, provideNgDiagram } from 'ng-diagram';
 
 @Component({
   imports: [
@@ -26,6 +30,7 @@ import { UserService } from '../../services/auth/user.service';
     MenuModule,
     ButtonModule,
   ],
+  providers: [provideNgDiagram()],
   selector: 'pro-legacy-header',
   styleUrl: './header.css',
   templateUrl: './header.html',
@@ -62,6 +67,11 @@ export class Header {
   private readonly dialogService = inject(DialogService);
   private readonly messageService = inject(MessageService);
   private readonly tabs = viewChild<Tabs>('tabs');
+
+  private readonly edificeService = inject(EdificeService);
+  private readonly globalLoadingService = inject(GlobalLoadingService);
+  private readonly graphSaveService = inject(GraphSaveStateService);
+  private readonly modelService = inject(NgDiagramModelService);
 
   private descSortedRoutes: string[] = [];
 
@@ -159,6 +169,12 @@ export class Header {
         }
       },
     };
+  }
+
+  public async resetData() {
+    await this.globalLoadingService.withLoader(() => {
+      this.graphSaveService.clear();
+    });
   }
 }
 

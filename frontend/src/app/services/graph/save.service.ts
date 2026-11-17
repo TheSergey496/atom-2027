@@ -1,8 +1,9 @@
 import { effect, Injectable, Service, signal } from '@angular/core';
 import { type Edge, type Metadata, type Node } from 'ng-diagram';
+import { Subject } from 'rxjs';
 
 @Service()
-export class SaveStateService {
+export class GraphSaveStateService {
   private KEY = 'ngDiagramSaveStateKey';
 
   state = signal<string | null>(localStorage.getItem(this.KEY));
@@ -13,6 +14,8 @@ export class SaveStateService {
       localStorage.setItem(this.KEY, this.state() as string);
     }
   });
+
+  public onClear = new Subject<void>();
 
   save(newState: string): void {
     this.state.set(newState);
@@ -29,6 +32,7 @@ export class SaveStateService {
   }
 
   clear(): void {
+    this.onClear.next();
     this.state.set(null);
   }
 }

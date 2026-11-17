@@ -23,14 +23,14 @@ import {
 } from 'ng-diagram';
 import ELK from 'elkjs/lib/elk.bundled.js';
 import { ColoredEdgeComponent } from '../../graph/colored-edge/colored-edge.component';
-import { LocalLoadingService } from '../../../services/loading.service';
+import { GlobalLoadingService, LocalLoadingService } from '../../../services/loading.service';
 import { SplitterModule } from '@openng/optimus-ui/splitter';
 import { EdificeDependencyService, EdificeService } from '../../../gen/atom2027-controllers';
 import { EdificeDependencyDto, EdificeDto } from '../../../gen/atom2027-dto';
 import { lastValueFrom } from 'rxjs';
 import { HoverableNodeComponent } from '../../graph/hoverable-node/hoverable-node.component';
 import { GraphHighlightService } from '../../../services/graph/graph-highlight.service';
-import { SaveStateService } from '../../../services/graph/save.service';
+import { GraphSaveStateService } from '../../../services/graph/save.service';
 import { EventsComponent } from '../events/events.component';
 import { createStructuredContentOutput } from '@angular/cli/src/commands/mcp/utils';
 
@@ -46,6 +46,7 @@ export class HomePageComponent implements OnInit {
   private readonly injector = inject(Injector);
 
   private loadingService?: LocalLoadingService;
+  private globalLoadingService = inject(GlobalLoadingService);
 
   selectedNode: any | null = signal<any | null>(null);
   hoveredNodeId: string | null = null;
@@ -55,8 +56,7 @@ export class HomePageComponent implements OnInit {
   private readonly edificeService = inject(EdificeService);
   private readonly edificeDependencyService = inject(EdificeDependencyService);
 
-  private readonly graphSaveService = inject(SaveStateService);
-  private readonly modelService = inject(NgDiagramModelService);
+  private readonly graphSaveService = inject(GraphSaveStateService);
 
   edificies: EdificeDto[] = [];
   dependencies: EdificeDependencyDto[] = [];
@@ -79,58 +79,18 @@ export class HomePageComponent implements OnInit {
       computed(() => this.wrapper()?.nativeElement),
       this.injector,
     );
+    this.graphSaveService.onClear.subscribe(async () => {
+      await this.resetData();
+    });
     this.loadingService.beginLoading();
   }
 
+  private pinger?: number;
+
   async ngOnInit() {
-    this.edificies = await lastValueFrom(
-      this.edificeService.getEdifices(<any>new Date().toISOString()),
-    );
-    this.dependencies = await lastValueFrom(this.edificeDependencyService.getEdificeDependencies());
-
-    await this.ngDiagramModelService.addNodes(
-      this.edificies.map(e => ({
-        id: String(e.id),
-        position: { x: 0, y: 0 }, // временная позиция, ELK перезапишет
-        data: e,
-        type: 'default',
-        groupId: e.district,
-      })),
-      { waitForMeasurements: true },
-    );
-    await this.ngDiagramModelService.addEdges(
-      this.dependencies.map(d => ({
-        id: String(d.id),
-        source: String(d.sourceEdificeId),
-        target: String(d.targetEdificeId),
-        type: 'colored',
-        data: { hasWater: d.hasWater, hasEnergy: d.hasEnergy },
-      })),
-    );
-
-    await this.applyLayout();
-    const model = this.graphSaveService.load();
-    if (model != null) {
-      runInInjectionContext(
-        this.injector,
-        () => (this.model = initializeModel(model as Partial<Model>)),
-      );
-    }
+    await this.initGraph();
     this.loadingService?.stopLoading();
-
-    setInterval(async () => {
-      this.edificies = await lastValueFrom(
-        this.edificeService.getEdifices(<any>new Date().toISOString()),
-      );
-      await this.ngDiagramModelService.updateNodes(
-        this.edificies.map(e => ({
-          id: String(e.id),
-          data: e,
-          type: 'default',
-          groupId: e.district,
-        })),
-      );
-    }, 1000);
+    this.setupPinger();
   }
 
   private async applyLayout() {
@@ -174,7 +134,6 @@ export class HomePageComponent implements OnInit {
 
   protected selectionChange(event: SelectionChangedEvent) {
     this.selectedNode.set((event?.selectedNodes ?? [])[0] ?? null);
-    console.log(this.selectedNode());
   }
 
   private buildAdjacencyList(): Map<string, string[]> {
@@ -210,7 +169,6 @@ export class HomePageComponent implements OnInit {
   }
 
   onNodeHoverEnter(node: Node) {
-    console.log(node);
     this.hoveredNodeId = node.id;
     const dependents = this.computeDependents(node.id);
     this.updateHighlight(dependents).then();
@@ -234,6 +192,71 @@ export class HomePageComponent implements OnInit {
   }
 
   public saveGraphState() {
-    this.graphSaveService.save(this.modelService.toJSON());
+    this.graphSaveService.save(this.ngDiagramModelService.toJSON());
+  }
+
+  public async resetData() {
+    clearInterval(this.pinger);
+    await this.globalLoadingService.withLoader(async () => {
+      const nodeIds = this.ngDiagramModelService.nodes().map(node => node.id);
+      if (nodeIds.length > 0) {
+        await this.ngDiagramModelService.deleteNodes(nodeIds);
+      }
+      await lastValueFrom(this.edificeService.resetData());
+      await this.initGraph();
+      this.setupPinger();
+    });
+  }
+
+  private async initGraph() {
+    this.edificies = await lastValueFrom(
+      this.edificeService.getEdifices(<any>new Date().toISOString()),
+    );
+    this.dependencies = await lastValueFrom(this.edificeDependencyService.getEdificeDependencies());
+
+    await this.ngDiagramModelService.addNodes(
+      this.edificies.map(e => ({
+        id: String(e.id),
+        position: { x: 0, y: 0 }, // временная позиция, ELK перезапишет
+        data: e,
+        type: 'default',
+        groupId: e.district,
+      })),
+      { waitForMeasurements: true },
+    );
+    await this.ngDiagramModelService.addEdges(
+      this.dependencies.map(d => ({
+        id: String(d.id),
+        source: String(d.sourceEdificeId),
+        target: String(d.targetEdificeId),
+        type: 'colored',
+        data: { hasWater: d.hasWater, hasEnergy: d.hasEnergy },
+      })),
+    );
+
+    await this.applyLayout();
+    const model = this.graphSaveService.load();
+    if (model != null) {
+      runInInjectionContext(
+        this.injector,
+        () => (this.model = initializeModel(model as Partial<Model>)),
+      );
+    }
+  }
+
+  private setupPinger() {
+    this.pinger = setInterval(async () => {
+      this.edificies = await lastValueFrom(
+        this.edificeService.getEdifices(<any>new Date().toISOString()),
+      );
+      await this.ngDiagramModelService.updateNodes(
+        this.edificies.map(e => ({
+          id: String(e.id),
+          data: e,
+          type: 'default',
+          groupId: e.district,
+        })),
+      );
+    }, 1000);
   }
 }
