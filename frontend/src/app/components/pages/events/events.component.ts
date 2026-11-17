@@ -24,7 +24,8 @@ export class EventsComponent implements AfterViewInit {
       width: 120,
     },
     {
-      type: 'text',
+      type: 'enum',
+      locale: EventStatusLocaleEnum,
       field: 'eventStatus.name',
       header: 'Тип события',
       decoration: 'tag',
@@ -34,13 +35,20 @@ export class EventsComponent implements AfterViewInit {
       type: 'date',
       field: 'occurredAt',
       header: 'Дата',
-      width: 350
+      width: 350,
     },
     {
       type: 'enum',
       locale: ResourceTypeLocaleEnum,
       field: 'resourceType',
+      decoration: 'tag',
       header: 'Тип ресурса',
+      width: 350,
+    },
+    {
+      type: 'boolean',
+      field: 'isArchived',
+      header: 'Архив',
       width: 350,
     },
     {
@@ -116,4 +124,10 @@ export class EventsComponent implements AfterViewInit {
 export enum ResourceTypeLocaleEnum {
   water = 'Вода',
   energy = 'Электроэнергия'
+}
+
+export const EventStatusLocaleEnum = {
+  'Активная авария': 'Активная авария',
+  'Ремонтные работы': 'Ремонтные работы',
+  'Норма': 'Норма'
 }

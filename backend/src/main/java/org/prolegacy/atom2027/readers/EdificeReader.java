@@ -52,12 +52,14 @@ public class EdificeReader {
                 .leftJoin(waterActiveEvent).on(
                         Expressions.allOf(
                                 waterActiveEvent.edificeId.eq(edifice.id),
+                                waterActiveEvent.resourceType.eq("water"),
                                 waterActiveEvent.occurredAt.eq(maxWaterTime)
                         )
                 )
                 .leftJoin(energyActiveEvent).on(
                         Expressions.allOf(
                                 energyActiveEvent.edificeId.eq(edifice.id),
+                                energyActiveEvent.resourceType.eq("energy"),
                                 energyActiveEvent.occurredAt.eq(maxEnergyTime)
                         )
                 )

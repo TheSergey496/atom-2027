@@ -27,6 +27,7 @@ export class EventDto {
   eventStatus?: EventStatusDto;
   eventStatusId?: number;
   id?: number;
+  isArchived?: boolean;
   occurredAt?: Date;
   resourceType?: string;
 }

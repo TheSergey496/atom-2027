@@ -384,6 +384,12 @@
                               @case ('Норма') {
                                   <p-tag severity="success" [value]="ColumnUtils.getColumnValueFormatted(row, column.originalColumn)" />
                               }
+                              @case ('Вода') {
+                                  <p-tag severity="info" [value]="ColumnUtils.getColumnValueFormatted(row, column.originalColumn)" />
+                              }
+                              @case ('Электроэнергия') {
+                                  <p-tag class="yellow-tag" severity="warn" [value]="ColumnUtils.getColumnValueFormatted(row, column.originalColumn)" />
+                              }
                           }
                       } @else {
                         <div class="cell-content-value cell-content-value-center">

@@ -190,7 +190,13 @@ ng-diagram-watermark {
     display: none;
 }
 
+<<<<<<< HEAD
 
 body.darkTheme {
     filter: invert();
 }
+=======
+p-tag.yellow-tag {
+    background: #f59e0b;
+}
+>>>>>>> cd4082b (isArchived & enums)

@@ -8,6 +8,7 @@ import { UserDto } from '../../../gen/auth-dto';
 import { lastValueFrom } from 'rxjs';
 import { EdificeDto } from '../../../gen/atom2027-dto';
 import { EdificeService } from '../../../gen/atom2027-controllers';
+import { EventStatusLocaleEnum } from '../events/events.component';
 
 @Component({
   imports: [Button, TableComponent, TableFastSearchComponent, Toolbar],
@@ -48,8 +49,9 @@ export class EdificesComponent {
       width: 350,
     },
     {
-      type: 'text',
+      type: 'enum',
       field: 'waterActiveEvent.eventStatus.name',
+      locale: EventStatusLocaleEnum,
       getter: (row: EdificeDto) => {
         return row?.waterActiveEvent?.eventStatus?.name ?? 'Норма';
       },

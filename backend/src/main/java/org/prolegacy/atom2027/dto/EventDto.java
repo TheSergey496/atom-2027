@@ -20,4 +20,5 @@ public class EventDto {
     private Instant occurredAt;
     private EventStatusId eventStatusId;
     private EventStatusDto eventStatus;
+    private Boolean isArchived;
 }
