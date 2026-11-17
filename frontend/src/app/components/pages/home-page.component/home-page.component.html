@@ -8,9 +8,10 @@
                     [config]="config"
                     (selectionChanged)="selectionChange($event)"
             (selectionMoved)="saveGraphState()"/>
-            <ng-diagram-minimap />
+            <ng-diagram-minimap position="bottom-left" />
         </ng-template>
         <ng-template #panel>
+            <pro-legacy-events [forEdifice]="true" [edifice]="selectedNode()?.data"></pro-legacy-events>
         </ng-template>
     </p-splitter>
 </div>

@@ -90,6 +90,7 @@ export class EventsComponent implements AfterViewInit {
     effect(() => {
       const _ = this.edifice();
       const __ = this.forEdifice();
+      console.log('asd', _);
       this.loadData().then();
     });
   }

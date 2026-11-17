@@ -31,11 +31,13 @@ import { lastValueFrom } from 'rxjs';
 import { HoverableNodeComponent } from '../../graph/hoverable-node/hoverable-node.component';
 import { GraphHighlightService } from '../../../services/graph/graph-highlight.service';
 import { SaveStateService } from '../../../services/graph/save.service';
+import { EventsComponent } from '../events/events.component';
+import { createStructuredContentOutput } from '@angular/cli/src/commands/mcp/utils';
 
 @Component({
   selector: 'pro-legacy-home-page.component',
   providers: [provideNgDiagram()],
-  imports: [NgDiagramComponent, SplitterModule, NgDiagramMinimapComponent],
+  imports: [NgDiagramComponent, SplitterModule, NgDiagramMinimapComponent, EventsComponent],
   templateUrl: './home-page.component.html',
   styleUrl: './home-page.component.css',
 })
@@ -172,6 +174,7 @@ export class HomePageComponent implements OnInit {
 
   protected selectionChange(event: SelectionChangedEvent) {
     this.selectedNode.set((event?.selectedNodes ?? [])[0] ?? null);
+    console.log(this.selectedNode());
   }
 
   private buildAdjacencyList(): Map<string, string[]> {

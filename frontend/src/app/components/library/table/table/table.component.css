@@ -24,6 +24,10 @@
     z-index: 1;
 }
 
+:host ::ng-deep p-table > div.p-datatable-table-container > p-scroller > div {
+    min-height: 100%;
+}
+
 
 :host ::ng-deep .p-datatable-header {
     position: relative;
