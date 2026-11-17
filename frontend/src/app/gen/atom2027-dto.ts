@@ -23,10 +23,15 @@ export class EdificeDto {
 export class EventDto {
   edifice?: EdificeDto;
   edificeId?: number;
+  eventStatus?: EventStatusDto;
   eventStatusId?: number;
-  eventStatusName?: string;
   id?: number;
   occurredAt?: Date;
   resourceType?: string;
+}
+
+export class EventStatusDto {
+  id?: number;
+  name?: string;
 }
 

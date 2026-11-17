@@ -1,9 +1,8 @@
 import { Component, inject, signal } from '@angular/core';
-import {Button} from "@openng/optimus-ui/button";
-import {TableComponent} from "../../library/table/table/table.component";
-import {TableFastSearchComponent} from "../../library/table/table-fast-search/table-fast-search.component";
-import {Toolbar} from "@openng/optimus-ui/toolbar";
-import {Tooltip} from "@openng/optimus-ui/tooltip";
+import { Button } from '@openng/optimus-ui/button';
+import { TableComponent } from '../../library/table/table/table.component';
+import { TableFastSearchComponent } from '../../library/table/table-fast-search/table-fast-search.component';
+import { Toolbar } from '@openng/optimus-ui/toolbar';
 import { Column } from '../../library/table/column';
 import { UserDto } from '../../../gen/auth-dto';
 import { lastValueFrom } from 'rxjs';
@@ -11,7 +10,7 @@ import { EdificeDto } from '../../../gen/atom2027-dto';
 import { EdificeService } from '../../../gen/atom2027-controllers';
 
 @Component({
-  imports: [Button, TableComponent, TableFastSearchComponent, Toolbar, Tooltip],
+  imports: [Button, TableComponent, TableFastSearchComponent, Toolbar],
   selector: 'pro-legacy-edifices',
   styleUrl: './edifices.component.css',
   templateUrl: './edifices.component.html',

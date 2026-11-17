@@ -1,11 +1,10 @@
 import {
-  AfterViewInit,
   Component,
   computed,
-  ElementRef,
   inject,
   Injector,
   OnInit,
+  runInInjectionContext,
   signal,
   Signal,
   viewChild,
@@ -13,21 +12,25 @@ import {
 import {
   initializeModel,
   LinkingConfig,
+  Model,
   NgDiagramComponent,
-  NgDiagramConfig, NgDiagramMinimapComponent,
+  NgDiagramConfig,
+  NgDiagramMinimapComponent,
   NgDiagramModelService,
-  NgDiagramService,
+  Node,
+  provideNgDiagram,
   SelectionChangedEvent,
 } from 'ng-diagram';
-import { provideNgDiagram } from 'ng-diagram';
 import ELK from 'elkjs/lib/elk.bundled.js';
 import { ColoredEdgeComponent } from '../../graph/colored-edge/colored-edge.component';
 import { LocalLoadingService } from '../../../services/loading.service';
-import { CardModule } from '@openng/optimus-ui/card';
 import { SplitterModule } from '@openng/optimus-ui/splitter';
 import { EdificeDependencyService, EdificeService } from '../../../gen/atom2027-controllers';
 import { EdificeDependencyDto, EdificeDto } from '../../../gen/atom2027-dto';
 import { lastValueFrom } from 'rxjs';
+import { HoverableNodeComponent } from '../../graph/hoverable-node/hoverable-node.component';
+import { GraphHighlightService } from '../../../services/graph/graph-highlight.service';
+import { SaveStateService } from '../../../services/graph/save.service';
 
 @Component({
   selector: 'pro-legacy-home-page.component',
@@ -43,12 +46,15 @@ export class HomePageComponent implements OnInit {
   private loadingService?: LocalLoadingService;
 
   selectedNode: any | null = signal<any | null>(null);
+  hoveredNodeId: string | null = null;
 
   private readonly ngDiagramModelService = inject(NgDiagramModelService);
-  private readonly ngDiagramService = inject(NgDiagramService);
   private readonly elk = new ELK();
   private readonly edificeService = inject(EdificeService);
   private readonly edificeDependencyService = inject(EdificeDependencyService);
+
+  private readonly graphSaveService = inject(SaveStateService);
+  private readonly modelService = inject(NgDiagramModelService);
 
   edificies: EdificeDto[] = [];
   dependencies: EdificeDependencyDto[] = [];
@@ -62,6 +68,7 @@ export class HomePageComponent implements OnInit {
   };
 
   protected readonly edgeTemplateMap = new Map([['colored', ColoredEdgeComponent]]);
+  protected readonly nodeTemplateMap = new Map([['default', HoverableNodeComponent]]);
 
   model = initializeModel({ nodes: [], edges: [] });
 
@@ -84,8 +91,10 @@ export class HomePageComponent implements OnInit {
         id: String(e.id),
         position: { x: 0, y: 0 }, // временная позиция, ELK перезапишет
         data: e,
+        type: 'default',
         groupId: e.district,
       })),
+      { waitForMeasurements: true },
     );
     await this.ngDiagramModelService.addEdges(
       this.dependencies.map(d => ({
@@ -98,7 +107,28 @@ export class HomePageComponent implements OnInit {
     );
 
     await this.applyLayout();
+    const model = this.graphSaveService.load();
+    if (model != null) {
+      runInInjectionContext(
+        this.injector,
+        () => (this.model = initializeModel(model as Partial<Model>)),
+      );
+    }
     this.loadingService?.stopLoading();
+
+    setInterval(async () => {
+      this.edificies = await lastValueFrom(
+        this.edificeService.getEdifices(<any>new Date().toISOString()),
+      );
+      await this.ngDiagramModelService.updateNodes(
+        this.edificies.map(e => ({
+          id: String(e.id),
+          data: e,
+          type: 'default',
+          groupId: e.district,
+        })),
+      );
+    }, 1000);
   }
 
   private async applyLayout() {
@@ -142,5 +172,65 @@ export class HomePageComponent implements OnInit {
 
   protected selectionChange(event: SelectionChangedEvent) {
     this.selectedNode.set((event?.selectedNodes ?? [])[0] ?? null);
+  }
+
+  private buildAdjacencyList(): Map<string, string[]> {
+    const adj = new Map<string, string[]>();
+    for (const edge of this.dependencies) {
+      const source = String(edge.sourceEdificeId);
+      const target = String(edge.targetEdificeId);
+      if (!adj.has(source)) adj.set(source, []);
+      adj.get(source)!.push(target);
+    }
+    return adj;
+  }
+
+  private computeDependents(startId: string): Set<string> {
+    const adj = this.buildAdjacencyList();
+    const visited = new Set<string>();
+    const queue: string[] = [startId];
+
+    while (queue.length > 0) {
+      const current = queue.shift()!;
+      if (visited.has(current)) continue;
+      visited.add(current);
+
+      const neighbors = adj.get(current) ?? [];
+      for (const neighbor of neighbors) {
+        if (!visited.has(neighbor)) {
+          queue.push(neighbor);
+        }
+      }
+    }
+    visited.delete(startId);
+    return visited;
+  }
+
+  onNodeHoverEnter(node: Node) {
+    console.log(node);
+    this.hoveredNodeId = node.id;
+    const dependents = this.computeDependents(node.id);
+    this.updateHighlight(dependents).then();
+  }
+
+  onNodeHoverLeave() {
+    this.hoveredNodeId = null;
+    this.updateHighlight(new Set()).then(); // clear all highlights
+  }
+
+  private async updateHighlight(dependentIds: Set<string>) {
+    const nodes = this.ngDiagramModelService.getModel().getNodes();
+    const updates = nodes.map(n => ({
+      id: n.id,
+      data: {
+        ...n.data,
+        highlighted: dependentIds.has(n.id),
+      },
+    }));
+    await this.ngDiagramModelService.updateNodes(updates);
+  }
+
+  public saveGraphState() {
+    this.graphSaveService.save(this.modelService.toJSON());
   }
 }

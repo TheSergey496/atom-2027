@@ -1,13 +1,13 @@
 <div #wrapper style="width: 100%; height: 100%;">
-    <p-splitter style="width: 100%; height: 100%" [class.hidden-right]="selectedNode() == null">
+    <p-splitter style="width: 100%; height: 100%" [panelSizes]="[75, 25]">
         <ng-template #panel>
             <ng-diagram
-
                     [model]="model"
                     [edgeTemplateMap]="edgeTemplateMap"
+                    [nodeTemplateMap]="nodeTemplateMap"
                     [config]="config"
-                    (selectionChanged)="selectionChange($event)"/>
-
+                    (selectionChanged)="selectionChange($event)"
+            (selectionMoved)="saveGraphState()"/>
             <ng-diagram-minimap />
         </ng-template>
         <ng-template #panel>
