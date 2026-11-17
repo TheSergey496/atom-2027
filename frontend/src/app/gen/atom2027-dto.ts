@@ -8,18 +8,20 @@ export class EdificeDependencyDto {
 }
 
 export class EdificeDto {
-  activeEvent?: EventDto;
   criticalIndex?: number;
   district?: string;
+  energyActiveEvent?: EventDto;
   hasEnergy?: boolean;
   hasWater?: boolean;
   houseNumber?: string;
   id?: number;
   name?: string;
   street?: string;
+  waterActiveEvent?: EventDto;
 }
 
 export class EventDto {
+  edifice?: EdificeDto;
   edificeId?: number;
   eventStatusId?: number;
   eventStatusName?: string;

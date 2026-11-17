@@ -20,5 +20,6 @@ public class EdificeDto {
     private String houseNumber;
     private Long criticalIndex;
 
-    private EventDto activeEvent;
+    private EventDto waterActiveEvent;
+    private EventDto energyActiveEvent;
 }

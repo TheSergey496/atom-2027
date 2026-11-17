@@ -50,8 +50,15 @@ export class EdificesComponent {
     },
     {
       type: 'text',
-      field: 'activeEvent.eventStatusName',
-      header: 'Статус',
+      field: 'waterActiveEvent.eventStatus.name',
+      header: 'Статус воды',
+      decoration: 'tag',
+      width: 350,
+    },
+    {
+      type: 'text',
+      field: 'energyActiveEvent.eventStatus.name',
+      header: 'Статус электроэнергии',
       decoration: 'tag',
       width: 350,
     },

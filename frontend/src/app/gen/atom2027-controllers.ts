@@ -1,6 +1,6 @@
 import {HttpClient, HttpHeaders, HttpParams} from '@angular/common/http';
 import {Service, inject} from '@angular/core';
-import {EdificeDependencyDto, EdificeDto} from './atom2027-dto';
+import {EdificeDependencyDto, EdificeDto, EventDto} from './atom2027-dto';
 import {TestQueue$TestQueuePayload} from './atom2027-queue';
 import {Observable} from 'rxjs';
 import {map} from 'rxjs/operators';
@@ -39,6 +39,29 @@ export class EdificeService {
       params = params.append(queryParam.name, queryParam.value);
     }
     return this.httpService.get<EdificeDto[]>('edifices', {params, responseType: 'json'});
+  }
+
+}
+
+@Service()
+export class EventService {
+  httpService: HttpClient;
+
+
+ public constructor() {
+    this.httpService = inject(HttpClient);
+  }
+
+ public getEvents(edificeId?: number): Observable<EventDto[]>  {
+    const queryParamsList: { name: string, value: string }[] = [];
+    if (edificeId !== undefined && edificeId !== null) {
+      queryParamsList.push({name: 'edificeId', value: edificeId.toString()});
+    }
+    let params = new HttpParams();
+    for (const queryParam of queryParamsList) {
+      params = params.append(queryParam.name, queryParam.value);
+    }
+    return this.httpService.get<EventDto[]>('events', {params, responseType: 'json'});
   }
 
 }

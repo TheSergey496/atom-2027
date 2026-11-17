@@ -15,8 +15,9 @@ import java.time.Instant;
 public class EventDto {
     private EventId id;
     private EdificeId edificeId;
+    private EdificeDto edifice;
     private String resourceType;
     private Instant occurredAt;
     private EventStatusId eventStatusId;
-    private String eventStatusName;
+    private EventStatusDto eventStatus;
 }
