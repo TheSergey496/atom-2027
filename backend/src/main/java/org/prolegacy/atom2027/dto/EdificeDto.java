@@ -18,4 +18,6 @@ public class EdificeDto {
     private String district;
     private String street;
     private String houseNumber;
+
+    private EventDto activeEvent;
 }

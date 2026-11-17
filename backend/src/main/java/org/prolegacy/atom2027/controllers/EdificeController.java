@@ -19,7 +19,7 @@ public class EdificeController {
     private EdificeReader edificeReader;
 
     @GetMapping
-    public List<EdificeDto> getEdifices(@RequestParam
+    public List<EdificeDto> getEdifices(@RequestParam(required = false)
                                         @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
                                         Instant instantAt) {
         return edificeReader.getEdifices(instantAt);

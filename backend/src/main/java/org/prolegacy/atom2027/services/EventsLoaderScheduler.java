@@ -17,7 +17,7 @@ public class EventsLoaderScheduler {
     //TODO: подумать, как обезопасить многопоточку
     private Instant lastTime = null;
 
-    @Scheduled(fixedRate = 1L, timeUnit = TimeUnit.MINUTES)
+    @Scheduled(fixedRate = 2L, timeUnit = TimeUnit.SECONDS)
     public void loadNewEvents() {
         try {
             lastTime = eventService.loadNewEvents(lastTime);
