@@ -90,6 +90,10 @@ export class Header {
             route: '/edificies',
           },
           {
+            label: 'События',
+            route: '/events',
+          },
+          {
             label: 'Пользователи',
             route: '/administration/users',
           },
@@ -99,6 +103,10 @@ export class Header {
           {
             label: 'Объекты',
             route: '/edificies',
+          },
+          {
+            label: 'События',
+            route: '/events',
           },
         ];
       }

@@ -50,6 +50,9 @@ export class EdificesComponent {
     {
       type: 'text',
       field: 'waterActiveEvent.eventStatus.name',
+      getter: (row: EdificeDto) => {
+        return row?.waterActiveEvent?.eventStatus?.name ?? 'Норма';
+      },
       header: 'Статус воды',
       decoration: 'tag',
       width: 350,
@@ -57,6 +60,9 @@ export class EdificesComponent {
     {
       type: 'text',
       field: 'energyActiveEvent.eventStatus.name',
+      getter: (row: EdificeDto) => {
+        return row?.energyActiveEvent?.eventStatus?.name ?? 'Норма';
+      },
       header: 'Статус электроэнергии',
       decoration: 'tag',
       width: 350,

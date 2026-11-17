@@ -8,6 +8,7 @@ import { AdminUsersPageComponent } from './components/pages/admin-users-page/adm
 import { adminGuard } from './guards/admin.guard';
 import { TreeTableDemoComponent } from './components/pages/tree-table-demo/tree-table-demo.component';
 import { EdificesComponent } from './components/pages/edifices/edifices.component';
+import { EventsComponent } from './components/pages/events/events.component';
 
 export const routes: Routes = [
   {
@@ -37,7 +38,11 @@ export const routes: Routes = [
   },
   {
     path: 'edificies',
-    component: EdificesComponent
+    component: EdificesComponent,
+  },
+  {
+    path: 'events',
+    component: EventsComponent,
   },
   { path: '**', redirectTo: 'home' },
 ];

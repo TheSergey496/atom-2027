@@ -12,6 +12,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalUnit;
 import java.util.List;
 
 @Service
@@ -43,7 +45,7 @@ public class EventService {
                                     new EventId(f.getId()),
                                     new EdificeId(f.getIdEdifice()),
                                     f.getResourceType(),
-                                    f.getOccurredAt(),
+                                    f.getOccurredAt().minus(3, ChronoUnit.HOURS),
                                     new EventStatusId(f.getIdStatus())
                             );
                         }
