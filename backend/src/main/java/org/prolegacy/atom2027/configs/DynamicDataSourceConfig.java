@@ -10,11 +10,11 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableTransactionManagement
 @Import(DynamicDataSourceRegistrar.class)
 public class DynamicDataSourceConfig {
-//    @Configuration
-//    @EnableJpaRepositories(
-//            basePackages = "org.prolegacy.atom2027.second_datasource.repositories",
-//            entityManagerFactoryRef = "secondaryEntityManagerFactory",
-//            transactionManagerRef = "secondaryTransactionManager")
-//    static class SecondaryRepositories {
-//    }
+    @Configuration
+    @EnableJpaRepositories(
+            basePackages = "org.prolegacy.atom2027.second_datasource.repositories",
+            entityManagerFactoryRef = "secondaryEntityManagerFactory",
+            transactionManagerRef = "secondaryTransactionManager")
+    static class SecondaryRepositories {
+    }
 }

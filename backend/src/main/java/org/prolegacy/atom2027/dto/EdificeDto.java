@@ -4,15 +4,17 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.prolegacy.atom2027.common.annotation.TypescriptModel;
+import org.prolegacy.atom2027.entities.ids.EdificeId;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @TypescriptModel
-public class EdificyDto {
-    private Long id;
+public class EdificeDto {
+    private EdificeId id;
     private String name;
-    private String resourceTypes;
+    private Boolean hasWater;
+    private Boolean hasEnergy;
     private String district;
     private String street;
     private String houseNumber;
