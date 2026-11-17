@@ -3,7 +3,6 @@ import { NavigationEnd, NavigationError, Router, RouterLink } from '@angular/rou
 import { Tabs, TabsModule } from '@openng/optimus-ui/tabs';
 import { filter } from 'rxjs';
 import { FormsModule } from '@angular/forms';
-import { Tooltip } from '@openng/optimus-ui/tooltip';
 import { NgOptimizedImage } from '@angular/common';
 import { OverlayBadgeModule } from '@openng/optimus-ui/overlaybadge';
 import { BadgeModule } from '@openng/optimus-ui/badge';

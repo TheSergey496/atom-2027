@@ -1,4 +1,7 @@
 import { Component, computed, input, output } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { interval } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { NgDiagramNodeSelectedDirective, NgDiagramNodeTemplate, Node } from 'ng-diagram';
 import { EdificeDto, EventDto } from '../../../gen/atom2027-dto';
 import { Tooltip, TooltipModule } from '@openng/optimus-ui/tooltip';
@@ -11,6 +14,7 @@ interface ResourceVm {
   label: string;
   status: StatusKind;
   statusLabel: string;
+  durationLabel: string | null;
   tooltip: string;
 }
 
@@ -92,6 +96,9 @@ const RESOURCE_LABEL: Record<ResourceKind, string> = {
                 </span>
                 <span class="resource-name">{{ resource.label }}</span>
                 <span class="resource-status">{{ resource.statusLabel }}</span>
+                @if (resource.durationLabel) {
+                  <span class="resource-duration">· {{ resource.durationLabel }}</span>
+                }
               </div>
             }
           </div>
@@ -290,6 +297,13 @@ const RESOURCE_LABEL: Record<ResourceKind, string> = {
         white-space: nowrap;
       }
 
+      .resource-duration {
+        flex: none;
+        color: var(--status-color);
+        font-weight: 500;
+        white-space: nowrap;
+      }
+
       .resource[data-status='accident'] .icon {
         animation: resource-pulse 1.6s ease-in-out infinite;
       }
@@ -322,19 +336,26 @@ export class HoverableNodeComponent implements NgDiagramNodeTemplate {
   hoverEnter = output<Node<EdificeNodeData>>();
   hoverLeave = output<Node<EdificeNodeData>>();
 
-  readonly vm = computed<EdificeVm>(() => this.buildVm(this.node().data));
+  // Re-emits every 30s so accident durations stay fresh.
+  private readonly now = toSignal(interval(30_000).pipe(map(() => Date.now())), {
+    initialValue: Date.now(),
+  });
 
-  private buildVm(data: EdificeNodeData): EdificeVm {
+  readonly vm = computed<EdificeVm>(() => this.buildVm(this.node().data, this.now()));
+
+  private buildVm(data: EdificeNodeData, now: number): EdificeVm {
     const resources = [
       this.buildResource(
         'energy',
         data.hasEnergy !== false || !!data.energyActiveEvent,
         data.energyActiveEvent,
+        now,
       ),
       this.buildResource(
         'water',
         data.hasWater !== false || !!data.waterActiveEvent,
         data.waterActiveEvent,
+        now,
       ),
     ].filter((r): r is ResourceVm => r !== null);
 
@@ -365,6 +386,7 @@ export class HoverableNodeComponent implements NgDiagramNodeTemplate {
     kind: ResourceKind,
     enabled: boolean,
     event: EventDto | undefined,
+    now: number,
   ): ResourceVm | null {
     if (!enabled) return null;
 
@@ -372,14 +394,25 @@ export class HoverableNodeComponent implements NgDiagramNodeTemplate {
     const statusLabel = STATUS_LABEL[status];
     const occurredAt = this.formatDate(event?.occurredAt);
 
+    // Only show duration for active accidents.
+    const durationLabel =
+      status === 'accident' ? this.formatDuration(event?.occurredAt, now) : null;
+
     const tooltip = [
-      `${RESOURCE_LABEL[kind]}: ${statusLabel}`,
+      `${RESOURCE_LABEL[kind]}: ${statusLabel}${durationLabel ? ` · ${durationLabel}` : ''}`,
       occurredAt ? `с ${occurredAt}` : null,
     ]
       .filter(Boolean)
       .join(' · ');
 
-    return { kind, label: RESOURCE_LABEL[kind], status, statusLabel, tooltip };
+    return {
+      kind,
+      label: RESOURCE_LABEL[kind],
+      status,
+      statusLabel,
+      durationLabel,
+      tooltip,
+    };
   }
 
   private resolveStatus(event: EventDto | undefined): StatusKind {
@@ -399,6 +432,26 @@ export class HoverableNodeComponent implements NgDiagramNodeTemplate {
       hour: '2-digit',
       minute: '2-digit',
     });
+  }
+
+  private formatDuration(value: Date | string | undefined, now: number): string | null {
+    if (!value) return null;
+    const date = value instanceof Date ? value : new Date(value);
+    if (Number.isNaN(date.getTime())) return null;
+
+    const ms = now - date.getTime();
+    if (ms < 0) return null;
+
+    const totalMinutes = Math.floor(ms / 60_000);
+    if (totalMinutes < 1) return '< 1 мин';
+
+    const days = Math.floor(totalMinutes / 1440);
+    const hours = Math.floor((totalMinutes % 1440) / 60);
+    const minutes = totalMinutes % 60;
+
+    if (days > 0) return `${days} д ${hours} ч`;
+    if (hours > 0) return `${hours} ч ${minutes} мин`;
+    return `${minutes} мин`;
   }
 }
 
