@@ -37,7 +37,7 @@ export const routes: Routes = [
     ],
   },
   {
-    path: 'edificies',
+    path: 'edifices',
     component: EdificesComponent,
   },
   {

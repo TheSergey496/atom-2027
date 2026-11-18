@@ -16,6 +16,7 @@ import { EdificeService } from '../../gen/atom2027-controllers';
 import { GlobalLoadingService } from '../../services/loading.service';
 import { GraphSaveStateService } from '../../services/graph/save.service';
 import { NgDiagramModelService, provideNgDiagram } from 'ng-diagram';
+import { ResetService } from '../../services/reset.service';
 
 @Component({
   imports: [
@@ -66,10 +67,9 @@ export class Header {
   private readonly messageService = inject(MessageService);
   private readonly tabs = viewChild<Tabs>('tabs');
 
-  private readonly edificeService = inject(EdificeService);
   private readonly globalLoadingService = inject(GlobalLoadingService);
   private readonly graphSaveService = inject(GraphSaveStateService);
-  private readonly modelService = inject(NgDiagramModelService);
+  private readonly resetService = inject(ResetService);
 
   private readonly renderer = inject(Renderer2);
 
@@ -99,7 +99,7 @@ export class Header {
         this.menuTabs = [
           {
             label: 'Объекты',
-            route: '/edificies',
+            route: '/edifices',
           },
           {
             label: 'События',
@@ -114,7 +114,7 @@ export class Header {
         this.menuTabs = [
           {
             label: 'Объекты',
-            route: '/edificies',
+            route: '/edifices',
           },
           {
             label: 'События',
@@ -176,9 +176,7 @@ export class Header {
   }
 
   public async resetData() {
-    await this.globalLoadingService.withLoader(() => {
-      this.graphSaveService.clear();
-    });
+    this.resetService.resetData();
   }
 
   public switchTheme() {

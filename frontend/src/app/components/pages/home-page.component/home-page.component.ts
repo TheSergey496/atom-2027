@@ -3,6 +3,7 @@ import {
   computed,
   inject,
   Injector,
+  OnDestroy,
   OnInit,
   runInInjectionContext,
   signal,
@@ -28,12 +29,11 @@ import { GlobalLoadingService, LocalLoadingService } from '../../../services/loa
 import { SplitterModule } from '@openng/optimus-ui/splitter';
 import { EdificeDependencyService, EdificeService } from '../../../gen/atom2027-controllers';
 import { EdificeDependencyDto, EdificeDto } from '../../../gen/atom2027-dto';
-import { lastValueFrom } from 'rxjs';
+import { lastValueFrom, Subscription } from 'rxjs';
 import { HoverableNodeComponent } from '../../graph/hoverable-node/hoverable-node.component';
-import { GraphHighlightService } from '../../../services/graph/graph-highlight.service';
 import { GraphSaveStateService } from '../../../services/graph/save.service';
 import { EventsComponent } from '../events/events.component';
-import { createStructuredContentOutput } from '@angular/cli/src/commands/mcp/utils';
+import { ResetService } from '../../../services/reset.service';
 
 @Component({
   selector: 'pro-legacy-home-page.component',
@@ -42,7 +42,7 @@ import { createStructuredContentOutput } from '@angular/cli/src/commands/mcp/uti
   templateUrl: './home-page.component.html',
   styleUrl: './home-page.component.css',
 })
-export class HomePageComponent implements OnInit {
+export class HomePageComponent implements OnInit, OnDestroy {
   private readonly wrapper: Signal<any> = viewChild.required('wrapper');
   private readonly injector = inject(Injector);
 
@@ -59,6 +59,7 @@ export class HomePageComponent implements OnInit {
   private readonly edificeDependencyService = inject(EdificeDependencyService);
 
   private readonly graphSaveService = inject(GraphSaveStateService);
+  private readonly resetService = inject(ResetService);
 
   edificies: EdificeDto[] = [];
   dependencies: EdificeDependencyDto[] = [];
@@ -76,23 +77,31 @@ export class HomePageComponent implements OnInit {
 
   model = initializeModel({ nodes: [], edges: [] });
 
+  private resetSubscription?: Subscription;
+
   constructor() {
     this.loadingService = new LocalLoadingService(
       computed(() => this.wrapper()?.nativeElement),
       this.injector,
     );
-    this.graphSaveService.onClear.subscribe(async () => {
-      await this.resetData();
-    });
     this.loadingService.beginLoading();
+  }
+
+  ngOnDestroy(): void {
+    this.resetSubscription?.unsubscribe();
   }
 
   private pinger?: number;
 
   async ngOnInit() {
     await this.initGraph();
+    this.resetSubscription = this.resetService.subscribe(async () => {
+      await this.loadingService?.withLoader(async () => {
+        await this.resetData();
+      });
+    });
     this.loadingService?.stopLoading();
-    this.setupPinger();
+    // this.setupPinger();
   }
 
   private async applyLayout() {
@@ -206,7 +215,7 @@ export class HomePageComponent implements OnInit {
       }
       await lastValueFrom(this.edificeService.resetData());
       await this.initGraph();
-      this.setupPinger();
+      // this.setupPinger();
     });
   }
 

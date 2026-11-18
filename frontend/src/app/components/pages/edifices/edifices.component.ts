@@ -1,14 +1,23 @@
-import { Component, inject, signal } from '@angular/core';
+import {
+  AfterViewInit,
+  ChangeDetectorRef,
+  Component,
+  inject,
+  OnDestroy,
+  OnInit,
+  signal,
+} from '@angular/core';
 import { Button } from '@openng/optimus-ui/button';
 import { TableComponent } from '../../library/table/table/table.component';
 import { TableFastSearchComponent } from '../../library/table/table-fast-search/table-fast-search.component';
 import { Toolbar } from '@openng/optimus-ui/toolbar';
 import { Column } from '../../library/table/column';
 import { UserDto } from '../../../gen/auth-dto';
-import { lastValueFrom } from 'rxjs';
+import { lastValueFrom, Subscription } from 'rxjs';
 import { EdificeDto } from '../../../gen/atom2027-dto';
 import { EdificeService } from '../../../gen/atom2027-controllers';
 import { EventStatusLocaleEnum } from '../events/events.component';
+import { ResetService } from '../../../services/reset.service';
 
 @Component({
   imports: [Button, TableComponent, TableFastSearchComponent, Toolbar],
@@ -16,7 +25,7 @@ import { EventStatusLocaleEnum } from '../events/events.component';
   styleUrl: './edifices.component.css',
   templateUrl: './edifices.component.html',
 })
-export class EdificesComponent {
+export class EdificesComponent implements OnInit, OnDestroy {
   protected readonly columns = signal<Column[]>([
     {
       type: 'int',
@@ -77,24 +86,36 @@ export class EdificesComponent {
     },
   ]);
 
-  protected readonly edificies = signal<EdificeDto[]>([]);
+  protected readonly edifices = signal<EdificeDto[]>([]);
 
   protected readonly getRowId = (row: UserDto) => `${row?.id}`;
   protected readonly filter = signal<boolean>(false);
   protected readonly loading = signal<boolean>(false);
 
   private readonly edificeService = inject(EdificeService);
+  private readonly resetService = inject(ResetService);
+  private readonly cdr = inject(ChangeDetectorRef);
+
+  private resetSubscription?: Subscription;
 
   ngOnInit() {
+    this.resetSubscription = this.resetService.subscribe(async () => {
+      await this.loadData();
+    });
     this.loadData().then();
+  }
+
+  ngOnDestroy(): void {
+    this.resetSubscription?.unsubscribe();
   }
 
   protected async loadData() {
     this.loading.set(true);
-    this.edificies.set([]);
+    this.edifices.set([]);
     try {
       const edifices = await lastValueFrom(this.edificeService.getEdifices());
-      this.edificies.set(edifices);
+      this.edifices.set(edifices);
+      this.cdr.detectChanges();
     } finally {
       this.loading.set(false);
     }

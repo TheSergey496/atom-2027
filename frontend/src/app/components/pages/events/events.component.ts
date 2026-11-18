@@ -1,4 +1,4 @@
-import { AfterViewInit, Component, effect, inject, input, signal } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, effect, inject, input, OnDestroy, signal } from '@angular/core';
 import { Button } from '@openng/optimus-ui/button';
 import { TableComponent } from '../../library/table/table/table.component';
 import { TableFastSearchComponent } from '../../library/table/table-fast-search/table-fast-search.component';
@@ -7,9 +7,10 @@ import { Column } from '../../library/table/column';
 import { EdificeDto, EventDto } from '../../../gen/atom2027-dto';
 import { UserDto } from '../../../gen/auth-dto';
 import { EventService } from '../../../gen/atom2027-controllers';
-import { lastValueFrom } from 'rxjs';
+import { lastValueFrom, Subscription } from 'rxjs';
 import { FormsModule } from '@angular/forms';
 import {SelectButtonModule} from "@openng/optimus-ui/selectbutton";
+import { ResetService } from '../../../services/reset.service';
 
 @Component({
   imports: [
@@ -24,7 +25,7 @@ import {SelectButtonModule} from "@openng/optimus-ui/selectbutton";
   styleUrl: './events.component.css',
   templateUrl: './events.component.html',
 })
-export class EventsComponent implements AfterViewInit {
+export class EventsComponent implements AfterViewInit, OnDestroy {
   protected readonly columns = signal<Column[]>([
     {
       type: 'int',
@@ -99,9 +100,13 @@ export class EventsComponent implements AfterViewInit {
   protected readonly loading = signal<boolean>(false);
 
   private readonly eventService = inject(EventService);
+  private readonly resetService = inject(ResetService);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   public forEdifice = input(false);
   public edifice = input<EdificeDto | null>(null);
+
+  private resetSubscription?: Subscription;
 
   protected showArchived = false;
   protected showArchivedOptions = [
@@ -124,7 +129,14 @@ export class EventsComponent implements AfterViewInit {
   }
 
   ngAfterViewInit() {
+    this.resetSubscription = this.resetService.subscribe(async () => {
+      await this.loadData();
+    });
     this.loadData().then();
+  }
+
+  ngOnDestroy(): void {
+    this.resetSubscription?.unsubscribe();
   }
 
   protected async loadData() {
@@ -134,8 +146,11 @@ export class EventsComponent implements AfterViewInit {
       if (this.forEdifice() && this.edifice() == null) {
         return;
       }
-      const events = await lastValueFrom(this.eventService.getEvents(this.edifice()?.id, this.showArchived));
+      const events = await lastValueFrom(
+        this.eventService.getEvents(this.edifice()?.id, this.showArchived),
+      );
       this.events.set(events);
+      this.cdr.detectChanges();
     } finally {
       this.loading.set(false);
     }
