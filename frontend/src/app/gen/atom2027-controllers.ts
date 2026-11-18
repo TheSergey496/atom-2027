@@ -1,6 +1,6 @@
 import {HttpClient, HttpHeaders, HttpParams} from '@angular/common/http';
 import {Service, inject} from '@angular/core';
-import {EdificeDependencyDto, EdificeDto, EventDto} from './atom2027-dto';
+import {EdificeDependencyDto, EdificeDto, EmployeeDto, EmployeeQualificationDto, EventDto} from './atom2027-dto';
 import {TestQueue$TestQueuePayload} from './atom2027-queue';
 import {Observable} from 'rxjs';
 import {map} from 'rxjs/operators';
@@ -43,6 +43,25 @@ export class EdificeService {
 
  public resetData(): Observable<void>  {
     return this.httpService.delete<void>('edifices/reset');
+  }
+
+}
+
+@Service()
+export class EmployeeService {
+  httpService: HttpClient;
+
+
+ public constructor() {
+    this.httpService = inject(HttpClient);
+  }
+
+ public getEmployees(): Observable<EmployeeDto[]>  {
+    return this.httpService.get<EmployeeDto[]>('employees', {responseType: 'json'});
+  }
+
+ public getQualifications(id: number): Observable<EmployeeQualificationDto[]>  {
+    return this.httpService.get<EmployeeQualificationDto[]>('employees/' + id + '/qualifications', {responseType: 'json'});
   }
 
 }

@@ -106,6 +106,10 @@ export class Header {
             route: '/events',
           },
           {
+            label: 'Рабочие',
+            route: '/employees',
+          },
+          {
             label: 'Пользователи',
             route: '/administration/users',
           },
@@ -119,6 +123,10 @@ export class Header {
           {
             label: 'События',
             route: '/events',
+          },
+          {
+            label: 'Рабочие',
+            route: '/employees',
           },
         ];
       } else {

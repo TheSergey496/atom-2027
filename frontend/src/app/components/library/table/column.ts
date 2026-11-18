@@ -5,7 +5,7 @@ interface BaseColumn {
   field: string;
   width?: number;
   frozen?: 'left' | 'right';
-  decoration?: 'tag';
+  decoration?: 'tag' | 'withoutTime';
 }
 
 export type Column =
@@ -222,17 +222,25 @@ export class ColumnUtils {
         if (column.formatter != null) {
           return column.formatter(dateValue);
         } else {
-          return dateValue != null
-            ? dateValue.toLocaleDateString('ru-RU', {
-                day: '2-digit',
-                month: '2-digit',
-                year: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit',
-                second: '2-digit',
-                hour12: false,
-              })
-            : '';
+          if (dateValue == null) {
+            return '';
+          } else if (column.decoration === 'withoutTime') {
+            return dateValue.toLocaleDateString('ru-RU', {
+              day: '2-digit',
+              month: '2-digit',
+              year: 'numeric',
+            });
+          } else {
+            return dateValue.toLocaleDateString('ru-RU', {
+              day: '2-digit',
+              month: '2-digit',
+              year: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit',
+              second: '2-digit',
+              hour12: false,
+            });
+          }
         }
       }
       case 'enum': {

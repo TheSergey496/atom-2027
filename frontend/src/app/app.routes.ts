@@ -9,6 +9,7 @@ import { adminGuard } from './guards/admin.guard';
 import { TreeTableDemoComponent } from './components/pages/tree-table-demo/tree-table-demo.component';
 import { EdificesComponent } from './components/pages/edifices/edifices.component';
 import { EventsComponent } from './components/pages/events/events.component';
+import { EmployeeComponent } from './components/pages/employee/employee.component';
 
 export const routes: Routes = [
   {
@@ -39,6 +40,10 @@ export const routes: Routes = [
   {
     path: 'edifices',
     component: EdificesComponent,
+  },
+  {
+    path: 'employees',
+    component: EmployeeComponent,
   },
   {
     path: 'events',

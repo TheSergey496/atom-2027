@@ -1,0 +1,35 @@
+package org.prolegacy.atom2027.readers;
+
+import org.prolegacy.atom2027.common.query.query.JPAQuery;
+import org.prolegacy.atom2027.common.query.query.JPAQueryFactory;
+import org.prolegacy.atom2027.dto.EmployeeDto;
+import org.prolegacy.atom2027.entities.QEmployee;
+import org.prolegacy.atom2027.entities.QEmployeeQualification;
+import org.prolegacy.atom2027.entities.QEmployeeQualificationAgg;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+
+@Repository
+public class EmployeeReader {
+    private static final QEmployee employee = QEmployee.employee;
+    private static final QEmployeeQualificationAgg employeeQualificationAgg = QEmployeeQualificationAgg.employeeQualificationAgg;
+
+    @Autowired
+    private JPAQueryFactory queryFactory;
+
+    public List<EmployeeDto> getEmployees() {
+        return baseQuery().fetch();
+    }
+
+    private JPAQuery<EmployeeDto> baseQuery() {
+        return queryFactory.from(employee)
+                .leftJoin(employeeQualificationAgg).on(employeeQualificationAgg.employeeId.eq(employee.id))
+                .selectDto(
+                        EmployeeDto.class,
+                        employeeQualificationAgg.qualifications.as("qualifications"),
+                        employee.lastName.concat(" ").concat(employee.firstName).concat(" ").concat(employee.middleName).as("fullName")
+                );
+    }
+}

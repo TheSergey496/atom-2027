@@ -21,6 +21,23 @@ export class EdificeDto {
   waterActiveEvent?: EventDto;
 }
 
+export class EmployeeDto {
+  firstName?: string;
+  fullName?: string;
+  id?: number;
+  lastName?: string;
+  middleName?: string;
+  qualifications?: string;
+  startDateExperience?: Date;
+}
+
+export class EmployeeQualificationDto {
+  employeeId?: number;
+  id?: number;
+  proff?: number;
+  resourceType?: string;
+}
+
 export class EventDto {
   edifice?: EdificeDto;
   edificeId?: number;

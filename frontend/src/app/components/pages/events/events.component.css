@@ -1,5 +1,7 @@
 :host ::ng-deep .hide-table-border .p-datatable-table-container {
-    border: 0;
+    border-left: 0;
+    border-right: 0;
+    border-bottom: 0;
 }
 
 :host ::ng-deep .hide-table-border .p-toolbar {
