@@ -12,9 +12,25 @@ import { ResetService } from '../../../services/reset.service';
 import { GlobalLoadingService } from '../../../services/loading.service';
 import { Button } from '@openng/optimus-ui/button';
 import { Tooltip } from '@openng/optimus-ui/tooltip';
+import {
+  BrigadeDto,
+  EmployeeDto,
+  EmployeeQualificationDto,
+  EventDto,
+} from '../../../gen/atom2027-dto';
+import { TableComponent } from '../../library/table/table/table.component';
+import { Splitter } from '@openng/optimus-ui/splitter';
 
 @Component({
-  imports: [TableFastSearchComponent, Toolbar, TreeTableComponent, Button, Tooltip],
+  imports: [
+    TableFastSearchComponent,
+    Toolbar,
+    TreeTableComponent,
+    Button,
+    Tooltip,
+    TableComponent,
+    Splitter,
+  ],
   selector: 'pro-legacy-brigade',
   styleUrl: './brigade.component.css',
   templateUrl: './brigade.component.html',
@@ -79,6 +95,53 @@ export class BrigadeComponent implements OnInit, OnDestroy {
     },
   ]);
 
+  protected readonly detailColumns = signal<Column[]>([
+    {
+      type: 'int',
+      field: 'id',
+      header: 'Табельный номер',
+      width: 240,
+    },
+    {
+      type: 'text',
+      field: 'fullName',
+      header: 'ФИО',
+      width: 350,
+    },
+    {
+      type: 'text',
+      field: 'lastName',
+      header: 'Фамилия',
+      width: 155,
+    },
+    {
+      type: 'text',
+      field: 'firstName',
+      header: 'Имя',
+      width: 155,
+    },
+    {
+      type: 'text',
+      field: 'middleName',
+      header: 'Отчество',
+      width: 155,
+    },
+    {
+      type: 'text',
+      field: 'qualifications',
+      decoration: 'qualifications',
+      header: 'Квалификации',
+      width: 350,
+    },
+    {
+      type: 'date',
+      field: 'startDateExperience',
+      header: 'Дата начала стажа',
+      decoration: 'withoutTime',
+      width: 235,
+    },
+  ]);
+
   protected readonly data = signal<TreeNode[]>([]);
 
   protected readonly count = signal(0);
@@ -93,9 +156,17 @@ export class BrigadeComponent implements OnInit, OnDestroy {
   private readonly globalLoadingService = inject(GlobalLoadingService);
 
   private resetSubscription?: Subscription;
+  protected selectedBrigadeOrEvent = signal<(BrigadeDto | EventDto) | null>(null);
+
+  protected readonly employees = signal<EmployeeDto[]>([]);
+  protected readonly detailGetRowId = (row: EmployeeDto) => `${row?.id}`;
+  protected readonly detailFilter = signal<boolean>(false);
+  protected readonly detailLoading = signal<boolean>(false);
 
   ngOnInit() {
     this.resetSubscription = this.resetService.subscribe(async () => {
+      this.selectedBrigadeOrEvent.set(null);
+      await this.loadDetailData();
       await this.loadData();
     });
     this.loadData().then();
@@ -103,6 +174,17 @@ export class BrigadeComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.resetSubscription?.unsubscribe();
+  }
+
+  protected onSelectionChange(event: any) {
+    const oldBrigadeId =
+      (<any>this.selectedBrigadeOrEvent())?.brigadeId ?? (<any>this.selectedBrigadeOrEvent())?.id;
+    this.selectedBrigadeOrEvent.set(event?.data);
+    const newBrigadeId =
+      (<any>this.selectedBrigadeOrEvent())?.brigadeId ?? (<any>this.selectedBrigadeOrEvent())?.id;
+    if (oldBrigadeId !== newBrigadeId) {
+      this.loadDetailData().then();
+    }
   }
 
   protected async loadData() {
@@ -150,8 +232,30 @@ export class BrigadeComponent implements OnInit, OnDestroy {
 
   protected async formBrigades() {
     await this.globalLoadingService.withLoader(async () => {
-       await lastValueFrom(this.brigadeOptimizerService.optimizeBrigades());
+      await lastValueFrom(this.brigadeOptimizerService.optimizeBrigades());
     });
     await this.loadData();
+  }
+
+  protected async loadDetailData() {
+    this.detailLoading.set(true);
+    this.employees.set([]);
+    try {
+      const brigadeId =
+        (<any>this.selectedBrigadeOrEvent())?.brigadeId ?? (<any>this.selectedBrigadeOrEvent())?.id;
+      if (brigadeId == null) {
+        this.cdr.detectChanges();
+        return;
+      }
+      const employees = await lastValueFrom(this.brigadeService.getEmployeesForBrigade(brigadeId));
+      this.employees.set(employees);
+      this.cdr.detectChanges();
+      requestAnimationFrame(() => {
+        this.cdr.detectChanges();
+        window.dispatchEvent(new Event('resize'));
+      });
+    } finally {
+      this.detailLoading.set(false);
+    }
   }
 }

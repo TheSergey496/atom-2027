@@ -47,16 +47,28 @@ public class DataStructureLoader {
     private EmployeeQualificationRepository employeeQualificationRepository;
     @Autowired
     private TimeResolveRepository timeResolveRepository;
+    @Autowired
+    private BrigadeRepository brigadeRepository;
+    @Autowired
+    private BrigadeMemberRepository brigadeMemberRepository;
+    @Autowired
+    private BrigadeEventRepository brigadeEventRepository;
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
     @Transactional
     public void reloadData() {
-        edificeRepository.deleteAll();
-        edificeDependenciesRepository.deleteAll();
-        eventRepository.deleteAll();
-        eventStatusRepository.deleteAll();
+        edificeRepository.deleteAllInBatch();
+        edificeDependenciesRepository.deleteAllInBatch();
+        eventRepository.deleteAllInBatch();
+        eventStatusRepository.deleteAllInBatch();
+        employeeRepository.deleteAllInBatch();
+        employeeQualificationRepository.deleteAllInBatch();
+        timeResolveRepository.deleteAllInBatch();
+        brigadeRepository.deleteAllInBatch();
+        brigadeMemberRepository.deleteAllInBatch();
+        brigadeEventRepository.deleteAllInBatch();
 
         final List<ForeignEdifice> foreignEdifices = foreignEdificeRepository.findAll();
         final List<ForeignDependencies> foreignDependencies = foreignDependenciesRepository.findAll();

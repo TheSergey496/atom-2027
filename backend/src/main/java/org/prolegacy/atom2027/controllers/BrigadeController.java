@@ -2,19 +2,20 @@ package org.prolegacy.atom2027.controllers;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import org.prolegacy.atom2027.common.annotation.TypescriptEndpoint;
+import org.prolegacy.atom2027.common.exceptions.BusinessLogicException;
 import org.prolegacy.atom2027.dto.BrigadeDto;
+import org.prolegacy.atom2027.dto.EmployeeDto;
 import org.prolegacy.atom2027.entities.Brigade;
 import org.prolegacy.atom2027.entities.BrigadeEvent;
 import org.prolegacy.atom2027.entities.BrigadeMember;
+import org.prolegacy.atom2027.entities.ids.BrigadeId;
 import org.prolegacy.atom2027.readers.BrigadeReader;
+import org.prolegacy.atom2027.readers.EmployeeReader;
 import org.prolegacy.atom2027.repositories.BrigadeEventRepository;
 import org.prolegacy.atom2027.repositories.BrigadeMemberRepository;
 import org.prolegacy.atom2027.repositories.BrigadeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
 import java.util.Comparator;
@@ -29,6 +30,8 @@ import java.util.stream.Collectors;
 public class BrigadeController {
     @Autowired
     private BrigadeReader brigadeReader;
+    @Autowired
+    private EmployeeReader employeeReader;
     @Autowired
     private BrigadeRepository brigadeRepository;
     @Autowired
@@ -56,6 +59,10 @@ public class BrigadeController {
         List<Brigade> brigades = brigadeRepository.findAll();
         List<BrigadeMember> members = brigadeMemberRepository.findAll();
         List<BrigadeEvent> events = brigadeEventRepository.findAll();
+
+        if (brigades.isEmpty()) {
+            throw new BusinessLogicException("Для выгрузки бригад сначала необходимо провести расчет");
+        }
 
         // Group employees by brigade
         Map<Long, List<Long>> membersByBrigade = members.stream()
@@ -90,5 +97,10 @@ public class BrigadeController {
                 .toList();
 
         return new BrigadesResponse(dtos);
+    }
+
+    @GetMapping("{id}/employees")
+    public List<EmployeeDto> getEmployeesForBrigade(@PathVariable BrigadeId id) {
+        return employeeReader.getEmployeesForBrigade(id);
     }
 }

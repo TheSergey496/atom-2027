@@ -12,7 +12,7 @@ export class BrigadeController$BrigadesResponse {
 export class BrigadeController$ExportBrigadeDto {
   brigade_id?: number;
   employees?: number[];
-  events_order?: number[];
+  event_order?: number[];
 }
 
 @Service()
@@ -45,6 +45,10 @@ export class BrigadeService {
 
  public getBrigades(): Observable<BrigadeDto[]>  {
     return this.httpService.get<BrigadeDto[]>('brigades', {responseType: 'json'});
+  }
+
+ public getEmployeesForBrigade(id: number): Observable<EmployeeDto[]>  {
+    return this.httpService.get<EmployeeDto[]>('brigades/' + id + '/employees', {responseType: 'json'});
   }
 
 }

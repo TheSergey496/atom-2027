@@ -1,22 +1,75 @@
-<div class="v-flex">
-    <p-toolbar>
-        <ng-template #start>
-            <div class="table-title">
-                Бригады ({{ count() }})
-            </div>
-            <div class="splitter"></div>
-            <p-button label="Рассчитать" icon="pi pi-hammer" (onClick)="formBrigades()"></p-button>
-            <p-button icon="pi-file" pTooltip="Выгрузить бригады" (onClick)="exportJson()"></p-button>
-        </ng-template>
-        <ng-template #end>
-            <pro-legacy-table-fast-search [table]="table">
-            </pro-legacy-table-fast-search>
-        </ng-template>
-    </p-toolbar>
-    <pro-legacy-tree-table #table
-                           class="v-flex-grow"
-                           [value]="data()"
-                           [columns]="columns()"
-                           [getRowId]="getRowId">
-    </pro-legacy-tree-table>
-</div>
+<p-splitter style="width: 100%; height: 100%" layout="vertical" [panelSizes]="[50, 50]">
+    <ng-template #panel>
+        <div class="v-flex">
+            <p-toolbar>
+                <ng-template #start>
+                    <div class="table-title">
+                        Бригады ({{ count() }})
+                    </div>
+                    <div class="splitter"></div>
+                    <p-button size="small" severity="success" label="Рассчитать"
+                              icon="pi pi-wrench" (onClick)="formBrigades()"></p-button>
+                    <p-button size="small" icon="pi pi-file" label="Выгрузить"
+                              (onClick)="exportJson()"></p-button>
+                </ng-template>
+                <ng-template #end>
+                    <pro-legacy-table-fast-search [table]="table">
+                    </pro-legacy-table-fast-search>
+                </ng-template>
+            </p-toolbar>
+            <pro-legacy-tree-table #table
+                                   class="v-flex-grow"
+                                   [value]="data()"
+                                   [columns]="columns()"
+                                   [getRowId]="getRowId"
+                                   [selection]="selectedBrigadeOrEvent"
+                                   (selectionChange)="onSelectionChange($event)">
+            </pro-legacy-tree-table>
+        </div>
+    </ng-template>
+
+
+    <ng-template #panel>
+        <div class="v-flex">
+            <p-toolbar>
+                <ng-template #start>
+                    <div class="table-title">
+                        {{ detailTable.getTitle('Состав бригады') }}
+                    </div>
+
+                    <p-button icon="pi pi-sync"
+                              size="small"
+                              (onClick)="loadDetailData()">
+                    </p-button>
+                    <p-button icon="pi pi-filter"
+                              size="small"
+                              (onClick)="detailFilter.set(!detailFilter())">
+                    </p-button>
+
+                    <div class="splitter"></div>
+
+                    <p-button size="small"
+                              severity="success"
+                              icon="pi pi-file-excel"
+                              [disabled]="detailLoading()"
+                              (onClick)="detailTable.exportToExcel()">
+                    </p-button>
+                </ng-template>
+
+                <ng-template #end>
+                    <pro-legacy-table-fast-search [table]="detailTable">
+                    </pro-legacy-table-fast-search>
+                </ng-template>
+            </p-toolbar>
+            <pro-legacy-table #detailTable
+                              class="v-flex-grow"
+                              [defaultSort]="[{field: 'id', order: -1}]"
+                              [columns]="detailColumns()"
+                              [value]="employees()"
+                              [filter]="detailFilter()"
+                              [loading]="detailLoading()"
+                              [getRowId]="detailGetRowId">
+            </pro-legacy-table>
+        </div>
+    </ng-template>
+</p-splitter>

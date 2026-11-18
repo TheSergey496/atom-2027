@@ -35,19 +35,19 @@ export class EmployeeComponent implements OnInit, OnDestroy {
       type: 'text',
       field: 'lastName',
       header: 'Фамилия',
-      width: 350,
+      width: 155,
     },
     {
       type: 'text',
       field: 'firstName',
       header: 'Имя',
-      width: 350,
+      width: 155,
     },
     {
       type: 'text',
       field: 'middleName',
       header: 'Отчество',
-      width: 350,
+      width: 155,
     },
     {
       type: 'text',
@@ -61,7 +61,7 @@ export class EmployeeComponent implements OnInit, OnDestroy {
       field: 'startDateExperience',
       header: 'Дата начала стажа',
       decoration: 'withoutTime',
-      width: 350,
+      width: 235,
     },
   ]);
 
@@ -146,6 +146,10 @@ export class EmployeeComponent implements OnInit, OnDestroy {
       );
       this.employeeQualifications.set(edifices);
       this.cdr.detectChanges();
+      requestAnimationFrame(() => {
+        this.cdr.detectChanges();
+        window.dispatchEvent(new Event('resize'));
+      });
     } finally {
       this.detailLoading.set(false);
     }
