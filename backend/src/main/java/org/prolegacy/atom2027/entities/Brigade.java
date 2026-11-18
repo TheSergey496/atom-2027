@@ -15,4 +15,10 @@ public class Brigade {
     @Id
     @LongIdGenerator
     private BrigadeId id;
+
+    private String name;
+
+    public Brigade(String name) {
+        this.name = name;
+    }
 }

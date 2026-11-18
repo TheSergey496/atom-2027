@@ -30,10 +30,7 @@ public class BrigadeReader {
                 .fetch();
 
         var events = eventReader.getEventsForBrigades();
-        long number = 1;
         for (BrigadeDto b : brigades) {
-            b.setName("Бригада %s".formatted(number));
-            number++;
             List<EventDto> e = new ArrayList<>(events.getOrDefault(b.getId(), Collections.emptyList()));
             e.sort(Comparator.comparing(EventDto::getBrigadeOrderNumber, Comparator.nullsLast(Comparator.naturalOrder())));
             b.setEvents(e);

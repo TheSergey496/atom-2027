@@ -92,8 +92,10 @@ public class BrigadeOptimizerService {
         brigadeEventRepository.deleteAllInBatch();
         brigadeMemberRepository.deleteAllInBatch();
         brigadeRepository.deleteAllInBatch();
-        for (BrigadeSolver.BrigadeSolution plan : solution.brigades()) {
-            Brigade brigade = brigadeRepository.save(new Brigade(null)); // id via @LongIdGenerator
+        List<BrigadeSolver.BrigadeSolution> brigades = solution.brigades();
+        for (int i = 0; i < brigades.size(); i++) {
+            BrigadeSolver.BrigadeSolution plan = brigades.get(i);
+            Brigade brigade = brigadeRepository.save(new Brigade("Бригада %s".formatted(i + 1))); // id via @LongIdGenerator
             BrigadeId brigadeId = brigade.getId();
             brigadeMemberRepository.saveAll(plan.members().stream()
                     .map(id -> new BrigadeMember(null, brigadeId, id)).toList());
