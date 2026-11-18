@@ -2,25 +2,15 @@ package org.prolegacy.atom2027.services;
 
 import org.apache.commons.collections4.SetUtils;
 import org.apache.commons.lang3.tuple.Pair;
-import org.prolegacy.atom2027.entities.Edifice;
-import org.prolegacy.atom2027.entities.EdificeDependency;
-import org.prolegacy.atom2027.entities.EventStatus;
-import org.prolegacy.atom2027.entities.ids.EdificeDependencyId;
-import org.prolegacy.atom2027.entities.ids.EdificeId;
-import org.prolegacy.atom2027.entities.ids.EventStatusId;
-import org.prolegacy.atom2027.repositories.EdificeDependenciesRepository;
-import org.prolegacy.atom2027.repositories.EdificeRepository;
-import org.prolegacy.atom2027.repositories.EventRepository;
-import org.prolegacy.atom2027.repositories.EventStatusRepository;
-import org.prolegacy.atom2027.second_datasource.entities.ForeignDependencies;
-import org.prolegacy.atom2027.second_datasource.entities.ForeignEdifice;
-import org.prolegacy.atom2027.second_datasource.entities.ForeignEventStatus;
-import org.prolegacy.atom2027.second_datasource.repositories.ForeignDependenciesRepository;
-import org.prolegacy.atom2027.second_datasource.repositories.ForeignEdificeRepository;
-import org.prolegacy.atom2027.second_datasource.repositories.ForeignEventStatusRepository;
+import org.prolegacy.atom2027.entities.*;
+import org.prolegacy.atom2027.entities.ids.*;
+import org.prolegacy.atom2027.repositories.*;
+import org.prolegacy.atom2027.second_datasource.entities.*;
+import org.prolegacy.atom2027.second_datasource.repositories.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
@@ -34,6 +24,14 @@ public class DataStructureLoader {
     private ForeignDependenciesRepository foreignDependenciesRepository;
     @Autowired
     private ForeignEventStatusRepository foreignEventStatusRepository;
+    @Autowired
+    private ForeignEventRepository foreignEventRepository;
+    @Autowired
+    private ForeignEmployeeRepository foreignEmployeeRepository;
+    @Autowired
+    private ForeignEmployeeQualificationRepository foreignEmployeeQualificationRepository;
+    @Autowired
+    private ForeignTimeResolveRepository foreignTimeResolveRepository;
 
     @Autowired
     private EdificeRepository edificeRepository;
@@ -43,10 +41,17 @@ public class DataStructureLoader {
     private EventRepository eventRepository;
     @Autowired
     private EventStatusRepository eventStatusRepository;
+    @Autowired
+    private EmployeeRepository employeeRepository;
+    @Autowired
+    private EmployeeQualificationRepository employeeQualificationRepository;
+    @Autowired
+    private TimeResolveRepository timeResolveRepository;
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
+    @Transactional
     public void reloadData() {
         edificeRepository.deleteAll();
         edificeDependenciesRepository.deleteAll();
@@ -56,6 +61,10 @@ public class DataStructureLoader {
         final List<ForeignEdifice> foreignEdifices = foreignEdificeRepository.findAll();
         final List<ForeignDependencies> foreignDependencies = foreignDependenciesRepository.findAll();
         final List<ForeignEventStatus> foreignEventStatuses = foreignEventStatusRepository.findAll();
+        final List<ForeignEvent> foreignEvents = foreignEventRepository.findAll();
+        final List<ForeignEmployee> foreignEmployees = foreignEmployeeRepository.findAll();
+        final List<ForeignEmployeeQualification> foreignEmployeeQualifications = foreignEmployeeQualificationRepository.findAll();
+        final List<ForeignTimeResolve> foreignTimeResolves = foreignTimeResolveRepository.findAll();
 
         List<Edifice> edifices = edificeRepository.saveAll(foreignEdifices.stream().map(
                 f -> new Edifice(
@@ -86,6 +95,51 @@ public class DataStructureLoader {
                         f.getName()
                 )
         ).toList());
+        eventRepository.saveAll(
+                foreignEvents.stream().map(e ->
+                    new Event(
+                            new EventId(e.getId()),
+                            new EdificeId(e.getIdEdifice()),
+                            e.getResourceType(),
+                            e.getOccurredAt(),
+                            new EventStatusId(e.getIdStatus())
+                    )
+                ).toList()
+        );
+
+        employeeRepository.saveAll(
+                foreignEmployees.stream().map(e ->
+                    new Employee(
+                            new EmployeeId(e.getTabel()),
+                            e.getFirstName(),
+                            e.getLastName(),
+                            e.getMiddleName(),
+                            e.getStartDateExperience()
+                    )
+                ).toList()
+        );
+
+        employeeQualificationRepository.saveAll(
+                foreignEmployeeQualifications.stream().map(e ->
+                        new EmployeeQualification(
+                                new EmployeeQualificationId(e.getIdQualification()),
+                                new EmployeeId(e.getIdEmployee()),
+                                e.getResourceType(),
+                                e.getProff()
+                        )
+                ).toList()
+        );
+
+        timeResolveRepository.saveAll(
+                foreignTimeResolves.stream().map(e ->
+                        new TimeResolve(
+                                new TimeResolveId(e.getIdTime()),
+                                e.getResourceType(),
+                                e.getAvgResolutionTime(),
+                                new EdificeId(e.getIdEdifice())
+                        )
+                )      .toList()
+        );
 
         edificeDependenciesRepository.flush();
 
@@ -174,7 +228,6 @@ public class DataStructureLoader {
                 e.setCriticalIndex(index);
                 e.setWaterDependantCount(water);
                 e.setEnergyDependantCount(energy);
-                edificeRepository.save(e);
             }
         });
     }

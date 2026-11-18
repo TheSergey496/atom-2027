@@ -19,19 +19,19 @@ public class EventsLoaderScheduler {
     private final AtomicBoolean disabled = new AtomicBoolean(false);
     private final AtomicReference<Instant> lastTime = new AtomicReference<>(null);
 
-    @Scheduled(fixedRate = 2L, timeUnit = TimeUnit.SECONDS)
-    public void loadNewEvents() {
-        if (disabled.get()) {
-            return;
-        }
-        try {
-            final Instant prevLastTime = this.lastTime.get();
-            final Instant instant = eventService.loadNewEvents(lastTime.get());
-            lastTime.compareAndSet(prevLastTime, instant);
-        } catch (Exception e) {
-            log.error("Ошибка загрузки новых сообщений", e);
-        }
-    }
+//    @Scheduled(fixedRate = 2L, timeUnit = TimeUnit.SECONDS)
+//    public void loadNewEvents() {
+//        if (disabled.get()) {
+//            return;
+//        }
+//        try {
+//            final Instant prevLastTime = this.lastTime.get();
+//            final Instant instant = eventService.loadNewEvents(lastTime.get());
+//            lastTime.compareAndSet(prevLastTime, instant);
+//        } catch (Exception e) {
+//            log.error("Ошибка загрузки новых сообщений", e);
+//        }
+//    }
 
     public void resetLastTime() {
         this.lastTime.set(null);
