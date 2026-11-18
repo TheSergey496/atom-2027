@@ -4,20 +4,13 @@ import { Toolbar } from '@openng/optimus-ui/toolbar';
 import { TreeTableComponent } from '../../library/table/tree-table/tree-table.component';
 import { Column } from '../../library/table/column';
 import { lastValueFrom, Subscription } from 'rxjs';
-import { UserDto } from '../../../gen/auth-dto';
 import { BrigadeOptimizerService, BrigadeService } from '../../../gen/atom2027-controllers';
 import { TreeNode } from '@openng/optimus-ui/api';
-import { EventStatusLocaleEnum, ResourceTypeLocaleEnum } from '../events/events.component';
+import { ResourceTypeLocaleEnum } from '../events/events.component';
 import { ResetService } from '../../../services/reset.service';
 import { GlobalLoadingService } from '../../../services/loading.service';
 import { Button } from '@openng/optimus-ui/button';
-import { Tooltip } from '@openng/optimus-ui/tooltip';
-import {
-  BrigadeDto,
-  EmployeeDto,
-  EmployeeQualificationDto,
-  EventDto,
-} from '../../../gen/atom2027-dto';
+import { BrigadeDto, EmployeeDto, EventDto, } from '../../../gen/atom2027-dto';
 import { TableComponent } from '../../library/table/table/table.component';
 import { Splitter } from '@openng/optimus-ui/splitter';
 
@@ -27,7 +20,6 @@ import { Splitter } from '@openng/optimus-ui/splitter';
     Toolbar,
     TreeTableComponent,
     Button,
-    Tooltip,
     TableComponent,
     Splitter,
   ],
