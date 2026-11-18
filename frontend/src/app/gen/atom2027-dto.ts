@@ -1,4 +1,3 @@
-import {Duration} from './java-time';
 
 export class BrigadeDto {
   events?: EventDto[];
@@ -7,12 +6,15 @@ export class BrigadeDto {
 }
 
 export class BrigadeEventDto {
-  averageResolutionTime?: Duration;
+  actualResolutionTime?: string;
+  averageResolutionTime?: string;
   brigade?: BrigadeDto;
   edifice?: EdificeDto;
   event?: EventDto;
+  expectedEndTime?: any;
   id?: number;
   orderNumber?: number;
+  startDate?: any;
 }
 
 export class EdificeDependencyDto {

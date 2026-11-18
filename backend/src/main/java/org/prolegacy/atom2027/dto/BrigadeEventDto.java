@@ -17,5 +17,8 @@ public class BrigadeEventDto {
     private BrigadeDto brigade;
     private EventDto event;
     private EdificeDto edifice;
-    private Duration averageResolutionTime;
+    private String averageResolutionTimeStr;
+    private String actualResolutionTimeStr;
+    private LocalDateTime startDate;
+    private LocalDateTime expectedEndTime;
 }

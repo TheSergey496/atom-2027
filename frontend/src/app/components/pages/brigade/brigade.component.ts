@@ -46,7 +46,7 @@ export class BrigadeComponent implements OnInit, OnDestroy {
     {
       type: 'text',
       field: 'name',
-      header: 'Наименование',
+      header: 'Номер бригады',
       width: 350,
     },
     {

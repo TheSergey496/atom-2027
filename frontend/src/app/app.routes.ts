@@ -12,6 +12,7 @@ import { EventsComponent } from './components/pages/events/events.component';
 import { EmployeeComponent } from './components/pages/employee/employee.component';
 import { BrigadeComponent } from './components/pages/brigade/brigade.component';
 import { BrigadeEventsComponent } from './components/pages/brigade-events/brigade-events.component';
+import { RepairsComponent } from './components/pages/repairs/repairs.component';
 
 export const routes: Routes = [
   {
@@ -54,6 +55,10 @@ export const routes: Routes = [
   {
     path: 'events',
     component: EventsComponent,
+  },
+  {
+    path: 'repairs',
+    component: RepairsComponent,
   },
   {
     path: 'brigade-events',
