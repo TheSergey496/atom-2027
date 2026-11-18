@@ -1,0 +1,336 @@
+:host {
+    display: block;
+    --label-w: 220px;
+    --row-h: 58px;
+    --bar-h: 26px;
+    --border: #e2e8f0;
+    --text: #0f172a;
+    --muted: #64748b;
+    font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+    color: var(--text);
+}
+
+.waterfall {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    padding: 16px 18px 18px;
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    background: #fff;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
+}
+
+/* ---------- Легенда ---------- */
+.waterfall__legend {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 18px;
+    font-size: 12px;
+}
+
+.legend-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-weight: 600;
+    color: var(--text);
+
+    &::before {
+        content: '';
+        width: 12px;
+        height: 12px;
+        border-radius: 3px;
+        box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1);
+    }
+
+    &--energy {
+        &::before {
+            background: #ea580c;
+        }
+    }
+
+    &--water {
+        &::before {
+            background: #2563eb;
+        }
+    }
+
+    &--total {
+        margin-left: auto;
+        color: var(--muted);
+        font-weight: 400;
+        &::before {
+            display: none;
+        }
+    }
+}
+
+/* ---------- Шапка со шкалой ---------- */
+.waterfall__header {
+    display: flex;
+    align-items: stretch;
+    height: 26px;
+    border-bottom: 1px solid var(--border);
+}
+
+.waterfall__corner {
+    flex: 0 0 var(--label-w);
+    width: var(--label-w);
+    display: flex;
+    align-items: center;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+}
+
+.waterfall__axis {
+    position: relative;
+    flex: 1 1 auto;
+}
+
+.axis-tick {
+    position: absolute;
+    bottom: 6px;
+    transform: translateX(-50%);
+    font-size: 11px;
+    font-variant-numeric: tabular-nums;
+    color: var(--muted);
+    white-space: nowrap;
+
+    &::after {
+        content: '';
+        position: absolute;
+        left: 50%;
+        bottom: -6px;
+        width: 1px;
+        height: 5px;
+        background: #cbd5e1;
+    }
+}
+
+/* ---------- Тело диаграммы ---------- */
+.waterfall__body {
+    position: relative;
+}
+
+.lane {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    height: var(--row-h);
+    border-bottom: 1px solid #f1f5f9;
+
+    &:last-child {
+        border-bottom: 0;
+    }
+}
+
+.lane__label {
+    flex: 0 0 var(--label-w);
+    width: var(--label-w);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 2px;
+    padding-right: 12px;
+    overflow: hidden;
+}
+
+.lane__name {
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.lane__meta {
+    font-size: 11px;
+    color: var(--muted);
+}
+
+.lane__track {
+    position: relative;
+    flex: 1 1 auto;
+    height: 100%;
+}
+
+.lane__line {
+    position: absolute;
+    left: 0;
+    right: 0;
+    top: 50%;
+    height: 1px;
+    background: #cbd5e1;
+}
+
+/* ---------- Сетка ---------- */
+.waterfall__gridlines {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: var(--label-w);
+    right: 0;
+    z-index: 0;
+    pointer-events: none;
+}
+
+.gridline {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: repeating-linear-gradient(
+            to bottom,
+            #e6ebf2 0 4px,
+            transparent 4px 9px
+    );
+}
+
+/* ---------- Полосы событий ---------- */
+.bar {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    height: var(--bar-h);
+    min-width: 4px;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 0 8px;
+    border: 0;
+    border-radius: 6px;
+    font: inherit;
+    font-size: 11px;
+    font-weight: 700;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    cursor: pointer;
+    z-index: 2;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    transition: box-shadow 0.15s ease, filter 0.15s ease, transform 0.15s ease;
+
+    &:hover,
+    &:focus-visible {
+        outline: none;
+        filter: brightness(1.15);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+        transform: translateY(-50%) scale(1.02);
+        z-index: 10;
+    }
+
+    &--energy {
+        background: linear-gradient(135deg, #f97316 0%, #c2410c 100%);
+        border: 1px solid #9a3412;
+    }
+
+    &--water {
+        background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+        border: 1px solid #1e3a8a;
+    }
+}
+
+.bar__order {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 16px;
+    height: 16px;
+    padding: 0 4px;
+    border-radius: 4px;
+    background: rgba(0, 0, 0, 0.2);
+    font-size: 10px;
+    line-height: 1;
+    color: #fff;
+}
+
+/* ---------- Тултип ---------- */
+.tooltip {
+    position: fixed;
+    z-index: 1000;
+    width: 300px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    background: #0f172a;
+    color: #e2e8f0;
+    font-size: 12px;
+    line-height: 1.45;
+    pointer-events: none;
+    box-shadow: 0 16px 40px rgba(2, 6, 23, 0.4);
+}
+
+.tooltip__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.tooltip__badge {
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+
+    &--energy {
+        background: rgba(249, 115, 22, 0.22);
+        color: #fdba74;
+    }
+
+    &--water {
+        background: rgba(37, 99, 235, 0.25);
+        color: #93c5fd;
+    }
+}
+
+.tooltip__order {
+    font-size: 11px;
+    color: #94a3b8;
+}
+
+.tooltip__title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #f8fafc;
+}
+
+.tooltip__subtitle {
+    margin-bottom: 10px;
+    font-size: 11px;
+    color: #94a3b8;
+}
+
+.tooltip__grid {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 3px 12px;
+    margin: 0;
+
+    dt {
+        color: #94a3b8;
+    }
+
+    dd {
+        margin: 0;
+        text-align: right;
+        font-variant-numeric: tabular-nums;
+        color: #f1f5f9;
+    }
+}
+
+/* ---------- Пустое состояние ---------- */
+.waterfall__empty {
+    padding: 32px 0;
+    text-align: center;
+    font-size: 13px;
+    color: var(--muted);
+}

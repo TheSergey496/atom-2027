@@ -1,1 +1,97 @@
-<p>brigade-events works!</p>
+<!-- brigade-waterfall.component.html -->
+<div class="waterfall">
+    @if (lanes().length) {
+        <div class="waterfall__legend">
+            <span class="legend-item legend-item--energy">Энергия</span>
+            <span class="legend-item legend-item--water">Вода</span>
+            <span class="legend-item legend-item--total">
+        {{ brigadeCount() }} бригад · {{ totalEvents() }} событий
+      </span>
+        </div>
+
+        <div class="waterfall__header">
+            <div class="waterfall__corner">Бригада</div>
+            <div class="waterfall__axis">
+                @for (tick of ticks(); track tick.time) {
+                    <span class="axis-tick" [style.left.%]="tick.left">{{ tick.label }}</span>
+                }
+            </div>
+        </div>
+
+        <div class="waterfall__body">
+            @for (lane of lanes(); track lane.brigadeId) {
+                <div class="lane">
+                    <div class="lane__label">
+                        <span class="lane__name">{{ lane.brigadeName }}</span>
+                        <span class="lane__meta">{{ lane.bars.length }} соб.</span>
+                    </div>
+
+                    <div class="lane__track">
+                        <div class="lane__line"></div>
+
+                        @for (bar of lane.bars; track bar.id) {
+                            <button
+                                    type="button"
+                                    class="bar"
+                                    [class.bar--energy]="bar.resourceType === 'energy'"
+                                    [class.bar--water]="bar.resourceType === 'water'"
+                                    [style.left.%]="bar.left"
+                                    [style.width.%]="bar.width"
+                                    [attr.aria-label]="bar.ariaLabel"
+                                    (mouseenter)="onBarHover($event, bar)"
+                                    (mousemove)="onBarHover($event, bar)"
+                                    (mouseleave)="onBarLeave()"
+                                    (focus)="onBarFocus($event, bar)"
+                                    (blur)="onBarLeave()"
+                            >
+                                <span class="bar__order">{{ bar.orderNumber }}</span>
+                                @if (bar.width >= 9) {
+                                    <span class="bar__duration">{{ bar.durationLabel }}</span>
+                                }
+                            </button>
+                        }
+                    </div>
+                </div>
+            }
+
+            <div class="waterfall__gridlines">
+                @for (tick of ticks(); track tick.time) {
+                    <span class="gridline" [style.left.%]="tick.left"></span>
+                }
+            </div>
+        </div>
+
+        @if (hoveredBar(); as bar) {
+            <div class="tooltip" [style]="tooltipStyle()" role="tooltip">
+                <div class="tooltip__head">
+          <span
+                  class="tooltip__badge"
+                  [class.tooltip__badge--water]="bar.resourceType === 'water'"
+                  [class.tooltip__badge--energy]="bar.resourceType === 'energy'"
+          >
+            {{ bar.resourceType === 'water' ? 'Вода' : 'Энергия' }}
+          </span>
+                    <span class="tooltip__order">Порядок №{{ bar.orderNumber }}</span>
+                </div>
+
+                <div class="tooltip__title">{{ bar.tooltip.edificeName }}</div>
+                <div class="tooltip__subtitle">
+                    {{ bar.tooltip.district }}, ул. {{ bar.tooltip.street }}, {{ bar.tooltip.houseNumber }}
+                </div>
+
+                <dl class="tooltip__grid">
+                    <dt>Начало</dt>
+                    <dd>{{ bar.startLabel }}</dd>
+                    <dt>Окончание</dt>
+                    <dd>{{ bar.endLabel }}</dd>
+                    <dt>Длительность</dt>
+                    <dd>{{ bar.durationLabel }}</dd>
+                    <dt>Событие</dt>
+                    <dd>#{{ bar.tooltip.eventId }}</dd>
+                </dl>
+            </div>
+        }
+    } @else {
+        <div class="waterfall__empty">Нет событий для отображения</div>
+    }
+</div>
