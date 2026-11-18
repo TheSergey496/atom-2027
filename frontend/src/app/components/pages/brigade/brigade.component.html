@@ -5,7 +5,8 @@
                 Бригады ({{ count() }})
             </div>
             <div class="splitter"></div>
-            <p-button icon="pi-file-export" pTooltip="Выгрузить бригады" (onClick)="exportJson()"></p-button>
+            <p-button label="Рассчитать" icon="pi pi-hammer" (onClick)="formBrigades()"></p-button>
+            <p-button icon="pi-file" pTooltip="Выгрузить бригады" (onClick)="exportJson()"></p-button>
         </ng-template>
         <ng-template #end>
             <pro-legacy-table-fast-search [table]="table">

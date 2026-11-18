@@ -5,7 +5,7 @@ import { TreeTableComponent } from '../../library/table/tree-table/tree-table.co
 import { Column } from '../../library/table/column';
 import { lastValueFrom, Subscription } from 'rxjs';
 import { UserDto } from '../../../gen/auth-dto';
-import { BrigadeService } from '../../../gen/atom2027-controllers';
+import { BrigadeOptimizerService, BrigadeService } from '../../../gen/atom2027-controllers';
 import { TreeNode } from '@openng/optimus-ui/api';
 import { EventStatusLocaleEnum, ResourceTypeLocaleEnum } from '../events/events.component';
 import { ResetService } from '../../../services/reset.service';
@@ -87,6 +87,7 @@ export class BrigadeComponent implements OnInit, OnDestroy {
     row?.brigadeId != null ? `${row?.brigadeId}/${row?.id}` : `${row?.id}`;
 
   private readonly brigadeService = inject(BrigadeService);
+  private readonly brigadeOptimizerService = inject(BrigadeOptimizerService);
   private readonly cdr = inject(ChangeDetectorRef);
   private readonly resetService = inject(ResetService);
   private readonly globalLoadingService = inject(GlobalLoadingService);
@@ -145,5 +146,12 @@ export class BrigadeComponent implements OnInit, OnDestroy {
 
       window.URL.revokeObjectURL(url);
     });
+  }
+
+  protected async formBrigades() {
+    await this.globalLoadingService.withLoader(async () => {
+       await lastValueFrom(this.brigadeOptimizerService.optimizeBrigades());
+    });
+    await this.loadData();
   }
 }
