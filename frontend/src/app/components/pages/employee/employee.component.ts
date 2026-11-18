@@ -52,6 +52,7 @@ export class EmployeeComponent implements OnInit, OnDestroy {
     {
       type: 'text',
       field: 'qualifications',
+      decoration: 'qualifications',
       header: 'Квалификации',
       width: 350,
     },

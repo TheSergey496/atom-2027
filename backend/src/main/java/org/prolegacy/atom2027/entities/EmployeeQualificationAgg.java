@@ -9,7 +9,7 @@ import org.prolegacy.atom2027.entities.ids.EmployeeId;
 @Subselect("""
 select employee_id as employee_id,
        string_agg(case resource_type when 'water' then 'Вода ' when 'energy' then 'Электроэнергия ' end || '(' ||
-                  proff::text || ')', ', ' ORDER BY resource_type) as qualifications
+                  proff::text || ')', '|' ORDER BY resource_type) as qualifications
 from employee_qualification
 group by employee_id
 """)

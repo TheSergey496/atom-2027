@@ -391,6 +391,16 @@
                                   <p-tag class="yellow-tag" severity="warn" [value]="ColumnUtils.getColumnValueFormatted(row, column.originalColumn)" />
                               }
                           }
+                      } @else if (column.originalColumn.decoration === 'qualifications') {
+                          <div style="display: inline-flex; gap: 2px;">
+                              @for (qual of ColumnUtils.getColumnValueFormatted(row, column.originalColumn).split('|'); track qual) {
+                                    @if(qual.startsWith('Вода')) {
+                                        <p-tag severity="info" [value]="qual" />
+                                    } @else {
+                                        <p-tag class="yellow-tag" severity="warn" [value]="qual" />
+                                    }
+                              }
+                          </div>
                       } @else {
                         <div class="cell-content-value cell-content-value-center">
                           {{ ColumnUtils.getColumnValueFormatted(row, column.originalColumn) }}
