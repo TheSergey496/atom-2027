@@ -3,6 +3,7 @@ package org.prolegacy.atom2027.dto;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.prolegacy.atom2027.entities.ids.BrigadeId;
 import org.prolegacy.atom2027.entities.ids.EdificeId;
 import org.prolegacy.atom2027.entities.ids.EventId;
 import org.prolegacy.atom2027.entities.ids.EventStatusId;
@@ -21,4 +22,7 @@ public class EventDto {
     private EventStatusId eventStatusId;
     private EventStatusDto eventStatus;
     private Boolean isArchived;
+
+    private BrigadeId brigadeId;
+    private Long brigadeOrderNumber;
 }

@@ -1,4 +1,10 @@
 
+export class BrigadeDto {
+  events?: EventDto[];
+  id?: number;
+  name?: string;
+}
+
 export class EdificeDependencyDto {
   hasEnergy?: boolean;
   hasWater?: boolean;
@@ -39,6 +45,8 @@ export class EmployeeQualificationDto {
 }
 
 export class EventDto {
+  brigadeId?: number;
+  brigadeOrderNumber?: number;
   edifice?: EdificeDto;
   edificeId?: number;
   eventStatus?: EventStatusDto;

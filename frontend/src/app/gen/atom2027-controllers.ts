@@ -1,9 +1,24 @@
 import {HttpClient, HttpHeaders, HttpParams} from '@angular/common/http';
 import {Service, inject} from '@angular/core';
-import {EdificeDependencyDto, EdificeDto, EmployeeDto, EmployeeQualificationDto, EventDto} from './atom2027-dto';
+import {BrigadeDto, EdificeDependencyDto, EdificeDto, EmployeeDto, EmployeeQualificationDto, EventDto} from './atom2027-dto';
 import {TestQueue$TestQueuePayload} from './atom2027-queue';
 import {Observable} from 'rxjs';
 import {map} from 'rxjs/operators';
+
+@Service()
+export class BrigadeService {
+  httpService: HttpClient;
+
+
+ public constructor() {
+    this.httpService = inject(HttpClient);
+  }
+
+ public getBrigades(): Observable<BrigadeDto[]>  {
+    return this.httpService.get<BrigadeDto[]>('brigades', {responseType: 'json'});
+  }
+
+}
 
 @Service()
 export class EdificeDependencyService {

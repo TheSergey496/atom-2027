@@ -1,18 +1,24 @@
 package org.prolegacy.atom2027.readers;
 
+import com.querydsl.core.group.GroupBy;
 import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.core.types.dsl.Expressions;
+import org.prolegacy.atom2027.common.query.query.DtoProjections;
 import org.prolegacy.atom2027.common.query.query.JPAQuery;
 import org.prolegacy.atom2027.common.query.query.JPAQueryFactory;
 import org.prolegacy.atom2027.dto.EventDto;
+import org.prolegacy.atom2027.entities.QBrigadeEvent;
 import org.prolegacy.atom2027.entities.QEdifice;
 import org.prolegacy.atom2027.entities.QEvent;
 import org.prolegacy.atom2027.entities.QEventStatus;
+import org.prolegacy.atom2027.entities.ids.BrigadeId;
 import org.prolegacy.atom2027.entities.ids.EdificeId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Repository
 public class EventReader {
@@ -22,6 +28,8 @@ public class EventReader {
 
     private static final QEvent ev1 = new QEvent("ev1");
     private static final QEvent ev2 = new QEvent("ev2");
+
+    private static final QBrigadeEvent brigadeEvent = QBrigadeEvent.brigadeEvent;
 
     @Autowired
     private JPAQueryFactory queryFactory;
@@ -77,5 +85,19 @@ public class EventReader {
         }
 
         return query.fetch();
+    }
+
+
+    public Map<BrigadeId, List<EventDto>> getEventsForBrigades() {
+        return queryFactory.from(event)
+                .innerJoin(brigadeEvent).on(brigadeEvent.eventId.eq(event.id))
+                .leftJoin(edifice).on(edifice.id.eq(event.edificeId))
+                .leftJoin(eventStatus).on(eventStatus.id.eq(event.eventStatusId))
+                .selectDto(
+                        EventDto.class,
+                        brigadeEvent.brigadeId.as("brigadeId"),
+                        brigadeEvent.orderNumber.as("brigadeOrderNumber")
+                ).stream()
+                .collect(Collectors.groupingBy(EventDto::getBrigadeId));
     }
 }

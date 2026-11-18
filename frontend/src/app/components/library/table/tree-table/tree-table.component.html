@@ -134,9 +134,29 @@
                   </div>
                 }
                 @default {
-                  <div class="cell-content-value cell-content-value-center">
-                    {{ ColumnUtils.getColumnValueFormatted(row, column.originalColumn) }}
-                  </div>
+                    @if (column.originalColumn.decoration === 'tag') {
+                        @switch (ColumnUtils.getColumnValueFormatted(row, column.originalColumn)) {
+                            @case ('Активная авария') {
+                                <p-tag severity="danger" [value]="ColumnUtils.getColumnValueFormatted(row, column.originalColumn)" />
+                            }
+                            @case ('Ремонтные работы') {
+                                <p-tag severity="warn" [value]="ColumnUtils.getColumnValueFormatted(row, column.originalColumn)" />
+                            }
+                            @case ('Норма') {
+                                <p-tag severity="success" [value]="ColumnUtils.getColumnValueFormatted(row, column.originalColumn)" />
+                            }
+                            @case ('Вода') {
+                                <p-tag severity="info" [value]="ColumnUtils.getColumnValueFormatted(row, column.originalColumn)" />
+                            }
+                            @case ('Электроэнергия') {
+                                <p-tag class="yellow-tag" severity="warn" [value]="ColumnUtils.getColumnValueFormatted(row, column.originalColumn)" />
+                            }
+                        }
+                    } @else {
+                        <div class="cell-content-value cell-content-value-center">
+                            {{ ColumnUtils.getColumnValueFormatted(row, column.originalColumn) }}
+                        </div>
+                    }
                 }
               }
             </div>

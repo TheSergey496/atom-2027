@@ -10,6 +10,7 @@ import { TreeTableDemoComponent } from './components/pages/tree-table-demo/tree-
 import { EdificesComponent } from './components/pages/edifices/edifices.component';
 import { EventsComponent } from './components/pages/events/events.component';
 import { EmployeeComponent } from './components/pages/employee/employee.component';
+import { BrigadeComponent } from './components/pages/brigade/brigade.component';
 
 export const routes: Routes = [
   {
@@ -44,6 +45,10 @@ export const routes: Routes = [
   {
     path: 'employees',
     component: EmployeeComponent,
+  },
+  {
+    path: 'brigades',
+    component: BrigadeComponent,
   },
   {
     path: 'events',

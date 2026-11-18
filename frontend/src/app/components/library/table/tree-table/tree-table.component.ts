@@ -39,6 +39,7 @@ import { Menu } from '@openng/optimus-ui/menu';
 import { CheckboxModule } from '@openng/optimus-ui/checkbox';
 import { TreeTableOverrides } from './tree-table-overrides';
 import { RowOverrides } from './row-overrides';
+import { Tag } from '@openng/optimus-ui/tag';
 
 @Component({
   imports: [
@@ -49,6 +50,7 @@ import { RowOverrides } from './row-overrides';
     Menu,
     FormsModule,
     CheckboxModule,
+    Tag,
   ],
   selector: 'pro-legacy-tree-table',
   styleUrl: './tree-table.component.css',
@@ -108,11 +110,11 @@ export class TreeTableComponent {
       icon: 'pi pi-sort-alt-slash',
       command: () => this.resetAllSorts(),
     },
-    {
-      label: 'Очистить все фильтры',
-      icon: 'pi pi-filter-slash',
-      command: () => this.resetAllFilters(),
-    },
+    // {
+    //   label: 'Очистить все фильтры',
+    //   icon: 'pi pi-filter-slash',
+    //   command: () => this.resetAllFilters(),
+    // },
     {
       label: 'Сбросить все настройки',
       icon: 'pi pi-refresh',
@@ -369,11 +371,11 @@ export class TreeTableComponent {
           icon: 'pi pi-sort-alt-slash',
           command: () => this.resetColumnSort(tableColumn),
         },
-        {
-          label: 'Очистить фильтр',
-          icon: 'pi pi-filter-slash',
-          command: () => this.resetColumnFilter(tableColumn),
-        },
+        // {
+        //   label: 'Очистить фильтр',
+        //   icon: 'pi pi-filter-slash',
+        //   command: () => this.resetColumnFilter(tableColumn),
+        // },
       ];
 
       tableColumns.push(tableColumn);

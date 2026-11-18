@@ -1,0 +1,19 @@
+<div class="v-flex">
+    <p-toolbar>
+        <ng-template #start>
+            <div class="table-title">
+                Бригады ({{ count() }})
+            </div>
+        </ng-template>
+        <ng-template #end>
+            <pro-legacy-table-fast-search [table]="table">
+            </pro-legacy-table-fast-search>
+        </ng-template>
+    </p-toolbar>
+    <pro-legacy-tree-table #table
+                           class="v-flex-grow"
+                           [value]="data()"
+                           [columns]="columns()"
+                           [getRowId]="getRowId">
+    </pro-legacy-tree-table>
+</div>

@@ -110,6 +110,10 @@ export class Header {
             route: '/employees',
           },
           {
+            label: 'Бригады',
+            route: '/brigades',
+          },
+          {
             label: 'Пользователи',
             route: '/administration/users',
           },
@@ -127,6 +131,10 @@ export class Header {
           {
             label: 'Рабочие',
             route: '/employees',
+          },
+          {
+            label: 'Бригады',
+            route: '/brigades',
           },
         ];
       } else {
