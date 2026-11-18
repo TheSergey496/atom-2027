@@ -11,6 +11,7 @@ import { EdificesComponent } from './components/pages/edifices/edifices.componen
 import { EventsComponent } from './components/pages/events/events.component';
 import { EmployeeComponent } from './components/pages/employee/employee.component';
 import { BrigadeComponent } from './components/pages/brigade/brigade.component';
+import { BrigadeEventsComponent } from './components/pages/brigade-events/brigade-events.component';
 
 export const routes: Routes = [
   {
@@ -53,6 +54,10 @@ export const routes: Routes = [
   {
     path: 'events',
     component: EventsComponent,
+  },
+  {
+    path: 'brigade-events',
+    component: BrigadeEventsComponent,
   },
   { path: '**', redirectTo: 'home' },
 ];

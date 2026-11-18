@@ -8,6 +8,8 @@ import org.prolegacy.atom2027.entities.ids.BrigadeEventId;
 import org.prolegacy.atom2027.entities.ids.BrigadeId;
 import org.prolegacy.atom2027.entities.ids.EventId;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Data
 @Setter(AccessLevel.PRIVATE)
@@ -21,4 +23,6 @@ public class BrigadeEvent {
     private BrigadeId brigadeId;
     private EventId eventId;
     private Long orderNumber;
+    private LocalDateTime startDate;
+    private LocalDateTime expectedEndTime;
 }

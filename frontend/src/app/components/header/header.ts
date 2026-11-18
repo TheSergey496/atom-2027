@@ -114,9 +114,13 @@ export class Header {
             route: '/brigades',
           },
           {
-            label: 'Пользователи',
-            route: '/administration/users',
+            label: 'Расписание',
+            route: '/brigade-events'
           },
+          // {
+          //   label: 'Пользователи',
+          //   route: '/administration/users',
+          // },
         ];
       } else if (this.userService.currentUser != null) {
         this.menuTabs = [
@@ -135,6 +139,10 @@ export class Header {
           {
             label: 'Бригады',
             route: '/brigades',
+          },
+          {
+            label: 'Расписание',
+            route: '/brigade-events',
           },
         ];
       } else {

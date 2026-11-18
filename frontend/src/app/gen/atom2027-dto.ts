@@ -1,8 +1,18 @@
+import {Duration} from './java-time';
 
 export class BrigadeDto {
   events?: EventDto[];
   id?: number;
   name?: string;
+}
+
+export class BrigadeEventDto {
+  averageResolutionTime?: Duration;
+  brigade?: BrigadeDto;
+  edifice?: EdificeDto;
+  event?: EventDto;
+  id?: number;
+  orderNumber?: number;
 }
 
 export class EdificeDependencyDto {

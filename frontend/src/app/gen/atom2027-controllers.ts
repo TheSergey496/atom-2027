@@ -1,6 +1,6 @@
 import {HttpClient, HttpHeaders, HttpParams} from '@angular/common/http';
 import {Service, inject} from '@angular/core';
-import {BrigadeDto, EdificeDependencyDto, EdificeDto, EmployeeDto, EmployeeQualificationDto, EventDto} from './atom2027-dto';
+import {BrigadeDto, BrigadeEventDto, EdificeDependencyDto, EdificeDto, EmployeeDto, EmployeeQualificationDto, EventDto} from './atom2027-dto';
 import {TestQueue$TestQueuePayload} from './atom2027-queue';
 import {Observable} from 'rxjs';
 import {map} from 'rxjs/operators';
@@ -41,6 +41,10 @@ export class BrigadeService {
 
  public exportBrigadesJson(): Observable<BrigadeController$BrigadesResponse>  {
     return this.httpService.get<BrigadeController$BrigadesResponse>('brigades/json', {responseType: 'json'});
+  }
+
+ public getBrigadeEvents(): Observable<BrigadeEventDto[]>  {
+    return this.httpService.get<BrigadeEventDto[]>('brigades/events', {responseType: 'json'});
   }
 
  public getBrigades(): Observable<BrigadeDto[]>  {

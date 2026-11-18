@@ -4,11 +4,19 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import org.prolegacy.atom2027.common.annotation.TypescriptEndpoint;
 import org.prolegacy.atom2027.common.exceptions.BusinessLogicException;
 import org.prolegacy.atom2027.dto.BrigadeDto;
+<<<<<<< HEAD
 import org.prolegacy.atom2027.dto.EmployeeDto;
 import org.prolegacy.atom2027.entities.Brigade;
 import org.prolegacy.atom2027.entities.BrigadeEvent;
 import org.prolegacy.atom2027.entities.BrigadeMember;
 import org.prolegacy.atom2027.entities.ids.BrigadeId;
+=======
+import org.prolegacy.atom2027.dto.BrigadeEventDto;
+import org.prolegacy.atom2027.entities.Brigade;
+import org.prolegacy.atom2027.entities.BrigadeEvent;
+import org.prolegacy.atom2027.entities.BrigadeMember;
+import org.prolegacy.atom2027.readers.BrigadeEventReader;
+>>>>>>> d287c53 (brigade event)
 import org.prolegacy.atom2027.readers.BrigadeReader;
 import org.prolegacy.atom2027.readers.EmployeeReader;
 import org.prolegacy.atom2027.repositories.BrigadeEventRepository;
@@ -38,10 +46,17 @@ public class BrigadeController {
     private BrigadeMemberRepository brigadeMemberRepository;
     @Autowired
     private BrigadeEventRepository brigadeEventRepository;
+    @Autowired
+    private BrigadeEventReader brigadeEventReader;
 
     @GetMapping
     public List<BrigadeDto> getBrigades() {
         return brigadeReader.getBrigades();
+    }
+
+    @GetMapping("events")
+    public List<BrigadeEventDto> getBrigadeEvents() {
+        return brigadeEventReader.getBrigadeEvents();
     }
 
     public record ExportBrigadeDto(

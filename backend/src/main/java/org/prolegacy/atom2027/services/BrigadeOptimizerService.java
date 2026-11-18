@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -92,17 +93,26 @@ public class BrigadeOptimizerService {
         brigadeEventRepository.deleteAllInBatch();
         brigadeMemberRepository.deleteAllInBatch();
         brigadeRepository.deleteAllInBatch();
+<<<<<<< HEAD
         List<BrigadeSolver.BrigadeSolution> brigades = solution.brigades();
         for (int i = 0; i < brigades.size(); i++) {
             BrigadeSolver.BrigadeSolution plan = brigades.get(i);
             Brigade brigade = brigadeRepository.save(new Brigade("Бригада %s".formatted(i + 1))); // id via @LongIdGenerator
+=======
+        final LocalDateTime origin = LocalDateTime.now();
+        for (BrigadeSolver.BrigadeSolution plan : solution.brigades()) {
+            Brigade brigade = brigadeRepository.save(new Brigade(null)); // id via @LongIdGenerator
+>>>>>>> d287c53 (brigade event)
             BrigadeId brigadeId = brigade.getId();
             brigadeMemberRepository.saveAll(plan.members().stream()
                     .map(id -> new BrigadeMember(null, brigadeId, id)).toList());
             List<BrigadeEvent> links = new ArrayList<>();
             long order = 1;
-            for (BrigadeSolver.Job job : plan.jobs()) // jobs already in execution order
-                links.add(new BrigadeEvent(null, brigadeId, job.event(), order++));
+            for (BrigadeSolver.Job job : plan.jobs()) {
+                LocalDateTime startTime = origin.plus(job.start());
+                LocalDateTime expectedEndTime = startTime.plus(job.duration());
+                links.add(new BrigadeEvent(null, brigadeId, job.event(), order++, startTime, expectedEndTime));
+            }
             brigadeEventRepository.saveAll(links);
         }
 
