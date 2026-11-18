@@ -9,8 +9,9 @@ import {
   signal,
 } from '@angular/core';
 import { BrigadeService } from '../../../gen/atom2027-controllers';
-import { lastValueFrom } from 'rxjs';
+import { lastValueFrom, Subscription } from 'rxjs';
 import { BrigadeEventDto } from '../../../gen/atom2027-dto';
+import { ResetService } from '../../../services/reset.service';
 
 const TIME_FORMATTER = new Intl.DateTimeFormat('ru-RU', {
   hour: '2-digit',
@@ -92,14 +93,23 @@ function formatDuration(ms: number): string {
 })
 export class BrigadeEventsComponent implements OnInit, OnDestroy {
   private readonly brigadeService = inject(BrigadeService);
+  private readonly resetService = inject(ResetService);
+
+  private resetSubscription?: Subscription;
 
   async ngOnInit() {
     const events = await lastValueFrom(this.brigadeService.getBrigadeEvents());
-    console.log(events);
     this.events.set(events ?? []);
+
+    this.resetSubscription = this.resetService.subscribe(async () => {
+      const events = await lastValueFrom(this.brigadeService.getBrigadeEvents());
+      this.events.set(events ?? []);
+    });
   }
 
-  ngOnDestroy(): void {}
+  ngOnDestroy(): void {
+    this.resetSubscription?.unsubscribe();
+  }
 
   readonly events = model<readonly BrigadeEventDto[]>([]);
 
