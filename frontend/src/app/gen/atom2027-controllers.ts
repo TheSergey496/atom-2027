@@ -5,6 +5,31 @@ import {TestQueue$TestQueuePayload} from './atom2027-queue';
 import {Observable} from 'rxjs';
 import {map} from 'rxjs/operators';
 
+export class BrigadeController$BrigadesResponse {
+  brigades?: BrigadeController$ExportBrigadeDto[];
+}
+
+export class BrigadeController$ExportBrigadeDto {
+  brigade_id?: number;
+  employees?: number[];
+  events_order?: number[];
+}
+
+@Service()
+export class BrigadeOptimizerService {
+  httpService: HttpClient;
+
+
+ public constructor() {
+    this.httpService = inject(HttpClient);
+  }
+
+ public optimizeBrigades(): Observable<void>  {
+    return this.httpService.post<void>('brigades/optimize', null );
+  }
+
+}
+
 @Service()
 export class BrigadeService {
   httpService: HttpClient;
@@ -12,6 +37,10 @@ export class BrigadeService {
 
  public constructor() {
     this.httpService = inject(HttpClient);
+  }
+
+ public exportBrigadesJson(): Observable<BrigadeController$BrigadesResponse>  {
+    return this.httpService.get<BrigadeController$BrigadesResponse>('brigades/json', {responseType: 'json'});
   }
 
  public getBrigades(): Observable<BrigadeDto[]>  {

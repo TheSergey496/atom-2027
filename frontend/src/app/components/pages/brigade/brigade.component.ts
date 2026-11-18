@@ -9,9 +9,12 @@ import { BrigadeService } from '../../../gen/atom2027-controllers';
 import { TreeNode } from '@openng/optimus-ui/api';
 import { EventStatusLocaleEnum, ResourceTypeLocaleEnum } from '../events/events.component';
 import { ResetService } from '../../../services/reset.service';
+import { GlobalLoadingService } from '../../../services/loading.service';
+import { Button } from '@openng/optimus-ui/button';
+import { Tooltip } from '@openng/optimus-ui/tooltip';
 
 @Component({
-  imports: [TableFastSearchComponent, Toolbar, TreeTableComponent],
+  imports: [TableFastSearchComponent, Toolbar, TreeTableComponent, Button, Tooltip],
   selector: 'pro-legacy-brigade',
   styleUrl: './brigade.component.css',
   templateUrl: './brigade.component.html',
@@ -86,6 +89,7 @@ export class BrigadeComponent implements OnInit, OnDestroy {
   private readonly brigadeService = inject(BrigadeService);
   private readonly cdr = inject(ChangeDetectorRef);
   private readonly resetService = inject(ResetService);
+  private readonly globalLoadingService = inject(GlobalLoadingService);
 
   private resetSubscription?: Subscription;
 
@@ -124,5 +128,22 @@ export class BrigadeComponent implements OnInit, OnDestroy {
     } finally {
       this.loading.set(false);
     }
+  }
+
+  protected async exportJson() {
+    await this.globalLoadingService.withLoader(async () => {
+      let json = await lastValueFrom(this.brigadeService.exportBrigadesJson());
+      const jsonString = JSON.stringify(json, null, 2);
+
+      const blob = new Blob([jsonString], { type: 'application/json' });
+      const url = window.URL.createObjectURL(blob);
+
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'бригады.json';
+      a.click();
+
+      window.URL.revokeObjectURL(url);
+    });
   }
 }

@@ -4,6 +4,8 @@
             <div class="table-title">
                 Бригады ({{ count() }})
             </div>
+            <div class="splitter"></div>
+            <p-button icon="fa fa-file-json" pTooltip="Выгрузить бригады" (onClick)="exportJson()"></p-button>
         </ng-template>
         <ng-template #end>
             <pro-legacy-table-fast-search [table]="table">
