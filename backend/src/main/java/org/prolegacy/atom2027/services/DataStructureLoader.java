@@ -12,8 +12,10 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -113,7 +115,7 @@ public class DataStructureLoader {
                             new EventId(e.getId()),
                             new EdificeId(e.getIdEdifice()),
                             e.getResourceType(),
-                            e.getOccurredAt(),
+                            e.getOccurredAt().minus(3, ChronoUnit.HOURS),
                             new EventStatusId(e.getIdStatus())
                     )
                 ).toList()
