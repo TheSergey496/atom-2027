@@ -17,7 +17,7 @@ public class ProtocolReader {
     private static final QProtocol protocol = QProtocol.protocol;
     private static final QEmployee employee = QEmployee.employee;
     private static final QCheck check = QCheck.check;
-    private static final QEdifice edifice = QEdifice.edifice;
+    private static final QEdifice edifice = new QEdifice("check$edifice");
     private static final QEmployeeQualificationAgg employeeQualificationAgg = QEmployeeQualificationAgg.employeeQualificationAgg;
 
     @Autowired

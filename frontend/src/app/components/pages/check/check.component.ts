@@ -29,6 +29,7 @@ import { SelectButton } from '@openng/optimus-ui/selectbutton';
 import { FormsModule } from '@angular/forms';
 import { Checkbox } from '@openng/optimus-ui/checkbox';
 import { ResetService } from '../../../services/reset.service';
+import { Router } from '@angular/router';
 
 @Component({
   imports: [
@@ -138,6 +139,7 @@ export class CheckComponent implements OnInit, OnDestroy {
   private readonly globalLoadingService = inject(GlobalLoadingService);
   private readonly cdr = inject(ChangeDetectorRef);
   private readonly resetService = inject(ResetService);
+  private readonly router = inject(Router);
 
   constructor() {
     this.intervalId = setInterval(() => this.table()?.table()?.cd?.detectChanges(), 3000);
@@ -148,6 +150,12 @@ export class CheckComponent implements OnInit, OnDestroy {
     this.resetSubscription = this.resetService.subscribe(async () => {
       await this.loadData();
     });
+    let checkId: unknown = this.router.lastSuccessfulNavigation()?.extras.state?.['checkId'];
+    if (checkId != null) {
+      requestAnimationFrame(() => {
+        this.table()?.findAndSelectRow({ checkId: checkId }).then();
+      });
+    }
   }
 
   ngOnDestroy() {

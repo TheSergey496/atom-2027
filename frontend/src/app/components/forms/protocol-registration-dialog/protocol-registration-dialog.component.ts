@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { DialogComponent } from '../../../utils/dialogComponent';
 import { CheckDto, EdificeDto, EmployeeDto, ProtocolDto } from '../../../gen/atom2027-dto';
 import { Button } from '@openng/optimus-ui/button';
@@ -10,8 +10,14 @@ import { FloatLabelTransitionFixDirective } from '../../../directives/float-labe
 import { InputText } from '@openng/optimus-ui/inputtext';
 import { SelectButton } from '@openng/optimus-ui/selectbutton';
 import { AutoComplete, AutoCompleteCompleteEvent } from '@openng/optimus-ui/autocomplete';
-import { CheckService, EdificeService, EmployeeService } from '../../../gen/atom2027-controllers';
+import {
+  CheckService,
+  EdificeService,
+  EmployeeService,
+  ProtocolService,
+} from '../../../gen/atom2027-controllers';
 import { lastValueFrom } from 'rxjs';
+import { CheckTypeRecord } from '../../../gen/entities-enums';
 
 @Component({
   imports: [
@@ -46,9 +52,14 @@ export class ProtocolRegistrationDialogComponent extends DialogComponent<Protoco
   protected allEdifices: EdificeDto[] = [];
   protected edifices: EdificeDto[] = [];
 
+  protected readonly header = signal<string | undefined>('Создание Протокола');
+
+  private readonly protocolService = inject(ProtocolService);
   private readonly checkService = inject(CheckService);
   private readonly employeeService = inject(EmployeeService);
   private readonly edificeService = inject(EdificeService);
+
+  protected readOnlyMode = signal(false);
 
   public constructor() {
     super();
@@ -56,11 +67,21 @@ export class ProtocolRegistrationDialogComponent extends DialogComponent<Protoco
     this.loading = true;
   }
 
-  public async init(protocolId?: number) {
-    if (protocolId == null) {
-      this.res = new ProtocolDto();
-    }
+  public async init(protocolId?: number, readOnlyMode = false) {
+    this.readOnlyMode.set(readOnlyMode);
     try {
+      if (protocolId == null) {
+        this.header.set('Создание протокола');
+        this.res = new ProtocolDto();
+      } else {
+        this.header.set(this.readOnlyMode() ? 'Просмотр протокола' : 'Редактирование проверки');
+        this.res = await lastValueFrom(this.protocolService.getProtocol(protocolId));
+        this.selectedType =
+          this.res.check?.checkType?.toString() === CheckTypeRecord.NON_PLAN.toString()
+            ? Type.NON_PLAN
+            : Type.NORMAL;
+      }
+
       this.allChecks = await lastValueFrom(this.checkService.getChecks(false, true));
       this.checks = [...this.allChecks];
 

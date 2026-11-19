@@ -5,6 +5,7 @@
                          optionLabel="label"
                          optionValue="value"
                          ariaLabelledBy="changePasswordSwitchLabel"
+                         [disabled]="readOnlyMode()"
                          [class]="'change-password-select'"
                          [styleClass]="'change-password-select-option'"
                          [allowEmpty]="false"
@@ -27,6 +28,7 @@
                                  dataKey="checkId"
                                  name="check"
                                  inputId="checkInput"
+                                 [disabled]="readOnlyMode()"
                                  [showClear]="true"
                                  (completeMethod)="searchChecks($event)"/>
                 <label for="edificeInput" class="required">Номер проверки</label>
@@ -44,6 +46,7 @@
                                  name="edifice"
                                  inputId="edificeInput"
                                  required
+                                 [disabled]="readOnlyMode()"
                                  [showClear]="true"
                                  (completeMethod)="searchEdifices($event)"/>
                 <label for="edificeInput" class="required">Объект</label>
@@ -56,6 +59,7 @@
                              name="employee"
                              required
                              inputId="employeeInput"
+                             [disabled]="readOnlyMode()"
                              [showClear]="true"
                              (completeMethod)="searchEmployee($event)"/>
             <label for="employeeInput" class="required">Проверяющий</label>
@@ -67,6 +71,7 @@
                       id="resultInput"
                       name="result"
                       style="max-height: 100px"
+                      [disabled]="readOnlyMode()"
                       [fluid]="true"
                       [autoResize]="true"
                       [(ngModel)]="res!.result">
@@ -79,6 +84,7 @@
                       id="defectsInput"
                       name="defects"
                       style="max-height: 100px"
+                      [disabled]="readOnlyMode()"
                       [fluid]="true"
                       [autoResize]="true"
                       [(ngModel)]="res!.defects">
@@ -91,6 +97,7 @@
                       id="conclusionInput"
                       name="conclusion"
                       style="max-height: 100px"
+                      [disabled]="readOnlyMode()"
                       [fluid]="true"
                       [autoResize]="true"
                       [(ngModel)]="res!.conclusion">
@@ -103,6 +110,7 @@
                       id="recommendationsInput"
                       name="recommendations"
                       style="max-height: 100px"
+                      [disabled]="readOnlyMode()"
                       [fluid]="true"
                       [autoResize]="true"
                       [(ngModel)]="res!.recommendations">

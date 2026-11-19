@@ -21,6 +21,9 @@ import { DialogService } from '../../../services/dialog.service';
 import { ProtocolRegistrationDialogComponent } from '../../forms/protocol-registration-dialog/protocol-registration-dialog.component';
 import { MessageService } from '@openng/optimus-ui/api';
 import { CheckTypeRecord } from '../../../gen/entities-enums';
+import { Router } from '@angular/router';
+import { routes } from '../../../app.routes';
+import { CheckEditDialogComponent } from '../../forms/check-edit-dialog/check-edit-dialog.component';
 
 @Component({
   imports: [Button, TableComponent, TableFastSearchComponent, Toolbar, Tooltip],
@@ -94,6 +97,7 @@ export class ProtocolsComponent implements OnInit, OnDestroy {
   private readonly cdr = inject(ChangeDetectorRef);
   private readonly messageService = inject(MessageService);
   private readonly dialogService = inject(DialogService);
+  private readonly router = inject(Router);
 
   private resetSubscription?: Subscription;
 
@@ -146,5 +150,32 @@ export class ProtocolsComponent implements OnInit, OnDestroy {
         }
       },
     };
+  }
+
+  protected navigateToCheck() {
+    const checkId = this.selectedProtocol()?.check?.checkId;
+    if (checkId == null) {
+      return;
+    }
+
+    this.router.navigate(['/checks'], { state: { checkId: checkId } }).then();
+  }
+
+  protected async lookAtProtocol() {
+    const id = this.selectedProtocol()?.id;
+    if (id == null) {
+      return;
+    }
+    const d = this.dialogService.createDialog(ProtocolRegistrationDialogComponent);
+    await d.init(id, true);
+  }
+
+  protected async lookAtCheck() {
+    const checkId = this.selectedProtocol()?.check?.checkId;
+    if (checkId == null) {
+      return;
+    }
+    const d = this.dialogService.createDialog(CheckEditDialogComponent);
+    await d.init(checkId, true);
   }
 }

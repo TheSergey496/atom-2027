@@ -23,6 +23,29 @@
                       (onClick)="createProtocol()">
             </p-button>
 
+            <p-button icon="pi pi-eye"
+                      size="small"
+                      pTooltip="Посмотр протокола"
+                      [disabled]="selectedProtocol() == null"
+                      (onClick)="lookAtProtocol()">
+            </p-button>
+
+            <div class="splitter"></div>
+
+            <p-button icon="pi pi-arrow-right"
+                      size="small"
+                      pTooltip="Перейти к проверке"
+                      [disabled]="selectedProtocol() == null"
+                      (onClick)="navigateToCheck()">
+            </p-button>
+
+            <p-button icon="pi pi-search"
+                      size="small"
+                      pTooltip="Посмотр проверки"
+                      [disabled]="selectedProtocol() == null"
+                      (onClick)="lookAtCheck()">
+            </p-button>
+
             <div class="splitter"></div>
 
             <p-button size="small"

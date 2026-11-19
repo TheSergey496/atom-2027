@@ -19,8 +19,9 @@ export class FloatLabelTransitionFixDirective implements AfterViewInit {
   }
 
   ngAfterViewInit(): void {
-    requestAnimationFrame(() =>
+    setTimeout(() =>
       this.renderer.removeClass(this.element.nativeElement, 'no-label-animation'),
+      100
     );
   }
 }

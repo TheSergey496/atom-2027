@@ -9,6 +9,7 @@
                       optionLabel="label"
                       optionValue="value"
                       inputId="typeSelect"
+                      [disabled]="readOnlyMode()"
                       [options]="checkTypes()"
                       [filter]="true"
                       [showClear]="true"
@@ -25,6 +26,7 @@
                              optionLabel="name"
                              inputId="edificeSelect"
                              dataKey="id"
+                             [disabled]="readOnlyMode()"
                              [suggestions]="edificeSuggestions()"
                              [(ngModel)]="check.edifice"
                              (completeMethod)="edificeCompleteMethod($event)"
@@ -41,6 +43,7 @@
                            name="planDate"
                            appendTo="body"
                            pInputMask="99.99.9999 99:99"
+                           [disabled]="readOnlyMode()"
                            [showIcon]="true"
                            [(ngModel)]="check.planDate"
                            [showTime]="true"
@@ -57,6 +60,7 @@
                              optionLabel="fullName"
                              inputId="responsibleSelect"
                              dataKey="id"
+                             [disabled]="readOnlyMode()"
                              [suggestions]="employeeSuggestions()"
                              [dropdown]="true"
                              [(ngModel)]="check.responsible"
@@ -72,6 +76,7 @@
                       id="commentTextArea"
                       style="max-height: 300px"
                       name="comment"
+                      [disabled]="readOnlyMode()"
                       [fluid]="true"
                       [autoResize]="true"
                       [(ngModel)]="check.comment">
@@ -82,9 +87,14 @@
     </form>
 
     <ng-template #footer>
-        <p-button label="Сохранить" (onClick)="save()" [disabled]="form.invalid">
-        </p-button>
-        <p-button label="Отмена" severity="secondary" (onClick)="this.visible = false">
-        </p-button>
+        @if (!readOnlyMode()) {
+            <p-button label="Сохранить" (onClick)="save()" [disabled]="form.invalid">
+            </p-button>
+            <p-button label="Отмена" severity="secondary" (onClick)="this.visible = false">
+            </p-button>
+        } @else {
+            <p-button label="Закрыть" (onClick)="this.visible = false" [disabled]="form.invalid">
+            </p-button>
+        }
     </ng-template>
 </p-dialog>

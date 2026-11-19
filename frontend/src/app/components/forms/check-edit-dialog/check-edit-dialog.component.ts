@@ -51,15 +51,18 @@ export class CheckEditDialogComponent extends DialogComponent<CheckDto, 'save'> 
   private readonly employeeService = inject(EmployeeService);
   private readonly messageService = inject(MessageService);
 
+  protected readOnlyMode = signal(false);
+
   constructor() {
     super();
   }
 
-  public async init(checkId?: number) {
+  public async init(checkId?: number, readOnlyMode = false) {
     this.loading = true;
+    this.readOnlyMode.set(readOnlyMode);
     try {
       if (checkId != null) {
-        this.header.set('Редактирование проверки');
+        this.header.set(this.readOnlyMode() ? 'Просмотр проверки' : 'Редактирование проверки');
         this.check = await lastValueFrom(this.checkService.getCheck(checkId));
         if (this.check == null) {
           this.messageService.add({
@@ -80,7 +83,10 @@ export class CheckEditDialogComponent extends DialogComponent<CheckDto, 'save'> 
       this.edifices = await lastValueFrom(this.edificeService.getEdifices());
       this.edificeSuggestions.set([...this.edifices]);
       this.checkTypes.set(
-        [CheckTypeRecord.PLAN, CheckTypeRecord.REPEATED].map(ct => ({
+        (this.readOnlyMode()
+          ? [CheckTypeRecord.NON_PLAN, CheckTypeRecord.PLAN, CheckTypeRecord.REPEATED]
+          : [CheckTypeRecord.PLAN, CheckTypeRecord.REPEATED]
+        ).map(ct => ({
           label: CheckTypeLocaleEnum[ct],
           value: ct,
         })),
