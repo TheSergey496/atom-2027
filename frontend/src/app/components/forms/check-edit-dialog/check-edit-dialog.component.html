@@ -38,6 +38,7 @@
             <label for="edificeSelect" class="required">Объект проверки</label>
         </p-floatlabel>
 
+        <div>
         <p-floatlabel proLegacyFloatLabelTransitionFix variant="on">
             <p-date-picker inputId="planDatePicker"
                            name="planDate"
@@ -45,7 +46,8 @@
                            pInputMask="99.99.9999 99:99"
                            [disabled]="readOnlyMode()"
                            [showIcon]="true"
-                           [(ngModel)]="check.planDate"
+                           [ngModel]="check.planDate"
+                           (ngModelChange)="onPlanDateChange($event)"
                            [showTime]="true"
                            [fluid]="true"
                            [showOnFocus]="false"
@@ -53,6 +55,10 @@
                            [required]="true"/>
             <label for="planDatePicker" class="required">Дата проверки</label>
         </p-floatlabel>
+            @if (!dateValid()) {
+                <pro-legacy-form-message message="Плановая дата проверки обязана быть в будущем"></pro-legacy-form-message>
+            }
+        </div>
 
         <p-floatlabel proLegacyFloatLabelTransitionFix variant="on">
             <p-auto-complete name="responsible"
@@ -88,7 +94,7 @@
 
     <ng-template #footer>
         @if (!readOnlyMode()) {
-            <p-button label="Сохранить" (onClick)="save()" [disabled]="form.invalid">
+            <p-button label="Сохранить" (onClick)="save()" [disabled]="form.invalid || !dateValid()">
             </p-button>
             <p-button label="Отмена" severity="secondary" (onClick)="this.visible = false">
             </p-button>

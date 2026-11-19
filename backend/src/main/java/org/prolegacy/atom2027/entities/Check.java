@@ -65,7 +65,7 @@ public class Check {
         this.planDate = Optional.ofNullable(dto.getPlanDate())
                 .orElseThrow(() -> new BusinessLogicException("Не задана плановая дата проверки"));
         if (planDate.isBefore(Instant.now())) {
-            throw new BusinessLogicException("Плановая дата обязана быть в будущем");
+            throw new BusinessLogicException("Плановая дата проверки обязана быть в будущем");
         }
         this.responsibleId = Optional.ofNullable(dto.getResponsible())
                 .map(EmployeeDto::getId)

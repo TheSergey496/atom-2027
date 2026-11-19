@@ -21,7 +21,9 @@
 
             <p-floatlabel proLegacyFloatLabelTransitionFix variant="on">
                 <p-auto-complete required
-                                 [(ngModel)]="res!.check" [dropdown]="true" [suggestions]="checks"
+                                 [ngModel]="res!.check"
+                                 (ngModelChange)="onCheckChange($event)"
+                                 [dropdown]="true" [suggestions]="checks"
                                  style="width: 100%"
                                  appendTo="body"
                                  optionLabel="checkId"
@@ -35,12 +37,16 @@
             </p-floatlabel>
 
             <p-floatlabel proLegacyFloatLabelTransitionFix variant="on">
-                <input pInputText name="edificeName" [disabled]="true" [ngModel]="res?.check?.edifice?.name" [fluid]="true">
+                <input pInputText name="edificeName" [disabled]="true" [ngModel]="res?.check?.edifice?.name"
+                       [fluid]="true">
                 <label for="edificeInput">Объект</label>
             </p-floatlabel>
         } @else {
             <p-floatlabel proLegacyFloatLabelTransitionFix variant="on">
-                <p-auto-complete [(ngModel)]="res!.edifice" [dropdown]="true" [suggestions]="edifices"
+                <p-auto-complete [ngModel]="res!.edifice"
+                                 (ngModelChange)="onEdificeChange($event)"
+                                 [dropdown]="true"
+                                 [suggestions]="edifices"
                                  style="width: 100%"
                                  appendTo="body" optionLabel="name" dataKey="id"
                                  name="edifice"
@@ -52,18 +58,26 @@
                 <label for="edificeInput" class="required">Объект</label>
             </p-floatlabel>
         }
-        <p-floatlabel proLegacyFloatLabelTransitionFix variant="on">
-            <p-auto-complete [(ngModel)]="res!.employee" [dropdown]="true" [suggestions]="employees"
-                             style="width: 100%"
-                             appendTo="body" optionLabel="fullName" dataKey="id"
-                             name="employee"
-                             required
-                             inputId="employeeInput"
-                             [disabled]="readOnlyMode()"
-                             [showClear]="true"
-                             (completeMethod)="searchEmployee($event)"/>
-            <label for="employeeInput" class="required">Проверяющий</label>
-        </p-floatlabel>
+        <div>
+            <p-floatlabel proLegacyFloatLabelTransitionFix variant="on">
+                <p-auto-complete [ngModel]="res!.employee"
+                                 (ngModelChange)="onEmployeeChange($event)"
+                                 [dropdown]="true"
+                                 [suggestions]="employees"
+                                 style="width: 100%"
+                                 appendTo="body" optionLabel="fullName" dataKey="id"
+                                 name="employee"
+                                 required
+                                 inputId="employeeInput"
+                                 [disabled]="readOnlyMode()"
+                                 [showClear]="true"
+                                 (completeMethod)="searchEmployee($event)"/>
+                <label for="employeeInput" class="required">Проверяющий</label>
+            </p-floatlabel>
+            @if (employeeError() != null) {
+                <pro-legacy-form-message [message]="employeeError()!"></pro-legacy-form-message>
+            }
+        </div>
 
         <p-floatlabel proLegacyFloatLabelTransitionFix variant="on">
             <textarea pTextarea
@@ -120,7 +134,7 @@
     </form>
 
     <ng-template #footer>
-        <p-button label="Создать" [disabled]="form.invalid" (onClick)="ok()"></p-button>
+        <p-button label="Создать" [disabled]="form.invalid || employeeError() != null" (onClick)="ok()"></p-button>
         <p-button label="Отмена" severity="secondary" (onClick)="close()"></p-button>
     </ng-template>
 </p-dialog>

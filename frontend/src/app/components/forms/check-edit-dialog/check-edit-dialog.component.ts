@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, OnDestroy, signal } from '@angular/core';
 import { DialogComponent } from '../../../utils/dialogComponent';
 import { CheckDto, EdificeDto, EmployeeDto } from '../../../gen/atom2027-dto';
 import { CheckService, EdificeService, EmployeeService } from '../../../gen/atom2027-controllers';
@@ -17,6 +17,7 @@ import { DatePickerModule } from '@openng/optimus-ui/datepicker';
 import { TextareaModule } from '@openng/optimus-ui/textarea';
 import { InputMaskModule } from '@openng/optimus-ui/inputmask';
 import { AutoComplete, AutoCompleteCompleteEvent } from '@openng/optimus-ui/autocomplete';
+import { FormMessageComponent } from '../../library/form-message/form-message.component';
 
 @Component({
   imports: [
@@ -31,12 +32,16 @@ import { AutoComplete, AutoCompleteCompleteEvent } from '@openng/optimus-ui/auto
     TextareaModule,
     InputMaskModule,
     AutoComplete,
+    FormMessageComponent,
   ],
   selector: 'pro-legacy-check-edit-dialog',
   styleUrl: './check-edit-dialog.component.css',
   templateUrl: './check-edit-dialog.component.html',
 })
-export class CheckEditDialogComponent extends DialogComponent<CheckDto, 'save'> {
+export class CheckEditDialogComponent
+  extends DialogComponent<CheckDto, 'save'>
+  implements OnDestroy
+{
   protected check: CheckDto = new CheckDto();
 
   protected readonly header = signal<string | undefined>('Редактирование проверки');
@@ -53,8 +58,24 @@ export class CheckEditDialogComponent extends DialogComponent<CheckDto, 'save'> 
 
   protected readOnlyMode = signal(false);
 
+  private readonly intervalId: any;
+  protected dateValid = signal(true);
+
   constructor() {
     super();
+    this.intervalId = setInterval(() => {
+      try {
+        if (this.check?.planDate != null) {
+          this.dateValid.set(this.check?.planDate.getTime() > new Date().getTime());
+        } else {
+          this.dateValid.set(true);
+        }
+      } catch (e) {}
+    }, 1000);
+  }
+
+  override ngOnDestroy() {
+    clearInterval(this.intervalId);
   }
 
   public async init(checkId?: number, readOnlyMode = false) {
@@ -63,8 +84,8 @@ export class CheckEditDialogComponent extends DialogComponent<CheckDto, 'save'> 
     try {
       if (checkId != null) {
         this.header.set(this.readOnlyMode() ? 'Просмотр проверки' : 'Редактирование проверки');
-        this.check = await lastValueFrom(this.checkService.getCheck(checkId));
-        if (this.check == null) {
+        const check = await lastValueFrom(this.checkService.getCheck(checkId));
+        if (check == null) {
           this.messageService.add({
             key: MessageServiceKey.OK,
             sticky: true,
@@ -73,7 +94,21 @@ export class CheckEditDialogComponent extends DialogComponent<CheckDto, 'save'> 
             detail: `Не найдена проверка с id = ${checkId}`,
           });
           this.visible = false;
+          return;
         }
+        if (check.planDate != null) {
+          check.planDate = new Date(check.planDate);
+        }
+
+        try {
+          if (this.check?.planDate != null) {
+            this.dateValid.set(this.check?.planDate.getTime() > new Date().getTime());
+          } else {
+            this.dateValid.set(true);
+          }
+        } catch (e) {}
+
+        this.check = check;
       } else {
         this.header.set('Назначение проверки');
       }
@@ -113,5 +148,16 @@ export class CheckEditDialogComponent extends DialogComponent<CheckDto, 'save'> 
     this.employeeSuggestions.set(
       this.employees.filter(e => e.fullName?.toLowerCase()?.includes(event.query?.toLowerCase())),
     );
+  }
+
+  protected onPlanDateChange(newDate: Date) {
+    this.check.planDate = newDate;
+    try {
+      if (this.check?.planDate != null) {
+        this.dateValid.set(this.check?.planDate.getTime() > new Date().getTime());
+      } else {
+        this.dateValid.set(true);
+      }
+    } catch (e) {}
   }
 }

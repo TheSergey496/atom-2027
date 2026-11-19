@@ -18,6 +18,7 @@ import {
 } from '../../../gen/atom2027-controllers';
 import { lastValueFrom } from 'rxjs';
 import { CheckTypeRecord } from '../../../gen/entities-enums';
+import { FormMessageComponent } from '../../library/form-message/form-message.component';
 
 @Component({
   imports: [
@@ -30,6 +31,7 @@ import { CheckTypeRecord } from '../../../gen/entities-enums';
     InputText,
     SelectButton,
     AutoComplete,
+    FormMessageComponent,
   ],
   selector: 'pro-legacy-protocol-registration-dialog',
   styleUrl: './protocol-registration-dialog.component.css',
@@ -61,6 +63,8 @@ export class ProtocolRegistrationDialogComponent extends DialogComponent<Protoco
 
   protected readOnlyMode = signal(false);
 
+  protected employeeError = signal<string | null>(null);
+
   public constructor() {
     super();
     this.res = new ProtocolDto();
@@ -85,7 +89,7 @@ export class ProtocolRegistrationDialogComponent extends DialogComponent<Protoco
       this.allChecks = await lastValueFrom(this.checkService.getChecks(false, true));
       this.checks = [...this.allChecks];
 
-      this.allEmployees = await lastValueFrom(this.employeeService.getEmployees());
+      this.allEmployees = (await lastValueFrom(this.employeeService.getEmployees()));
       this.employees = [...this.allEmployees];
 
       this.allEdifices = await lastValueFrom(this.edificeService.getEdifices());
@@ -129,6 +133,45 @@ export class ProtocolRegistrationDialogComponent extends DialogComponent<Protoco
   }
 
   protected readonly Type = Type;
+
+  protected onEmployeeChange(newValue: EmployeeDto) {
+    this.res!.employee = newValue;
+    this.calculateEmployeeError();
+  }
+
+  protected onCheckChange(newValue: CheckDto) {
+    this.res!.check = newValue;
+    this.calculateEmployeeError();
+  }
+
+  protected onEdificeChange(newValue: EdificeDto) {
+    this.res!.edifice = newValue;
+    this.calculateEmployeeError();
+  }
+
+  private calculateEmployeeError() {
+    const edifice = this.res?.check?.edifice ?? this.res?.edifice;
+    if (edifice != null && this.res!.employee != null) {
+      const badForWater = edifice.hasWater && !this.res!.employee.qualifications?.includes('Вода');
+      const badForEnergy =
+        edifice.hasEnergy && !this.res!.employee.qualifications?.includes('Электроэнергия');
+      if (badForEnergy && badForWater) {
+        this.employeeError.set(
+          'Выбранный проверяющий должен обладать квалификациями по воде и электроэнергии',
+        );
+      } else if (badForWater) {
+        this.employeeError.set('Выбранный проверяющий должен обладать квалификацией по воде');
+      } else if (badForEnergy) {
+        this.employeeError.set(
+          'Выбранный проверяющий должен обладать квалификацией по электроэнергии',
+        );
+      } else {
+        this.employeeError.set(null);
+      }
+    } else {
+      this.employeeError.set(null);
+    }
+  }
 }
 
 enum Type {

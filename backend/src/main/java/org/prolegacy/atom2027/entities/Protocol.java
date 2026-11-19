@@ -42,16 +42,16 @@ public class Protocol {
 
     private void validate(ProtocolDto dto) {
         if (dto.getResult() == null ) {
-            throw new BusinessLogicException("Не указаны Результаты проверки");
+            throw new BusinessLogicException("Не указаны результаты проверки");
         }
         if (dto.getDefects() == null ) {
-            throw new BusinessLogicException("Не указаны Обнаруженные замечания и дефекты");
+            throw new BusinessLogicException("Не указаны обнаруженные замечания и дефекты");
         }
         if (dto.getConclusion() == null ) {
-            throw new BusinessLogicException("Не указано Итоговое заключение");
+            throw new BusinessLogicException("Не указано итоговое заключение");
         }
         if (dto.getRecommendations() == null ) {
-            throw new BusinessLogicException("Не указаны Рекомендации/комментарии");
+            throw new BusinessLogicException("Не указаны рекомендации/комментарии");
         }
     }
 }

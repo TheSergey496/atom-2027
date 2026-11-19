@@ -1,5 +1,6 @@
 package org.prolegacy.atom2027.readers;
 
+import com.querydsl.core.types.dsl.StringExpression;
 import org.prolegacy.atom2027.common.query.query.JPAQuery;
 import org.prolegacy.atom2027.common.query.query.JPAQueryFactory;
 import org.prolegacy.atom2027.dto.EmployeeDto;
@@ -31,12 +32,14 @@ public class EmployeeReader {
     }
 
     private JPAQuery<EmployeeDto> baseQuery() {
+        StringExpression fullName = employee.lastName.concat(" ").concat(employee.firstName).concat(" ").concat(employee.middleName);
         return queryFactory.from(employee)
                 .leftJoin(employeeQualificationAgg).on(employeeQualificationAgg.employeeId.eq(employee.id))
+                .orderBy(fullName.asc().nullsLast())
                 .selectDto(
                         EmployeeDto.class,
                         employeeQualificationAgg.qualifications.as("qualifications"),
-                        employee.lastName.concat(" ").concat(employee.firstName).concat(" ").concat(employee.middleName).as("fullName")
+                        fullName.as("fullName")
                 );
     }
 

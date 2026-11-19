@@ -1134,7 +1134,6 @@ export class TableComponent {
     if (value == null) {
       return false;
     }
-    console.log('eblan');
 
     return row?.checkStatus === CheckStatusRecord.SCHEDULED && value.getTime() < (new Date()).getTime();
   }
