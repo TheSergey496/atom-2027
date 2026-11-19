@@ -5,20 +5,20 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.prolegacy.atom2027.entities.ids.ProtocolId;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class ProtocolDto {
     private ProtocolId id;
-    private Long checkId;
-    private Boolean isNotPlanned;
-    private LocalDateTime protocolTime;
+    private CheckDto check;
+    private Instant protocolTime;
     private EmployeeDto employee;
     private EdificeDto edifice;
     private String result;
     private String defects;
     private String conclusion;
     private String recommendations;
+    private Boolean isNotPlanned;
 }

@@ -6,7 +6,6 @@ import { unauthorizedGuard } from './guards/unauthorized.guard';
 import { authorizedGuard } from './guards/authorized.guard';
 import { AdminUsersPageComponent } from './components/pages/admin-users-page/admin-users-page.component';
 import { adminGuard } from './guards/admin.guard';
-import { TreeTableDemoComponent } from './components/pages/tree-table-demo/tree-table-demo.component';
 import { EdificesComponent } from './components/pages/edifices/edifices.component';
 import { EventsComponent } from './components/pages/events/events.component';
 import { EmployeeComponent } from './components/pages/employee/employee.component';
@@ -14,6 +13,7 @@ import { BrigadeComponent } from './components/pages/brigade/brigade.component';
 import { BrigadeEventsComponent } from './components/pages/brigade-events/brigade-events.component';
 import { RepairsComponent } from './components/pages/repairs/repairs.component';
 import { CheckComponent } from './components/pages/check/check.component';
+import { ProtocolsComponent } from './components/pages/protocols/protocols.component';
 // import { ProtocolsComponent } from './components/pages/protocols/protocols.component';
 
 export const routes: Routes = [
@@ -66,13 +66,13 @@ export const routes: Routes = [
     path: 'brigade-events',
     component: BrigadeEventsComponent,
   },
-  // {
-  //   path: 'protocols',
-  //   component: ProtocolsComponent,
-  // },
+  {
+    path: 'protocols',
+    component: ProtocolsComponent,
+  },
   {
     path: 'checks',
-    component: CheckComponent
+    component: CheckComponent,
   },
   { path: '**', redirectTo: 'home' },
 ];

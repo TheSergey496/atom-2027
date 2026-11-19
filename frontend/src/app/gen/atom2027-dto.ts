@@ -86,3 +86,16 @@ export class EventStatusDto {
   name?: string;
 }
 
+export class ProtocolDto {
+  check?: CheckDto;
+  conclusion?: string;
+  defects?: string;
+  edifice?: EdificeDto;
+  employee?: EmployeeDto;
+  id?: number;
+  isNotPlanned?: boolean;
+  protocolTime?: Date;
+  recommendations?: string;
+  result?: string;
+}
+

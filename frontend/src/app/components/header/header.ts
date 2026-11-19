@@ -125,6 +125,10 @@ export class Header {
             label: 'Проверки',
             route: '/checks',
           },
+          {
+            label: 'Протоколы',
+            route: '/protocols',
+          },
           // {
           //   label: 'Пользователи',
           //   route: '/administration/users',
@@ -159,6 +163,10 @@ export class Header {
           {
             label: 'Проверки',
             route: '/checks',
+          },
+          {
+            label: 'Протоколы',
+            route: '/protocols',
           },
         ];
       } else {

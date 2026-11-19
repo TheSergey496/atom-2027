@@ -5,6 +5,15 @@
                 {{ table.getTitle('Протоколы') }}
             </div>
 
+            <p-button icon="pi pi-sync"
+                      size="small"
+                      (onClick)="loadData()">
+            </p-button>
+            <p-button icon="pi pi-filter"
+                      size="small"
+                      (onClick)="filter.set(!filter())">
+            </p-button>
+
             <div class="splitter"></div>
 
             <p-button icon="pi pi-plus"

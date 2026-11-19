@@ -1,6 +1,6 @@
 import {HttpClient, HttpHeaders, HttpParams} from '@angular/common/http';
 import {Service, inject} from '@angular/core';
-import {BrigadeDto, BrigadeEventDto, CheckDto, EdificeDependencyDto, EdificeDto, EmployeeDto, EmployeeQualificationDto, EventDto} from './atom2027-dto';
+import {BrigadeDto, BrigadeEventDto, CheckDto, EdificeDependencyDto, EdificeDto, EmployeeDto, EmployeeQualificationDto, EventDto, ProtocolDto} from './atom2027-dto';
 import {TestQueue$TestQueuePayload} from './atom2027-queue';
 import {Observable} from 'rxjs';
 import {map} from 'rxjs/operators';
@@ -197,6 +197,30 @@ export class LogService {
 
  public constructor() {
     this.httpService = inject(HttpClient);
+  }
+
+}
+
+@Service()
+export class ProtocolService {
+  httpService: HttpClient;
+
+
+ public constructor() {
+    this.httpService = inject(HttpClient);
+  }
+
+ public createProtocol(protocolDto: ProtocolDto): Observable<ProtocolDto>  {
+    const headers = new HttpHeaders().set('Content-type', 'application/json');
+    return this.httpService.post<ProtocolDto>('protocols', JSON.stringify(protocolDto) , {headers, responseType: 'json'});
+  }
+
+ public getProtocol(id: number): Observable<ProtocolDto>  {
+    return this.httpService.get<ProtocolDto>('protocols/' + id + '', {responseType: 'json'});
+  }
+
+ public getProtocols(): Observable<ProtocolDto[]>  {
+    return this.httpService.get<ProtocolDto[]>('protocols', {responseType: 'json'});
   }
 
 }

@@ -1,0 +1,96 @@
+<p-dialog header="Создание протокола" [style]="{ width: '600px' }" [modal]="true">
+    <div class="form-row">
+        <label>Тип осмотра</label>
+        <p-select-button name="changePassword"
+                         optionLabel="label"
+                         optionValue="value"
+                         ariaLabelledBy="changePasswordSwitchLabel"
+                         [class]="'change-password-select'"
+                         [styleClass]="'change-password-select-option'"
+                         [allowEmpty]="false"
+                         [fluid]="true"
+                         [options]="stateOptions"
+                         [ngModel]="selectedType"
+                         (ngModelChange)="onSelectedTypeChange($event)">
+        </p-select-button>
+    </div>
+    <div style="height: 10px"></div>
+    <form #form="ngForm" class="prolegacy-form">
+        @if (selectedType === Type.NORMAL) {
+
+        } @else {
+            <p-floatlabel proLegacyFloatLabelTransitionFix variant="on">
+                <p-auto-complete [(ngModel)]="res!.edifice" [dropdown]="true" [suggestions]="edifices"
+                                 style="width: 100%"
+                                 appendTo="body" optionLabel="name" dataKey="id"
+                                 name="edifice"
+                                 inputId="edificeInput"
+                                 (completeMethod)="searchEdifices($event)"/>
+                <label for="edificeInput" class="required">Объект</label>
+            </p-floatlabel>
+        }
+        <p-floatlabel proLegacyFloatLabelTransitionFix variant="on">
+            <p-auto-complete [(ngModel)]="res!.employee" [dropdown]="true" [suggestions]="employees"
+                             style="width: 100%"
+                             appendTo="body" optionLabel="fullName" dataKey="id"
+                             name="employee"
+                             inputId="employeeInput"
+                             (completeMethod)="searchEmployee($event)"/>
+            <label for="employeeInput" class="required">Проверяющий</label>
+        </p-floatlabel>
+
+        <p-floatlabel proLegacyFloatLabelTransitionFix variant="on">
+            <textarea pTextarea
+                      required
+                      id="resultInput"
+                      name="result"
+                      style="max-height: 100px"
+                      [fluid]="true"
+                      [autoResize]="true"
+                      [(ngModel)]="res!.result">
+            </textarea>
+            <label for="resultInput" class="required">Результаты проверки</label>
+        </p-floatlabel>
+        <p-floatlabel proLegacyFloatLabelTransitionFix variant="on">
+            <textarea pTextarea
+                      required
+                      id="defectsInput"
+                      name="defects"
+                      style="max-height: 100px"
+                      [fluid]="true"
+                      [autoResize]="true"
+                      [(ngModel)]="res!.defects">
+            </textarea>
+            <label for="defectsInput" class="required">Обнаруженные замечания и дефекты</label>
+        </p-floatlabel>
+        <p-floatlabel proLegacyFloatLabelTransitionFix variant="on">
+            <textarea pTextarea
+                      required
+                      id="conclusionInput"
+                      name="conclusion"
+                      style="max-height: 100px"
+                      [fluid]="true"
+                      [autoResize]="true"
+                      [(ngModel)]="res!.conclusion">
+            </textarea>
+            <label for="conclusionInput" class="required">Итоговое заключение</label>
+        </p-floatlabel>
+        <p-floatlabel proLegacyFloatLabelTransitionFix variant="on">
+            <textarea pTextarea
+                      required
+                      id="recommendationsInput"
+                      name="recommendations"
+                      style="max-height: 100px"
+                      [fluid]="true"
+                      [autoResize]="true"
+                      [(ngModel)]="res!.recommendations">
+            </textarea>
+            <label for="recommendationsInput" class="required">Рекомендации/комментарии</label>
+        </p-floatlabel>
+    </form>
+
+    <ng-template #footer>
+        <p-button label="Создать" [disabled]="form.invalid" (onClick)="ok()"></p-button>
+        <p-button label="Отмена" severity="secondary" (onClick)="close()"></p-button>
+    </ng-template>
+</p-dialog>

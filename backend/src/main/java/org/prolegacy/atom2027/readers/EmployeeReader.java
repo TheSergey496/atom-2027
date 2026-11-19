@@ -5,9 +5,9 @@ import org.prolegacy.atom2027.common.query.query.JPAQueryFactory;
 import org.prolegacy.atom2027.dto.EmployeeDto;
 import org.prolegacy.atom2027.entities.QBrigadeMember;
 import org.prolegacy.atom2027.entities.QEmployee;
-import org.prolegacy.atom2027.entities.QEmployeeQualification;
 import org.prolegacy.atom2027.entities.QEmployeeQualificationAgg;
 import org.prolegacy.atom2027.entities.ids.BrigadeId;
+import org.prolegacy.atom2027.entities.ids.EmployeeId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -21,6 +21,10 @@ public class EmployeeReader {
 
     @Autowired
     private JPAQueryFactory queryFactory;
+
+    public EmployeeDto getEmployee(EmployeeId employeeId) {
+        return baseQuery().where(employee.id.eq(employeeId)).fetchFirst();
+    }
 
     public List<EmployeeDto> getEmployees() {
         return baseQuery().fetch();
