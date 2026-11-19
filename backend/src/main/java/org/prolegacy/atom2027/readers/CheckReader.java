@@ -1,5 +1,6 @@
 package org.prolegacy.atom2027.readers;
 
+import com.querydsl.core.types.dsl.Expressions;
 import org.prolegacy.atom2027.common.query.query.JPAQuery;
 import org.prolegacy.atom2027.common.query.query.JPAQueryFactory;
 import org.prolegacy.atom2027.dto.CheckDto;
@@ -47,7 +48,10 @@ public class CheckReader {
                 .leftJoin(employee).on(employee.id.eq(check.responsibleId))
                 .selectDto(
                         CheckDto.class,
-                        employee.lastName.concat(" ").concat(employee.firstName).concat(" ").concat(employee.middleName).as("responsible$fullName")
+                        employee.lastName.concat(" ").concat(employee.firstName).concat(" ").concat(employee.middleName).as("responsible$fullName"),
+                        Expressions.cases()
+                                .when(check.protocolDate.after(check.planDate)).then(true)
+                                .otherwise(false).as("finishedAfterExpiry")
                 );
     }
 }

@@ -19,6 +19,7 @@ public class CheckDto {
     private Instant planDate;
     private EmployeeDto responsible;
     private CheckStatus checkStatus;
+    private Boolean finishedAfterExpiry;
     private String comment;
     private Instant protocolDate;
 }

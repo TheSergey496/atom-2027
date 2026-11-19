@@ -1,18 +1,23 @@
-import { ChangeDetectorRef, Component, inject, OnInit, signal, viewChild } from '@angular/core';
-import {Button, ButtonModule } from "@openng/optimus-ui/button";
-import {TableComponent} from "../../library/table/table/table.component";
-import {TableFastSearchComponent} from "../../library/table/table-fast-search/table-fast-search.component";
-import {Toolbar, ToolbarModule } from "@openng/optimus-ui/toolbar";
-import {Tooltip, TooltipModule } from "@openng/optimus-ui/tooltip";
+import {
+  ChangeDetectorRef,
+  Component,
+  inject,
+  OnDestroy,
+  OnInit,
+  signal,
+  viewChild,
+} from '@angular/core';
+import { ButtonModule } from '@openng/optimus-ui/button';
+import { TableComponent } from '../../library/table/table/table.component';
+import { TableFastSearchComponent } from '../../library/table/table-fast-search/table-fast-search.component';
+import { ToolbarModule } from '@openng/optimus-ui/toolbar';
+import { TooltipModule } from '@openng/optimus-ui/tooltip';
 import { Column } from '../../library/table/column';
-import { UserDto } from '../../../gen/auth-dto';
-import { UserAdminService } from '../../../gen/controllers-user';
 import { DialogService } from '../../../services/dialog.service';
 import { MessageService } from '@openng/optimus-ui/api';
 import { SyncConfirmationService } from '../../../services/sync-confirmation.service';
 import { GlobalLoadingService } from '../../../services/loading.service';
-import { lastValueFrom } from 'rxjs';
-import { AdminUserEditDialogComponent } from '../../forms/admin-user-edit-dialog/admin-user-edit-dialog.component';
+import { lastValueFrom, Subscription } from 'rxjs';
 import { BlockUIModule } from '@openng/optimus-ui/blockui';
 import { CheckStatusLocaleEnum } from '../../../enums/CheckStatusLocaleEnum';
 import { CheckTypeLocaleEnum } from '../../../enums/CheckTypeLocaleEnum';
@@ -23,6 +28,7 @@ import { CheckEditDialogComponent } from '../../forms/check-edit-dialog/check-ed
 import { SelectButton } from '@openng/optimus-ui/selectbutton';
 import { FormsModule } from '@angular/forms';
 import { Checkbox } from '@openng/optimus-ui/checkbox';
+import { ResetService } from '../../../services/reset.service';
 
 @Component({
   imports: [
@@ -40,7 +46,7 @@ import { Checkbox } from '@openng/optimus-ui/checkbox';
   styleUrl: './check.component.css',
   templateUrl: './check.component.html',
 })
-export class CheckComponent implements OnInit {
+export class CheckComponent implements OnInit, OnDestroy {
   protected readonly CheckStatusRecord = CheckStatusRecord;
 
   protected readonly columns = signal<Column[]>([
@@ -54,6 +60,7 @@ export class CheckComponent implements OnInit {
       type: 'enum',
       field: 'checkType',
       header: 'Вид проверки',
+      decoration: 'tag',
       locale: CheckTypeLocaleEnum,
       width: 350,
     },
@@ -72,6 +79,7 @@ export class CheckComponent implements OnInit {
     {
       type: 'date',
       field: 'planDate',
+      decoration: 'invalidDate',
       header: 'Плановая дата проверки',
     },
     {
@@ -83,7 +91,14 @@ export class CheckComponent implements OnInit {
       type: 'enum',
       field: 'checkStatus',
       header: 'Текущее состояние',
+      decoration: 'tag',
       locale: CheckStatusLocaleEnum,
+      width: 350,
+    },
+    {
+      type: 'boolean',
+      field: 'finishedAfterExpiry',
+      header: 'Выполнено с опозданием',
       width: 350,
     },
     {
@@ -98,6 +113,9 @@ export class CheckComponent implements OnInit {
   protected readonly loading = signal<boolean>(false);
   protected readonly checks = signal<CheckDto[]>([]);
   protected selectedCheck = signal<CheckDto | null>(null);
+
+  private readonly intervalId: any;
+  private resetSubscription?: Subscription;
 
   protected onlyCancelled = false;
   protected onlyCancelledOptions = [
@@ -119,11 +137,22 @@ export class CheckComponent implements OnInit {
   private readonly syncConfirmationService = inject(SyncConfirmationService);
   private readonly globalLoadingService = inject(GlobalLoadingService);
   private readonly cdr = inject(ChangeDetectorRef);
+  private readonly resetService = inject(ResetService);
 
-  constructor() {}
+  constructor() {
+    this.intervalId = setInterval(() => this.table()?.table()?.cd?.detectChanges(), 3000);
+  }
 
   ngOnInit() {
     this.loadData().then();
+    this.resetSubscription = this.resetService.subscribe(async () => {
+      await this.loadData();
+    });
+  }
+
+  ngOnDestroy() {
+    clearInterval(this.intervalId);
+    this.resetSubscription?.unsubscribe();
   }
 
   protected async loadData() {

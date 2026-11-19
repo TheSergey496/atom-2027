@@ -452,3 +452,7 @@
 :host ::ng-deep .filter-remove:hover {
     color: var(--p-red-600);
 }
+
+:host ::ng-deep .invalid-cell {
+    background-color: var(--p-red-300);
+}

@@ -5,7 +5,7 @@ interface BaseColumn {
   field: string;
   width?: number;
   frozen?: 'left' | 'right';
-  decoration?: 'tag' | 'withoutTime' | 'qualifications';
+  decoration?: 'tag' | 'withoutTime' | 'qualifications' | 'invalidDate';
 }
 
 export type Column =

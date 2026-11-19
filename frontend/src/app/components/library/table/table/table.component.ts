@@ -60,6 +60,7 @@ import { CustomFilterMatchMode } from '../custom-filter-match-mode';
 import { SortEvent, TableUtils } from '../table-utils';
 import { GlobalLoadingService } from '../../../../services/loading.service';
 import { TagModule } from '@openng/optimus-ui/tag';
+import { CheckStatusRecord } from '../../../../gen/entities-enums';
 
 @Component({
   imports: [
@@ -160,7 +161,7 @@ export class TableComponent {
   private readonly largeExcelExportService = inject(LargeExcelExportService);
   private readonly messageService = inject(MessageService);
   private readonly globalLoadingService = inject(GlobalLoadingService);
-  private readonly table = viewChild.required(Table);
+  public readonly table = viewChild.required(Table);
   private readonly rows = viewChildren(SelectableRow);
   private readonly reorderableColumns = viewChildren(ReorderableColumn);
   private readonly frozenColumns = viewChildren(FrozenColumn);
@@ -1123,6 +1124,19 @@ export class TableComponent {
 
   public applyGlobalFilter(value: string) {
     this.table().filterGlobal(value, FilterMatchMode.CONTAINS);
+  }
+
+  protected dateAfterToday(row: any, originalColumn: Column): boolean {
+    if (originalColumn?.field !== 'planDate' && originalColumn?.type !== 'date') {
+      return false;
+    }
+    const value = ColumnUtils.getColumnValue(row, originalColumn);
+    if (value == null) {
+      return false;
+    }
+    console.log('eblan');
+
+    return row?.checkStatus === CheckStatusRecord.SCHEDULED && value.getTime() < (new Date()).getTime();
   }
 }
 

@@ -24,6 +24,7 @@ export class CheckDto {
   checkType?: CheckTypeRecord;
   comment?: string;
   edifice?: EdificeDto;
+  finishedAfterExpiry?: boolean;
   planDate?: Date;
   protocolDate?: Date;
   responsible?: EmployeeDto;

@@ -350,7 +350,7 @@
                 [frozen]="column.frozen != null"
                 [class.frozen-right]="column.frozen === 'right'"
                 [alignFrozen]="column.frozen">
-              <div class="cell-content">
+              <div class="cell-content" [class.invalid-cell]="dateAfterToday(row, column.originalColumn)">
                 @switch (column.originalColumn.type) {
                   @case ('boolean') {
                     <div class="cell-content-value cell-content-value-center">
@@ -389,6 +389,36 @@
                               }
                               @case ('Электроэнергия') {
                                   <p-tag class="yellow-tag" severity="warn" [value]="ColumnUtils.getColumnValueFormatted(row, column.originalColumn)" />
+                              }
+                              @case ('Запланирована') {
+                                  <div class="cell-content-value cell-content-value-center">
+                                  <p-tag severity="info" [value]="ColumnUtils.getColumnValueFormatted(row, column.originalColumn)" />
+                                  </div>
+                              }
+                              @case ('Отменена') {
+                                  <div class="cell-content-value cell-content-value-center">
+                                  <p-tag severity="danger" [value]="ColumnUtils.getColumnValueFormatted(row, column.originalColumn)" />
+                                  </div>
+                              }
+                              @case ('Завершена') {
+                                  <div class="cell-content-value cell-content-value-center">
+                                  <p-tag severity="success" [value]="ColumnUtils.getColumnValueFormatted(row, column.originalColumn)" />
+                                  </div>
+                              }
+                              @case ('Плановая') {
+                                  <div class="cell-content-value cell-content-value-center">
+                                      <p-tag severity="success" [value]="ColumnUtils.getColumnValueFormatted(row, column.originalColumn)" />
+                                  </div>
+                              }
+                              @case ('Внеплановая') {
+                                  <div class="cell-content-value cell-content-value-center">
+                                      <p-tag severity="info" [value]="ColumnUtils.getColumnValueFormatted(row, column.originalColumn)" />
+                                  </div>
+                              }
+                              @case ('Повторная') {
+                                  <div class="cell-content-value cell-content-value-center">
+                                      <p-tag class="yellow-tag" [value]="ColumnUtils.getColumnValueFormatted(row, column.originalColumn)" />
+                                  </div>
                               }
                           }
                       } @else if (column.originalColumn.decoration === 'qualifications') {

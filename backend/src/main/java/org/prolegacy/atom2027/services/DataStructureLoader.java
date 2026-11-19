@@ -55,6 +55,10 @@ public class DataStructureLoader {
     private BrigadeMemberRepository brigadeMemberRepository;
     @Autowired
     private BrigadeEventRepository brigadeEventRepository;
+    @Autowired
+    private CheckRepository checkRepository;
+    @Autowired
+    private ProtocolRepository protocolRepository;
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
@@ -71,6 +75,8 @@ public class DataStructureLoader {
         brigadeRepository.deleteAllInBatch();
         brigadeMemberRepository.deleteAllInBatch();
         brigadeEventRepository.deleteAllInBatch();
+        checkRepository.deleteAllInBatch();
+        protocolRepository.deleteAllInBatch();
 
         final List<ForeignEdifice> foreignEdifices = foreignEdificeRepository.findAll();
         final List<ForeignDependencies> foreignDependencies = foreignDependenciesRepository.findAll();
