@@ -20,6 +20,7 @@ import { lastValueFrom, Subscription } from 'rxjs';
 import { DialogService } from '../../../services/dialog.service';
 import { ProtocolRegistrationDialogComponent } from '../../forms/protocol-registration-dialog/protocol-registration-dialog.component';
 import { MessageService } from '@openng/optimus-ui/api';
+import { CheckTypeRecord } from '../../../gen/entities-enums';
 
 @Component({
   imports: [Button, TableComponent, TableFastSearchComponent, Toolbar, Tooltip],
@@ -65,7 +66,7 @@ export class ProtocolsComponent implements OnInit, OnDestroy {
       header: 'Результаты',
     },
     {
-      type: 'boolean',
+      type: 'text',
       field: 'defects',
       header: 'Замечания и дефекты',
     },
@@ -75,7 +76,7 @@ export class ProtocolsComponent implements OnInit, OnDestroy {
       header: 'Заключение',
     },
     {
-      type: 'boolean',
+      type: 'text',
       field: 'recommendations',
       header: 'Рекоммендации и комментарии',
     },
@@ -132,10 +133,11 @@ export class ProtocolsComponent implements OnInit, OnDestroy {
         try {
           const newProtocol = await lastValueFrom(this.protocolService.createProtocol(res));
           dialog.visible = false;
+          const isNonPlan = newProtocol?.check?.checkType?.toString() === CheckTypeRecord.NON_PLAN;
           this.messageService.add({
             severity: 'success',
             summary: 'Выполнено',
-            detail: 'Пользователь добавлен',
+            detail: `Протокол создан, ${isNonPlan ? 'внеплановая' : 'плановая'} проверка завершена`,
           });
           await this.loadData();
           await this.table()?.findAndSelectRow(newProtocol);

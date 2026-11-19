@@ -10,6 +10,7 @@ import org.prolegacy.atom2027.common.exceptions.BusinessLogicException;
 import org.prolegacy.atom2027.dto.CheckDto;
 import org.prolegacy.atom2027.dto.EdificeDto;
 import org.prolegacy.atom2027.dto.EmployeeDto;
+import org.prolegacy.atom2027.dto.ProtocolDto;
 import org.prolegacy.atom2027.entities.enums.CheckStatus;
 import org.prolegacy.atom2027.entities.enums.CheckType;
 import org.prolegacy.atom2027.entities.ids.CheckId;
@@ -38,6 +39,14 @@ public class Check {
     private CheckStatus checkStatus;
     private String comment;
     private Instant protocolDate;
+
+    public Check(ProtocolDto dto) {
+        this.checkStatus = CheckStatus.SCHEDULED;
+        this.checkType = CheckType.NON_PLAN;
+        this.edificeId = Optional.ofNullable(dto.getEdifice())
+                .map(EdificeDto::getId)
+                .orElseThrow(() -> new BusinessLogicException("Не задан объект для проверки"));
+    }
 
     public Check(CheckDto dto) {
         this.checkStatus = CheckStatus.SCHEDULED;
@@ -69,5 +78,13 @@ public class Check {
             throw new BusinessLogicException("Некорректный статус для отмены проверки");
         }
         this.checkStatus = CheckStatus.CANCELED;
+    }
+
+    public void finish() {
+        if (this.checkStatus != CheckStatus.SCHEDULED) {
+            throw new BusinessLogicException("Некорректный статус для завершения проверки");
+        }
+        this.checkStatus = CheckStatus.FINISHED;
+        this.protocolDate = Instant.now();
     }
 }

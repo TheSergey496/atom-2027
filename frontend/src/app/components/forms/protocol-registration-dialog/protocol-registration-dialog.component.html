@@ -18,6 +18,24 @@
     <form #form="ngForm" class="prolegacy-form">
         @if (selectedType === Type.NORMAL) {
 
+            <p-floatlabel proLegacyFloatLabelTransitionFix variant="on">
+                <p-auto-complete required
+                                 [(ngModel)]="res!.check" [dropdown]="true" [suggestions]="checks"
+                                 style="width: 100%"
+                                 appendTo="body"
+                                 optionLabel="checkId"
+                                 dataKey="checkId"
+                                 name="check"
+                                 inputId="checkInput"
+                                 [showClear]="true"
+                                 (completeMethod)="searchChecks($event)"/>
+                <label for="edificeInput" class="required">Номер проверки</label>
+            </p-floatlabel>
+
+            <p-floatlabel proLegacyFloatLabelTransitionFix variant="on">
+                <input pInputText name="edificeName" [disabled]="true" [ngModel]="res?.check?.edifice?.name" [fluid]="true">
+                <label for="edificeInput">Объект</label>
+            </p-floatlabel>
         } @else {
             <p-floatlabel proLegacyFloatLabelTransitionFix variant="on">
                 <p-auto-complete [(ngModel)]="res!.edifice" [dropdown]="true" [suggestions]="edifices"
@@ -25,6 +43,8 @@
                                  appendTo="body" optionLabel="name" dataKey="id"
                                  name="edifice"
                                  inputId="edificeInput"
+                                 required
+                                 [showClear]="true"
                                  (completeMethod)="searchEdifices($event)"/>
                 <label for="edificeInput" class="required">Объект</label>
             </p-floatlabel>
@@ -34,7 +54,9 @@
                              style="width: 100%"
                              appendTo="body" optionLabel="fullName" dataKey="id"
                              name="employee"
+                             required
                              inputId="employeeInput"
+                             [showClear]="true"
                              (completeMethod)="searchEmployee($event)"/>
             <label for="employeeInput" class="required">Проверяющий</label>
         </p-floatlabel>

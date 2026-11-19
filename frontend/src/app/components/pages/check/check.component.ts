@@ -20,6 +20,9 @@ import { CheckDto } from '../../../gen/atom2027-dto';
 import { CheckService } from '../../../gen/atom2027-controllers';
 import { CheckStatusRecord } from '../../../gen/entities-enums';
 import { CheckEditDialogComponent } from '../../forms/check-edit-dialog/check-edit-dialog.component';
+import { SelectButton } from '@openng/optimus-ui/selectbutton';
+import { FormsModule } from '@angular/forms';
+import { Checkbox } from '@openng/optimus-ui/checkbox';
 
 @Component({
   imports: [
@@ -29,6 +32,9 @@ import { CheckEditDialogComponent } from '../../forms/check-edit-dialog/check-ed
     TooltipModule,
     BlockUIModule,
     TableFastSearchComponent,
+    SelectButton,
+    FormsModule,
+    Checkbox,
   ],
   selector: 'pro-legacy-check',
   styleUrl: './check.component.css',
@@ -93,8 +99,18 @@ export class CheckComponent implements OnInit {
   protected readonly checks = signal<CheckDto[]>([]);
   protected selectedCheck = signal<CheckDto | null>(null);
 
-  private onlyCancelled = signal<boolean>(false);
-  private onlyUnfinished = signal<boolean>(false);
+  protected onlyCancelled = false;
+  protected onlyCancelledOptions = [
+    {
+      label: 'Основные',
+      value: false,
+    },
+    {
+      label: 'Отменённые',
+      value: true,
+    },
+  ];
+  protected onlyUnfinished = false;
 
   private readonly table = viewChild<TableComponent>('table');
   private readonly checkService = inject(CheckService);
@@ -115,7 +131,7 @@ export class CheckComponent implements OnInit {
     this.checks.set([]);
     try {
       const checks = await lastValueFrom(
-        this.checkService.getChecks(this.onlyCancelled(), this.onlyUnfinished()),
+        this.checkService.getChecks(this.onlyCancelled, this.onlyUnfinished),
       );
       this.checks.set(checks);
       this.cdr.detectChanges();
@@ -205,5 +221,15 @@ export class CheckComponent implements OnInit {
       this.table()?.removeRows([canceledCheck], 'Проверка отменена');
       this.selectedCheck.set(canceledCheck);
     });
+  }
+
+  protected onOnlyCancelledChange(newValue: boolean) {
+    this.onlyCancelled = newValue;
+    this.loadData().then();
+  }
+
+  protected onOnlyUnfinishedChanged(newValue: boolean) {
+    this.onlyUnfinished = newValue;
+    this.loadData().then();
   }
 }

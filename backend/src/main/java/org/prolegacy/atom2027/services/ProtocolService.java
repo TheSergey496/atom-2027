@@ -1,6 +1,7 @@
 package org.prolegacy.atom2027.services;
 
 import org.prolegacy.atom2027.common.exceptions.BusinessLogicException;
+import org.prolegacy.atom2027.dto.EdificeDto;
 import org.prolegacy.atom2027.dto.EmployeeDto;
 import org.prolegacy.atom2027.dto.ProtocolDto;
 import org.prolegacy.atom2027.entities.Check;
@@ -15,6 +16,8 @@ import org.prolegacy.atom2027.repositories.ProtocolRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 @Service
 public class ProtocolService {
@@ -38,25 +41,31 @@ public class ProtocolService {
             check = checkRepository.findById(checkId)
                     .orElseThrow(() -> new BusinessLogicException("Не найдена проверка с id=%s".formatted(checkId)));
         } else {
-            check = checkRepository.save(new Check());
+            var edificeId = Optional.ofNullable(protocolDto.getEdifice())
+                    .map(EdificeDto::getId)
+                    .orElseThrow(() -> new BusinessLogicException("Не задан объект для проверки"));
+            Edifice edifice = edificeRepository.findById(edificeId)
+                    .orElseThrow(() -> new BusinessLogicException("Не найден объект с id = %s".formatted(edificeId)));
+            check = checkRepository.save(new Check(protocolDto));
         }
         if (protocolDto.getEmployee() == null || protocolDto.getEmployee().getId() == null) {
-            throw new BusinessLogicException("Не указан проверяющий работник");
+            throw new BusinessLogicException("Не указан проверяющий рабочий");
         }
-        final EmployeeDto employee = employeeReader.getEmployee(protocolDto.getEmployee().getId());
+        final EmployeeDto employee = Optional.ofNullable(employeeReader.getEmployee(protocolDto.getEmployee().getId()))
+                .orElseThrow(() -> new BusinessLogicException("Не найден рабочий с id = %s"));
         final Edifice edifice = edificeRepository.findById(check.getEdificeId())
                 .orElseThrow(() -> new BusinessLogicException("Не найден объект с id=%s".formatted(protocolDto.getEdifice().getId())));
 
         String qualificationError = null;
-        final boolean badForWater = edifice.isHasWater() && !employee.getQualifications().contains("water");
-        final boolean badForEnergy = edifice.isHasEnergy() && !employee.getQualifications().contains("energy");
+        final boolean badForWater = edifice.isHasWater() && !employee.getQualifications().contains("Вода");
+        final boolean badForEnergy = edifice.isHasEnergy() && !employee.getQualifications().contains("Электроэнергия");
 
         if (badForEnergy && badForWater) {
-            qualificationError = "Выбранный проверяющий не обладает кфалификациями по Воде и Электроэнергии";
+            qualificationError = "Выбранный проверяющий должен обладать квалификациями по воде и электроэнергии";
         } else if (badForWater) {
-            qualificationError = "Выбранный проверяющий не обладает кфалификацией по Воде";
+            qualificationError = "Выбранный проверяющий должен обладать квалификацией по воде";
         } else if (badForEnergy) {
-            qualificationError = "Выбранный проверяющий не обладает кфалификацией по Электроэнергии";
+            qualificationError = "Выбранный проверяющий должен обладать квалификацией по электроэнергии";
         }
 
         if (qualificationError != null) {
@@ -64,6 +73,7 @@ public class ProtocolService {
         }
 
         final Protocol protocol = protocolRepository.save(new Protocol(protocolDto, check.getCheckId(), employee.getId()));
+        check.finish();
 
         return protocolReader.getProtocol(protocol.getId());
     }

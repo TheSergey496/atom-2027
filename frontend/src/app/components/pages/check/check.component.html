@@ -47,9 +47,25 @@
                       [disabled]="loading()"
                       (onClick)="table.exportToExcel()">
             </p-button>
+
+            @if (!onlyCancelled) {
+                <div style="padding-left: 20px">
+                    <label for="onlyUnfinishedCheckbox" style="padding-right: 5px">Только незавершенные:</label>
+                    <p-checkbox id="onlyUnfinishedCheckbox" [ngModel]="onlyUnfinished" (ngModelChange)="onOnlyUnfinishedChanged($event)" [binary]="true"/>
+                </div>
+            }
         </ng-template>
 
         <ng-template #end>
+            <p-select-button optionLabel="label"
+                             optionValue="value"
+                             size="small"
+                             [allowEmpty]="false"
+                             [options]="onlyCancelledOptions"
+                             [ngModel]="onlyCancelled"
+                             (ngModelChange)="onOnlyCancelledChange($event)">
+            </p-select-button>
+
             <pro-legacy-table-fast-search [table]="table">
             </pro-legacy-table-fast-search>
         </ng-template>

@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { DialogComponent } from '../../../utils/dialogComponent';
-import { EdificeDto, EmployeeDto, ProtocolDto } from '../../../gen/atom2027-dto';
+import { CheckDto, EdificeDto, EmployeeDto, ProtocolDto } from '../../../gen/atom2027-dto';
 import { Button } from '@openng/optimus-ui/button';
 import { Dialog } from '@openng/optimus-ui/dialog';
 import { Textarea } from '@openng/optimus-ui/textarea';
@@ -9,9 +9,8 @@ import { FloatLabel } from '@openng/optimus-ui/floatlabel';
 import { FloatLabelTransitionFixDirective } from '../../../directives/float-label-transition-fix.directive';
 import { InputText } from '@openng/optimus-ui/inputtext';
 import { SelectButton } from '@openng/optimus-ui/selectbutton';
-import { DatePicker } from '@openng/optimus-ui/datepicker';
 import { AutoComplete, AutoCompleteCompleteEvent } from '@openng/optimus-ui/autocomplete';
-import { EdificeService, EmployeeService } from '../../../gen/atom2027-controllers';
+import { CheckService, EdificeService, EmployeeService } from '../../../gen/atom2027-controllers';
 import { lastValueFrom } from 'rxjs';
 
 @Component({
@@ -24,7 +23,6 @@ import { lastValueFrom } from 'rxjs';
     FloatLabelTransitionFixDirective,
     InputText,
     SelectButton,
-    DatePicker,
     AutoComplete,
   ],
   selector: 'pro-legacy-protocol-registration-dialog',
@@ -39,12 +37,16 @@ export class ProtocolRegistrationDialogComponent extends DialogComponent<Protoco
 
   protected selectedType = Type.NORMAL;
 
+  protected allChecks: CheckDto[] = [];
+  protected checks: CheckDto[] = [];
+
   protected allEmployees: EmployeeDto[] = [];
   protected employees: EmployeeDto[] = [];
 
   protected allEdifices: EdificeDto[] = [];
   protected edifices: EdificeDto[] = [];
 
+  private readonly checkService = inject(CheckService);
   private readonly employeeService = inject(EmployeeService);
   private readonly edificeService = inject(EdificeService);
 
@@ -59,6 +61,9 @@ export class ProtocolRegistrationDialogComponent extends DialogComponent<Protoco
       this.res = new ProtocolDto();
     }
     try {
+      this.allChecks = await lastValueFrom(this.checkService.getChecks(false, true));
+      this.checks = [...this.allChecks];
+
       this.allEmployees = await lastValueFrom(this.employeeService.getEmployees());
       this.employees = [...this.allEmployees];
 
@@ -78,6 +83,12 @@ export class ProtocolRegistrationDialogComponent extends DialogComponent<Protoco
   searchEdifices(event: AutoCompleteCompleteEvent) {
     this.edifices = this.allEdifices.filter(e =>
       e.name?.toLowerCase().includes(event.query.toLowerCase()),
+    );
+  }
+
+  protected searchChecks(event: AutoCompleteCompleteEvent) {
+    this.checks = this.allChecks.filter(e =>
+      e.checkId?.toString().includes(event.query.toString()),
     );
   }
 
