@@ -13,7 +13,8 @@ import { EmployeeComponent } from './components/pages/employee/employee.componen
 import { BrigadeComponent } from './components/pages/brigade/brigade.component';
 import { BrigadeEventsComponent } from './components/pages/brigade-events/brigade-events.component';
 import { RepairsComponent } from './components/pages/repairs/repairs.component';
-import { ProtocolsComponent } from './components/pages/protocols/protocols.component';
+import { CheckComponent } from './components/pages/check/check.component';
+// import { ProtocolsComponent } from './components/pages/protocols/protocols.component';
 
 export const routes: Routes = [
   {
@@ -65,9 +66,13 @@ export const routes: Routes = [
     path: 'brigade-events',
     component: BrigadeEventsComponent,
   },
+  // {
+  //   path: 'protocols',
+  //   component: ProtocolsComponent,
+  // },
   {
-    path: 'protocols',
-    component: ProtocolsComponent,
+    path: 'checks',
+    component: CheckComponent
   },
   { path: '**', redirectTo: 'home' },
 ];

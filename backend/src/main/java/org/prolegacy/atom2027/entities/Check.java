@@ -5,6 +5,7 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import lombok.*;
+import org.prolegacy.atom2027.common.annotation.LongIdGenerator;
 import org.prolegacy.atom2027.common.exceptions.BusinessLogicException;
 import org.prolegacy.atom2027.dto.CheckDto;
 import org.prolegacy.atom2027.dto.EdificeDto;
@@ -25,6 +26,7 @@ import java.util.Optional;
 @NoArgsConstructor
 public class Check {
     @Id
+    @LongIdGenerator
     private CheckId checkId;
 
     @Enumerated(EnumType.STRING)
@@ -42,7 +44,10 @@ public class Check {
         update(dto);
     }
 
-    private void update(CheckDto dto) {
+    public void update(CheckDto dto) {
+        if (this.checkStatus != CheckStatus.SCHEDULED) {
+            throw new BusinessLogicException("Некорректный статус для обновления проверки");
+        }
         this.checkType = Optional.ofNullable(dto.getCheckType())
                 .orElseThrow(() -> new BusinessLogicException("Не задан тип проверки"));
         this.edificeId = Optional.ofNullable(dto.getEdifice())
@@ -50,12 +55,19 @@ public class Check {
                 .orElseThrow(() -> new BusinessLogicException("Не задан объект для проверки"));
         this.planDate = Optional.ofNullable(dto.getPlanDate())
                 .orElseThrow(() -> new BusinessLogicException("Не задана плановая дата проверки"));
-        if (planDate.isAfter(Instant.now())) {
+        if (planDate.isBefore(Instant.now())) {
             throw new BusinessLogicException("Плановая дата обязана быть в будущем");
         }
         this.responsibleId = Optional.ofNullable(dto.getResponsible())
                 .map(EmployeeDto::getId)
                 .orElse(null);
         this.comment = dto.getComment();
+    }
+
+    public void cancel() {
+        if (this.checkStatus != CheckStatus.SCHEDULED) {
+            throw new BusinessLogicException("Некорректный статус для отмены проверки");
+        }
+        this.checkStatus = CheckStatus.CANCELED;
     }
 }

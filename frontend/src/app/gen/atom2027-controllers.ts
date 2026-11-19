@@ -1,6 +1,6 @@
 import {HttpClient, HttpHeaders, HttpParams} from '@angular/common/http';
 import {Service, inject} from '@angular/core';
-import {BrigadeDto, BrigadeEventDto, EdificeDependencyDto, EdificeDto, EmployeeDto, EmployeeQualificationDto, EventDto} from './atom2027-dto';
+import {BrigadeDto, BrigadeEventDto, CheckDto, EdificeDependencyDto, EdificeDto, EmployeeDto, EmployeeQualificationDto, EventDto} from './atom2027-dto';
 import {TestQueue$TestQueuePayload} from './atom2027-queue';
 import {Observable} from 'rxjs';
 import {map} from 'rxjs/operators';
@@ -53,6 +53,51 @@ export class BrigadeService {
 
  public getEmployeesForBrigade(id: number): Observable<EmployeeDto[]>  {
     return this.httpService.get<EmployeeDto[]>('brigades/' + id + '/employees', {responseType: 'json'});
+  }
+
+}
+
+@Service()
+export class CheckService {
+  httpService: HttpClient;
+
+
+ public cancelCheck(checkId: number): Observable<CheckDto>  {
+    return this.httpService.delete<CheckDto>('checks/' + checkId + '', {responseType: 'json'});
+  }
+
+ public constructor() {
+    this.httpService = inject(HttpClient);
+  }
+
+ public createCheck(dto: CheckDto): Observable<CheckDto>  {
+    const headers = new HttpHeaders().set('Content-type', 'application/json');
+    return this.httpService.post<CheckDto>('checks', JSON.stringify(dto) , {headers, responseType: 'json'});
+  }
+
+ public getCheck(checkId: number): Observable<CheckDto>  {
+    return this.httpService.get<CheckDto>('checks/' + checkId + '', {responseType: 'json'});
+  }
+
+ public getChecks(onlyCancelled: boolean = false, onlyUnfinished: boolean = false): Observable<CheckDto[]>  {
+    const queryParamsList: { name: string, value: string }[] = [];
+    if (onlyCancelled !== undefined && onlyCancelled !== null) {
+      queryParamsList.push({name: 'onlyCancelled', value: onlyCancelled.toString()});
+    }
+
+    if (onlyUnfinished !== undefined && onlyUnfinished !== null) {
+      queryParamsList.push({name: 'onlyUnfinished', value: onlyUnfinished.toString()});
+    }
+    let params = new HttpParams();
+    for (const queryParam of queryParamsList) {
+      params = params.append(queryParam.name, queryParam.value);
+    }
+    return this.httpService.get<CheckDto[]>('checks', {params, responseType: 'json'});
+  }
+
+ public updateCheck(dto: CheckDto): Observable<CheckDto>  {
+    const headers = new HttpHeaders().set('Content-type', 'application/json');
+    return this.httpService.put<CheckDto>('checks', JSON.stringify(dto) , {headers, responseType: 'json'});
   }
 
 }

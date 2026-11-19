@@ -6,7 +6,6 @@ import lombok.NoArgsConstructor;
 import org.prolegacy.atom2027.entities.enums.CheckStatus;
 import org.prolegacy.atom2027.entities.enums.CheckType;
 import org.prolegacy.atom2027.entities.ids.CheckId;
-import org.prolegacy.atom2027.entities.ids.EdificeId;
 
 import java.time.Instant;
 

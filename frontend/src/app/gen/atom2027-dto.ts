@@ -1,3 +1,4 @@
+import {CheckStatusRecord, CheckTypeRecord} from './entities-enums';
 
 export class BrigadeDto {
   events?: EventDto[];
@@ -6,8 +7,8 @@ export class BrigadeDto {
 }
 
 export class BrigadeEventDto {
-  actualResolutionTime?: string;
-  averageResolutionTime?: string;
+  actualResolutionTimeStr?: string;
+  averageResolutionTimeStr?: string;
   brigade?: BrigadeDto;
   edifice?: EdificeDto;
   event?: EventDto;
@@ -15,6 +16,17 @@ export class BrigadeEventDto {
   id?: number;
   orderNumber?: number;
   startDate?: any;
+}
+
+export class CheckDto {
+  checkId?: number;
+  checkStatus?: CheckStatusRecord;
+  checkType?: CheckTypeRecord;
+  comment?: string;
+  edifice?: EdificeDto;
+  planDate?: Date;
+  protocolDate?: Date;
+  responsible?: EmployeeDto;
 }
 
 export class EdificeDependencyDto {

@@ -114,12 +114,16 @@ export class Header {
             route: '/brigades',
           },
           {
-            label: 'Работы',
+            label: 'Расписание',
             route: '/repairs',
           },
           {
-            label: 'Расписание',
+            label: 'Диаграмма',
             route: '/brigade-events',
+          },
+          {
+            label: 'Проверки',
+            route: '/checks',
           },
           // {
           //   label: 'Пользователи',
@@ -145,12 +149,16 @@ export class Header {
             route: '/brigades',
           },
           {
-            label: 'Работы',
+            label: 'Расписание',
             route: '/repairs',
           },
           {
-            label: 'Расписание',
+            label: 'Диаграмма',
             route: '/brigade-events',
+          },
+          {
+            label: 'Проверки',
+            route: '/checks',
           },
         ];
       } else {

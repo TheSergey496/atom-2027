@@ -1,0 +1,68 @@
+<div class="v-flex">
+    <p-toolbar>
+        <ng-template #start>
+            <div class="table-title">
+                {{ table.getTitle('Проверки') }}
+            </div>
+
+            <p-button icon="pi pi-sync"
+                      size="small"
+                      (onClick)="loadData()">
+            </p-button>
+            <p-button icon="pi pi-filter"
+                      size="small"
+                      (onClick)="filter.set(!filter())">
+            </p-button>
+
+            <div class="splitter"></div>
+
+            <p-button icon="pi pi-plus"
+                      size="small"
+                      severity="success"
+                      pTooltip="Назначить проверку"
+                      (onClick)="createCheck()">
+            </p-button>
+
+            <p-button icon="pi pi-pencil"
+                      size="small"
+                      pTooltip="Редактировать проверку"
+                      [disabled]="selectedCheck() == null || selectedCheck()?.checkStatus?.toString() !== CheckStatusRecord.SCHEDULED"
+                      (onClick)="updateCheck()">
+            </p-button>
+
+            <p-button icon="pi pi-times"
+                      severity="danger"
+                      size="small"
+                      pTooltip="Отменить проверку"
+                      [disabled]="selectedCheck() == null || selectedCheck()?.checkStatus?.toString() !== CheckStatusRecord.SCHEDULED"
+                      (onClick)="cancelCheck()">
+            </p-button>
+
+
+            <div class="splitter"></div>
+
+            <p-button size="small"
+                      severity="success"
+                      icon="pi pi-file-excel"
+                      [disabled]="loading()"
+                      (onClick)="table.exportToExcel()">
+            </p-button>
+        </ng-template>
+
+        <ng-template #end>
+            <pro-legacy-table-fast-search [table]="table">
+            </pro-legacy-table-fast-search>
+        </ng-template>
+    </p-toolbar>
+    <pro-legacy-table #table
+                      class="v-flex-grow"
+                      [defaultSort]="[{field: 'id', order: -1}]"
+                      [columns]="columns()"
+                      [value]="checks()"
+                      [checkboxSelection]="false"
+                      [(selection)]="selectedCheck"
+                      [filter]="filter()"
+                      [loading]="loading()"
+                      [getRowId]="getRowId">
+    </pro-legacy-table>
+</div>

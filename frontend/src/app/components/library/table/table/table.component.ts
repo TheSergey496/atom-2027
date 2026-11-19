@@ -1048,7 +1048,8 @@ export class TableComponent {
   }
 
   public getTitle(title: string) {
-    return `${title} (${this.table()?.processedData?.length ?? 0})`;
+    const data: any[] = (this.table()?.processedData ?? []).filter(d => d[this.deletedMessageField] == null);
+    return `${title} (${data.length ?? 0})`;
   }
 
   public async exportToExcel(fileName = 'export.xlsx') {
