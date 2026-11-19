@@ -80,6 +80,14 @@
         </ng-template>
 
         <ng-template #end>
+            @if (hasBadChecks()) {
+                <p-button [style]="{'pointer-events': 'none'}" icon="pi pi-exclamation-triangle" size="small"
+                          [rounded]="true"
+                          severity="danger"
+                          pTooltip="Есть просроченные проверки (их плановая дата проверки подсвечена красным)"/>
+                <div style="width: 10px"></div>
+            }
+
             <p-select-button optionLabel="label"
                              optionValue="value"
                              size="small"

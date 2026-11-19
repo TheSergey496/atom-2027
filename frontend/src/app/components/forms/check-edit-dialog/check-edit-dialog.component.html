@@ -79,19 +79,33 @@
             <label for="responsibleSelect">Ответственный за проведение проверки</label>
         </p-floatlabel>
 
-        <p-floatlabel proLegacyFloatLabelTransitionFix variant="on">
-            <textarea pTextarea
-                      id="commentTextArea"
-                      style="max-height: 300px"
-                      name="comment"
-                      [placeholder]="readOnlyMode() ? '' : undefined"
-                      [disabled]="readOnlyMode()"
-                      [fluid]="true"
-                      [autoResize]="true"
-                      [(ngModel)]="check.comment">
-            </textarea>
-            <label for="commentTextArea">Комментарий к проверке</label>
-        </p-floatlabel>
+        @if (readOnlyMode()) {
+            <p-floatlabel proLegacyFloatLabelTransitionFix variant="on">
+              <textarea pTextarea
+                        id="commentTextArea"
+                        style="max-height: 300px"
+                        name="comment"
+                        [placeholder]="''"
+                        [disabled]="true"
+                        [fluid]="true"
+                        [autoResize]="true"
+                        [(ngModel)]="check.comment">
+              </textarea>
+                <label for="commentTextArea">Комментарий к проверке</label>
+            </p-floatlabel>
+        } @else {
+            <p-floatlabel proLegacyFloatLabelTransitionFix variant="on">
+              <textarea pTextarea
+                        id="commentTextArea"
+                        style="max-height: 300px"
+                        name="comment"
+                        [fluid]="true"
+                        [autoResize]="true"
+                        [(ngModel)]="check.comment">
+              </textarea>
+                <label for="commentTextArea">Комментарий к проверке</label>
+            </p-floatlabel>
+        }
 
     </form>
 

@@ -22,7 +22,7 @@ import { BlockUIModule } from '@openng/optimus-ui/blockui';
 import { CheckStatusLocaleEnum } from '../../../enums/CheckStatusLocaleEnum';
 import { CheckTypeLocaleEnum } from '../../../enums/CheckTypeLocaleEnum';
 import { CheckDto } from '../../../gen/atom2027-dto';
-import { CheckService, ProtocolService } from '../../../gen/atom2027-controllers';
+import { CheckService } from '../../../gen/atom2027-controllers';
 import { CheckStatusRecord } from '../../../gen/entities-enums';
 import { CheckEditDialogComponent } from '../../forms/check-edit-dialog/check-edit-dialog.component';
 import { SelectButton } from '@openng/optimus-ui/selectbutton';
@@ -156,6 +156,8 @@ export class CheckComponent implements OnInit, OnDestroy {
   private readonly resetService = inject(ResetService);
   private readonly router = inject(Router);
 
+  protected hasBadChecks = signal(false);
+
   constructor() {
     this.intervalId = setInterval(() => this.table()?.table()?.cd?.detectChanges(), 3000);
   }
@@ -171,6 +173,17 @@ export class CheckComponent implements OnInit, OnDestroy {
         this.table()?.findAndSelectRow({ checkId: checkId }).then();
       }, 100);
     }
+    setInterval(() => {
+      this.calculateHasBadChecks();
+    }, 1000);
+  }
+
+  private calculateHasBadChecks() {
+    const now = new Date();
+    this.hasBadChecks.set(this.checks().some(
+      e => (<any>e)['__deletedMessage'] == null && e.planDate != null && new Date(e.planDate).getTime() < now.getTime() && e.checkStatus?.toString() === CheckStatusRecord.SCHEDULED.toString())
+    );
+    this.cdr.detectChanges();
   }
 
   ngOnDestroy() {
@@ -186,6 +199,7 @@ export class CheckComponent implements OnInit, OnDestroy {
         this.checkService.getChecks(this.onlyCancelled, this.onlyUnfinished),
       );
       this.checks.set(checks);
+      this.calculateHasBadChecks();
       this.cdr.detectChanges();
       requestAnimationFrame(() => {
         this.cdr.detectChanges();
@@ -272,6 +286,7 @@ export class CheckComponent implements OnInit, OnDestroy {
 
       this.table()?.removeRows([canceledCheck], 'Проверка отменена');
       this.selectedCheck.set(canceledCheck);
+      this.calculateHasBadChecks();
     });
   }
 
