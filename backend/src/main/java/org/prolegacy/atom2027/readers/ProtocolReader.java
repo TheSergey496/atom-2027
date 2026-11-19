@@ -6,6 +6,7 @@ import org.prolegacy.atom2027.common.query.query.JPAQueryFactory;
 import org.prolegacy.atom2027.dto.ProtocolDto;
 import org.prolegacy.atom2027.entities.*;
 import org.prolegacy.atom2027.entities.enums.CheckType;
+import org.prolegacy.atom2027.entities.ids.CheckId;
 import org.prolegacy.atom2027.entities.ids.ProtocolId;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,7 +18,8 @@ public class ProtocolReader {
     private static final QProtocol protocol = QProtocol.protocol;
     private static final QEmployee employee = QEmployee.employee;
     private static final QCheck check = QCheck.check;
-    private static final QEdifice edifice = new QEdifice("check$edifice");
+    private static final QEdifice edifice1 = new QEdifice("edifice");
+    private static final QEdifice edifice2 = new QEdifice("check$edifice");
     private static final QEmployeeQualificationAgg employeeQualificationAgg = QEmployeeQualificationAgg.employeeQualificationAgg;
 
     @Autowired
@@ -25,6 +27,10 @@ public class ProtocolReader {
 
     public ProtocolDto getProtocol(ProtocolId protocolId) {
         return baseQuery().where(protocol.id.eq(protocolId)).fetchFirst();
+    }
+
+    public ProtocolDto getProtocolForCheck(CheckId checkId) {
+        return baseQuery().where(check.checkId.eq(checkId)).fetchFirst();
     }
 
     public List<ProtocolDto> getProtocols() {
@@ -36,7 +42,8 @@ public class ProtocolReader {
                 .leftJoin(employee).on(employee.id.eq(protocol.employeeId))
                 .leftJoin(employeeQualificationAgg).on(employeeQualificationAgg.employeeId.eq(employee.id))
                 .leftJoin(check).on(check.checkId.eq(protocol.checkId))
-                .leftJoin(edifice).on(edifice.id.eq(check.edificeId))
+                .leftJoin(edifice1).on(edifice1.id.eq(check.edificeId))
+                .leftJoin(edifice2).on(edifice2.id.eq(check.edificeId))
                 .selectDto(
                         ProtocolDto.class,
                         employeeQualificationAgg.qualifications.as("employee$qualifications"),

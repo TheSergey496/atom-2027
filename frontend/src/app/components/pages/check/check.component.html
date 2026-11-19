@@ -38,6 +38,29 @@
                       (onClick)="cancelCheck()">
             </p-button>
 
+            <p-button icon="pi pi-eye"
+                      size="small"
+                      pTooltip="Посмотр проверки"
+                      [disabled]="selectedCheck() == null"
+                      (onClick)="lookAtCheck()">
+            </p-button>
+
+            <div class="splitter"></div>
+
+            <p-button icon="pi pi-arrow-right"
+                      size="small"
+                      pTooltip="Перейти к протоколу"
+                      [disabled]="this.selectedCheck()?.checkStatus?.toString() !== CheckStatusRecord.FINISHED.toString()"
+                      (onClick)="navigateToProtocol()">
+            </p-button>
+
+            <p-button icon="pi pi-search"
+                      size="small"
+                      pTooltip="Посмотр протокола"
+                      [disabled]="this.selectedCheck()?.checkStatus?.toString() !== CheckStatusRecord.FINISHED.toString()"
+                      (onClick)="lookAtProtocol()">
+            </p-button>
+
 
             <div class="splitter"></div>
 

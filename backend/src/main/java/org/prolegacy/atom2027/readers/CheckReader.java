@@ -39,7 +39,7 @@ public class CheckReader {
             query = query.where(check.checkStatus.ne(CheckStatus.FINISHED));
         }
 
-        return query.fetch();
+        return query.orderBy(check.checkId.desc()).fetch();
     }
 
     private JPAQuery<CheckDto> baseQuery() {

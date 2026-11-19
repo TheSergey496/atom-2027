@@ -2,8 +2,10 @@ package org.prolegacy.atom2027.controllers;
 
 import org.prolegacy.atom2027.common.annotation.TypescriptEndpoint;
 import org.prolegacy.atom2027.dto.CheckDto;
+import org.prolegacy.atom2027.dto.ProtocolDto;
 import org.prolegacy.atom2027.entities.ids.CheckId;
 import org.prolegacy.atom2027.readers.CheckReader;
+import org.prolegacy.atom2027.readers.ProtocolReader;
 import org.prolegacy.atom2027.services.CheckService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -19,6 +21,8 @@ public class CheckController {
     private CheckReader checkReader;
     @Autowired
     private CheckService checkService;
+    @Autowired
+    private ProtocolReader protocolReader;
 
     @GetMapping
     public List<CheckDto> getChecks(
@@ -46,5 +50,10 @@ public class CheckController {
     @DeleteMapping("{checkId}")
     public CheckDto cancelCheck(@PathVariable CheckId checkId) {
         return checkService.cancelCheck(checkId);
+    }
+
+    @GetMapping("{id}/protocol")
+    public ProtocolDto getProtocol(@PathVariable CheckId id) {
+        return protocolReader.getProtocolForCheck(id);
     }
 }

@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { ChangeDetectorRef, Component, inject, signal } from '@angular/core';
 import { DialogComponent } from '../../../utils/dialogComponent';
 import { CheckDto, EdificeDto, EmployeeDto, ProtocolDto } from '../../../gen/atom2027-dto';
 import { Button } from '@openng/optimus-ui/button';
@@ -60,6 +60,7 @@ export class ProtocolRegistrationDialogComponent extends DialogComponent<Protoco
   private readonly checkService = inject(CheckService);
   private readonly employeeService = inject(EmployeeService);
   private readonly edificeService = inject(EdificeService);
+  private readonly cdr = inject(ChangeDetectorRef);
 
   protected readOnlyMode = signal(false);
 
@@ -85,6 +86,7 @@ export class ProtocolRegistrationDialogComponent extends DialogComponent<Protoco
             ? Type.NON_PLAN
             : Type.NORMAL;
       }
+      this.cdr.detectChanges();
 
       this.allChecks = await lastValueFrom(this.checkService.getChecks(false, true));
       this.checks = [...this.allChecks];

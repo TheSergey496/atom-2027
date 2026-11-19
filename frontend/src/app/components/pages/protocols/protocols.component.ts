@@ -106,6 +106,12 @@ export class ProtocolsComponent implements OnInit, OnDestroy {
       await this.loadData();
     });
     this.loadData().then();
+    let protocolId: unknown = this.router.lastSuccessfulNavigation()?.extras.state?.['protocolId'];
+    if (protocolId != null) {
+      setTimeout(() => {
+        this.table()?.findAndSelectRow({ id: protocolId }).then();
+      }, 100);
+    }
   }
 
   ngOnDestroy(): void {

@@ -33,7 +33,7 @@
                                  [disabled]="readOnlyMode()"
                                  [showClear]="true"
                                  (completeMethod)="searchChecks($event)"/>
-                <label for="edificeInput" class="required">Номер проверки</label>
+                <label for="edificeInput" [class.required]="!readOnlyMode()">Номер проверки</label>
             </p-floatlabel>
 
             <p-floatlabel proLegacyFloatLabelTransitionFix variant="on">
@@ -55,7 +55,7 @@
                                  [disabled]="readOnlyMode()"
                                  [showClear]="true"
                                  (completeMethod)="searchEdifices($event)"/>
-                <label for="edificeInput" class="required">Объект</label>
+                <label for="edificeInput" [class.required]="!readOnlyMode()">Объект</label>
             </p-floatlabel>
         }
         <div>
@@ -72,7 +72,7 @@
                                  [disabled]="readOnlyMode()"
                                  [showClear]="true"
                                  (completeMethod)="searchEmployee($event)"/>
-                <label for="employeeInput" class="required">Проверяющий</label>
+                <label for="employeeInput" [class.required]="!readOnlyMode()">Проверяющий</label>
             </p-floatlabel>
             @if (employeeError() != null) {
                 <pro-legacy-form-message [message]="employeeError()!"></pro-legacy-form-message>
@@ -90,7 +90,7 @@
                       [autoResize]="true"
                       [(ngModel)]="res!.result">
             </textarea>
-            <label for="resultInput" class="required">Результаты проверки</label>
+            <label for="resultInput" [class.required]="!readOnlyMode()">Результаты проверки</label>
         </p-floatlabel>
         <p-floatlabel proLegacyFloatLabelTransitionFix variant="on">
             <textarea pTextarea
@@ -103,7 +103,7 @@
                       [autoResize]="true"
                       [(ngModel)]="res!.defects">
             </textarea>
-            <label for="defectsInput" class="required">Обнаруженные замечания и дефекты</label>
+            <label for="defectsInput" [class.required]="!readOnlyMode()">Обнаруженные замечания и дефекты</label>
         </p-floatlabel>
         <p-floatlabel proLegacyFloatLabelTransitionFix variant="on">
             <textarea pTextarea
@@ -116,7 +116,7 @@
                       [autoResize]="true"
                       [(ngModel)]="res!.conclusion">
             </textarea>
-            <label for="conclusionInput" class="required">Итоговое заключение</label>
+            <label for="conclusionInput" [class.required]="!readOnlyMode()">Итоговое заключение</label>
         </p-floatlabel>
         <p-floatlabel proLegacyFloatLabelTransitionFix variant="on">
             <textarea pTextarea
@@ -129,7 +129,7 @@
                       [autoResize]="true"
                       [(ngModel)]="res!.recommendations">
             </textarea>
-            <label for="recommendationsInput" class="required">Рекомендации/комментарии</label>
+            <label for="recommendationsInput" [class.required]="!readOnlyMode()">Рекомендации/комментарии</label>
         </p-floatlabel>
     </form>
 

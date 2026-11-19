@@ -22,7 +22,7 @@ import { BlockUIModule } from '@openng/optimus-ui/blockui';
 import { CheckStatusLocaleEnum } from '../../../enums/CheckStatusLocaleEnum';
 import { CheckTypeLocaleEnum } from '../../../enums/CheckTypeLocaleEnum';
 import { CheckDto } from '../../../gen/atom2027-dto';
-import { CheckService } from '../../../gen/atom2027-controllers';
+import { CheckService, ProtocolService } from '../../../gen/atom2027-controllers';
 import { CheckStatusRecord } from '../../../gen/entities-enums';
 import { CheckEditDialogComponent } from '../../forms/check-edit-dialog/check-edit-dialog.component';
 import { SelectButton } from '@openng/optimus-ui/selectbutton';
@@ -30,6 +30,7 @@ import { FormsModule } from '@angular/forms';
 import { Checkbox } from '@openng/optimus-ui/checkbox';
 import { ResetService } from '../../../services/reset.service';
 import { Router } from '@angular/router';
+import { ProtocolRegistrationDialogComponent } from '../../forms/protocol-registration-dialog/protocol-registration-dialog.component';
 
 @Component({
   imports: [
@@ -152,9 +153,9 @@ export class CheckComponent implements OnInit, OnDestroy {
     });
     let checkId: unknown = this.router.lastSuccessfulNavigation()?.extras.state?.['checkId'];
     if (checkId != null) {
-      requestAnimationFrame(() => {
+      setTimeout(() => {
         this.table()?.findAndSelectRow({ checkId: checkId }).then();
-      });
+      }, 100);
     }
   }
 
@@ -268,5 +269,49 @@ export class CheckComponent implements OnInit, OnDestroy {
   protected onOnlyUnfinishedChanged(newValue: boolean) {
     this.onlyUnfinished = newValue;
     this.loadData().then();
+  }
+
+  protected async lookAtCheck() {
+    const checkId = this.selectedCheck()?.checkId;
+    if (checkId == null) {
+      return;
+    }
+
+    const d = this.dialogService.createDialog(CheckEditDialogComponent);
+    await d.init(checkId, true);
+  }
+
+  protected async navigateToProtocol() {
+    let checkId = this.selectedCheck()?.checkId;
+    if (
+      checkId == null ||
+      this.selectedCheck()?.checkStatus?.toString() !== CheckStatusRecord.FINISHED.toString()
+    ) {
+      return;
+    }
+
+    const protocol = await lastValueFrom(this.checkService.getProtocol(checkId));
+    if (protocol?.id == null) {
+      return;
+    }
+
+    this.router.navigate(['/protocols'], { state: { protocolId: protocol.id } }).then();
+  }
+
+  protected async lookAtProtocol() {
+    let checkId = this.selectedCheck()?.checkId;
+    if (
+      checkId == null ||
+      this.selectedCheck()?.checkStatus?.toString() !== CheckStatusRecord.FINISHED.toString()
+    ) {
+      return;
+    }
+
+    const protocol = await lastValueFrom(this.checkService.getProtocol(checkId));
+    if (protocol?.id == null) {
+      return;
+    }
+    const d = this.dialogService.createDialog(ProtocolRegistrationDialogComponent);
+    await d.init(protocol.id, true);
   }
 }

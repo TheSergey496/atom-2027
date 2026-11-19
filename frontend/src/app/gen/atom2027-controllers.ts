@@ -95,6 +95,10 @@ export class CheckService {
     return this.httpService.get<CheckDto[]>('checks', {params, responseType: 'json'});
   }
 
+ public getProtocol(id: number): Observable<ProtocolDto>  {
+    return this.httpService.get<ProtocolDto>('checks/' + id + '/protocol', {responseType: 'json'});
+  }
+
  public updateCheck(dto: CheckDto): Observable<CheckDto>  {
     const headers = new HttpHeaders().set('Content-type', 'application/json');
     return this.httpService.put<CheckDto>('checks', JSON.stringify(dto) , {headers, responseType: 'json'});

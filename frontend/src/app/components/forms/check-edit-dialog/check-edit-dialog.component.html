@@ -17,7 +17,7 @@
                       [fluid]="true"
                       [required]="true">
             </p-select>
-            <label for="typeSelect" class="required">Вид проверки</label>
+            <label for="typeSelect" [class.required]="!readOnlyMode()">Вид проверки</label>
         </p-floatlabel>
 
         <p-floatlabel proLegacyFloatLabelTransitionFix variant="on">
@@ -35,7 +35,7 @@
                              [fluid]="true"
                              [required]="true">
             </p-auto-complete>
-            <label for="edificeSelect" class="required">Объект проверки</label>
+            <label for="edificeSelect" [class.required]="!readOnlyMode()">Объект проверки</label>
         </p-floatlabel>
 
         <div>
@@ -44,6 +44,7 @@
                            name="planDate"
                            appendTo="body"
                            pInputMask="99.99.9999 99:99"
+                           [placeholder]="readOnlyMode() ? 'Не задано' : undefined"
                            [disabled]="readOnlyMode()"
                            [showIcon]="true"
                            [ngModel]="check.planDate"
@@ -53,7 +54,7 @@
                            [showOnFocus]="false"
                            [hourFormat]="'24'"
                            [required]="true"/>
-            <label for="planDatePicker" class="required">Дата проверки</label>
+            <label for="planDatePicker" [class.required]="!readOnlyMode()">Плановая дата проверки</label>
         </p-floatlabel>
             @if (!dateValid()) {
                 <pro-legacy-form-message message="Плановая дата проверки обязана быть в будущем"></pro-legacy-form-message>
@@ -66,6 +67,7 @@
                              optionLabel="fullName"
                              inputId="responsibleSelect"
                              dataKey="id"
+                             [placeholder]="readOnlyMode() ? 'Не задано' : undefined"
                              [disabled]="readOnlyMode()"
                              [suggestions]="employeeSuggestions()"
                              [dropdown]="true"
@@ -82,6 +84,7 @@
                       id="commentTextArea"
                       style="max-height: 300px"
                       name="comment"
+                      [placeholder]="readOnlyMode() ? '' : undefined"
                       [disabled]="readOnlyMode()"
                       [fluid]="true"
                       [autoResize]="true"
