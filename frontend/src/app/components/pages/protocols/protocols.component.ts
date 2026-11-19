@@ -36,52 +36,56 @@ export class ProtocolsComponent implements OnInit, OnDestroy {
     {
       type: 'int',
       field: 'id',
-      header: '№ Протокола',
-      width: 120,
+      header: 'Номер протокола',
+      width: 225,
     },
     {
       type: 'int',
       field: 'check.checkId',
-      header: '№ Проверки',
-      width: 120,
+      header: 'Номер проверки',
+      width: 225,
     },
     {
       type: 'boolean',
       field: 'isNotPlanned',
       header: 'Вне плана',
-      width: 120,
+      width: 185,
     },
     {
       type: 'date',
       field: 'protocolTime',
       header: 'Осмотр проведён',
-      width: 280,
+      width: 235,
     },
     {
       type: 'text',
       field: 'employee.fullName',
       header: 'Проверяющий',
-      width: 255,
+      width: 200,
     },
     {
       type: 'text',
       field: 'result',
       header: 'Результаты',
+      width: 190,
     },
     {
       type: 'text',
       field: 'defects',
       header: 'Замечания и дефекты',
+      width: 290,
     },
     {
       type: 'text',
       field: 'conclusion',
       header: 'Заключение',
+      width: 200,
     },
     {
       type: 'text',
       field: 'recommendations',
       header: 'Рекоммендации и комментарии',
+      width: 385,
     },
   ]);
 
