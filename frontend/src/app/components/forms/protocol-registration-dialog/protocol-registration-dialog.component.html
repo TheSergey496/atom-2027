@@ -74,7 +74,7 @@
                                  (completeMethod)="searchEmployee($event)"/>
                 <label for="employeeInput" [class.required]="!readOnlyMode()">Проверяющий</label>
             </p-floatlabel>
-            @if (employeeError() != null) {
+            @if (!readOnlyMode() && employeeError() != null) {
                 <pro-legacy-form-message [message]="employeeError()!"></pro-legacy-form-message>
             }
         </div>
@@ -134,7 +134,11 @@
     </form>
 
     <ng-template #footer>
+        @if (!readOnlyMode()) {
         <p-button label="Создать" [disabled]="form.invalid || employeeError() != null" (onClick)="ok()"></p-button>
         <p-button label="Отмена" severity="secondary" (onClick)="close()"></p-button>
+        } @else {
+            <p-button label="Закрыть" (onClick)="this.visible = false"></p-button>
+        }
     </ng-template>
 </p-dialog>
