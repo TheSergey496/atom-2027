@@ -1,4 +1,4 @@
-import { Component, effect, inject, Renderer2, viewChild } from '@angular/core';
+import { Component, effect, inject, OnInit, Renderer2, viewChild } from '@angular/core';
 import { NavigationEnd, NavigationError, Router, RouterLink } from '@angular/router';
 import { Tabs, TabsModule } from '@openng/optimus-ui/tabs';
 import { filter } from 'rxjs';
@@ -12,10 +12,9 @@ import { ButtonModule } from '@openng/optimus-ui/button';
 import { DialogService } from '../../services/dialog.service';
 import { UserEditDialogComponent } from '../forms/user-edit-dialog/user-edit-dialog.component';
 import { UserService } from '../../services/auth/user.service';
-import { EdificeService } from '../../gen/atom2027-controllers';
 import { GlobalLoadingService } from '../../services/loading.service';
 import { GraphSaveStateService } from '../../services/graph/save.service';
-import { NgDiagramModelService, provideNgDiagram } from 'ng-diagram';
+import { provideNgDiagram } from 'ng-diagram';
 import { ResetService } from '../../services/reset.service';
 
 @Component({
@@ -34,7 +33,7 @@ import { ResetService } from '../../services/reset.service';
   styleUrl: './header.css',
   templateUrl: './header.html',
 })
-export class Header {
+export class Header implements OnInit {
   protected readonly logo = '/assets/images/just_works_logo.png';
   protected readonly logoHover = '/assets/images/just_works_logo_hover.png';
   protected readonly logoHoverAlt = '/assets/images/just_works_logo_hover_alt.png';
@@ -192,6 +191,19 @@ export class Header {
       });
 
     this.activeRoute = this.getActiveRoute(this.router.url);
+  }
+
+  ngOnInit() {
+    // setInterval(() => {
+    //   let querySelector = document.querySelector('.p-tab.p-tab-active');
+    //   const clientWidth = querySelector?.clientWidth;
+    //   const clientLeft = querySelector?.clientLeft;
+    //   let activeBar = document.querySelector('.p-tablist-active-bar');
+    //   if (activeBar != null && querySelector != null) {
+    //     activeBar.setAttribute('width', clientWidth + 'px');
+    //     activeBar.setAttribute('left', clientLeft + 'px');
+    //   }
+    // }, 100);
   }
 
   private getActiveRoute(url: string): string | undefined {

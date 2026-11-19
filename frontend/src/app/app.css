@@ -45,3 +45,7 @@
     padding-right: 19px;
     margin: 0;
 }
+
+:host ::ng-deep .p-tablist-nav-button.p-tablist-next-button {
+    display: none !important;
+}
