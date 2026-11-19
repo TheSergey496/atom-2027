@@ -41,7 +41,9 @@
     height: 100%;
     color: var(--p-primary-contrast-color);
     border: none;
-    border-radius: var(--p-border-radius-sm)
+    border-radius: var(--p-border-radius-sm);
+    font-size: clamp(0.9em, 1.1vw, 1em);
+    padding: clamp(10px, 1.2vw, 20px);
 }
 
 :host ::ng-deep .tabmenu-wrapper .p-tab:not(.p-disabled):hover {
@@ -206,16 +208,16 @@
     place-items: center;
     width: 2.5rem;
     height: 2.5rem;
-    border: 1px solid var(--p-surface-300, #d1d5db);
+    border: 0;
     border-radius: 50%;
-    background: var(--p-surface-0, #ffffff);
+    background: transparent;
     color: var(--p-text-color, #374151);
     cursor: pointer;
     transition: background-color 0.2s, color 0.2s, transform 0.15s;
 }
 
 .theme-toggle:hover {
-    background: var(--p-surface-100, #f3f4f6);
+    background: transparent;
     color: var(--p-primary-color, #3b82f6);
 }
 
