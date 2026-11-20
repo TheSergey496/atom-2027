@@ -1,6 +1,7 @@
 package org.prolegacy.atom2027.second_datasource.entities;
 
 import io.hypersistence.utils.hibernate.type.interval.PostgreSQLIntervalType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
@@ -20,6 +21,7 @@ public class ForeignTimeResolve {
     private Long idTime;
     private String resourceType;
     @Type(PostgreSQLIntervalType.class)
+    @Column(columnDefinition = "interval")
     private Duration avgResolutionTime;
     private Long idEdifice;
 }

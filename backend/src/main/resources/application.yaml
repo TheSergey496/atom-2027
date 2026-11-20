@@ -2,18 +2,21 @@ app:
   db-schema: atom_2027
   dynamic-datasources:
     secondary:
-      url: jdbc:postgresql://as.start:5432/main?currentSchema=public
-      username: anon
-      password: anon
+      url: jdbc:postgresql://localhost:5496/postgres?currentSchema=test_data
+      username: postgres
+      password: postgres
       driver-class-name: org.postgresql.Driver
       persistence-unit-name: secondary
       entity-packages:
         - org.prolegacy.atom2027.second_datasource.entities
       jpa-properties:
         hibernate:
-          default_schema: public
+          default_schema: test_data
           show_sql: true
           physical_naming_strategy: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
+          hbm2ddl:
+            create_namespaces: true
+            auto: create
 server:
   port: 8496
 spring:
